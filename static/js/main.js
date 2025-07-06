@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Player name state
     let playerName = '';
-    let gamePaused = true; // Start with game paused
+    let gamePaused = false; // Start with game running
     
     // Cookie functions
     function setCookie(name, value, days) {

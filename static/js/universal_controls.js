@@ -36,6 +36,10 @@ class UniversalControls {
         this.echoBurstButton.className = 'universal-control-button';
         this.echoBurstButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
         this.echoBurstButton.setAttribute('data-tooltip', 'Echo Burst');
+        this.echoBurstButton.style.position = 'fixed';
+        this.echoBurstButton.style.bottom = '80px';
+        this.echoBurstButton.style.right = '20px';
+        this.echoBurstButton.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.echoBurstButton);
         
         // Create Wave Mode button
@@ -44,6 +48,10 @@ class UniversalControls {
         this.waveModeButton.className = 'universal-control-button';
         this.waveModeButton.innerHTML = '<i class="fas fa-sync"></i>';
         this.waveModeButton.setAttribute('data-tooltip', 'Change Wave Mode');
+        this.waveModeButton.style.position = 'fixed';
+        this.waveModeButton.style.bottom = '20px';
+        this.waveModeButton.style.right = '100px';
+        this.waveModeButton.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.waveModeButton);
         
         // Create Pause button
@@ -52,18 +60,32 @@ class UniversalControls {
         this.pauseButton.className = 'universal-control-button';
         this.pauseButton.innerHTML = '<i class="fas fa-pause"></i>';
         this.pauseButton.setAttribute('data-tooltip', 'Pause Game');
+        this.pauseButton.style.position = 'fixed';
+        this.pauseButton.style.bottom = '20px';
+        this.pauseButton.style.right = '20px';
+        this.pauseButton.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.pauseButton);
         
         // Create current mode indicator
         this.modeIndicator = document.createElement('div');
         this.modeIndicator.id = 'universal-mode-indicator';
         this.modeIndicator.innerHTML = '<span>Normal</span>';
+        this.modeIndicator.style.position = 'fixed';
+        this.modeIndicator.style.bottom = '20px';
+        this.modeIndicator.style.left = '20px';
+        this.modeIndicator.style.zIndex = '1000';
+        this.modeIndicator.style.display = 'block';
         this.controlsContainer.appendChild(this.modeIndicator);
         
         // Create interaction cooldown progress bar
         this.interactionCooldownBar = document.createElement('div');
         this.interactionCooldownBar.id = 'interaction-cooldown-bar';
         this.interactionCooldownBar.className = 'universal-cooldown-bar';
+        this.interactionCooldownBar.style.position = 'fixed';
+        this.interactionCooldownBar.style.bottom = '60px';
+        this.interactionCooldownBar.style.left = '50%';
+        this.interactionCooldownBar.style.transform = 'translateX(-50%)';
+        this.interactionCooldownBar.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.interactionCooldownBar);
         
         // Create interaction cooldown label
@@ -71,6 +93,11 @@ class UniversalControls {
         this.interactionCooldownLabel.id = 'interaction-cooldown-label';
         this.interactionCooldownLabel.className = 'universal-cooldown-label';
         this.interactionCooldownLabel.innerHTML = 'Interaction Cooldown';
+        this.interactionCooldownLabel.style.position = 'fixed';
+        this.interactionCooldownLabel.style.bottom = '75px';
+        this.interactionCooldownLabel.style.left = '50%';
+        this.interactionCooldownLabel.style.transform = 'translateX(-50%)';
+        this.interactionCooldownLabel.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.interactionCooldownLabel);
     }
     
