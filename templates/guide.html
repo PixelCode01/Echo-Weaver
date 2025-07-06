@@ -9,7 +9,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
     <style>
-        .guide-container { max-width: 800px; margin: 0 auto; padding: 20px; background: #000; color: #fff; min-height: 100vh; }
+        /* Override body overflow for guide page */
+        body.guide-page, html.guide-page {
+            overflow: auto !important;
+            height: auto !important;
+        }
+        
+        .guide-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #000; 
+            color: #fff; 
+            min-height: 100vh; 
+        }
         .guide-header { text-align: center; margin-bottom: 40px; }
         .guide-header h1 { color: #00ff00; font-size: 2.5em; margin-bottom: 10px; }
         .guide-section { margin-bottom: 30px; padding: 20px; background: rgba(0, 255, 255, 0.1); border-radius: 10px; border: 1px solid #00ffff; }
@@ -34,7 +47,7 @@
         @media (max-width: 768px) { .control-grid { grid-template-columns: 1fr; } .guide-container { padding: 10px; } }
     </style>
 </head>
-<body>
+<body class="guide-page">
     <div class="guide-container">
         <div class="guide-header">
             <h1>ECHO WEAVER</h1>

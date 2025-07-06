@@ -240,9 +240,21 @@ class Game {
         // Update wave manager
         this.waveManager.update();
         
-        // Failsafe: Always ensure at least one enemy is present
+        // Enhanced failsafe: Always ensure enemies are present and game is playable
+        const minEnemiesOnScreen = Math.max(1, Math.min(8, Math.floor(this.score / 50) + 1));
+        
+        // If we have too few enemies, spawn more immediately
+        if (this.enemies.length < minEnemiesOnScreen) {
+            const enemiesToSpawn = minEnemiesOnScreen - this.enemies.length;
+            for (let i = 0; i < enemiesToSpawn; i++) {
+                this._spawnEnemy();
+            }
+        }
+        
+        // Emergency failsafe: If no enemies for too long, force spawn
         if (this.enemies.length === 0) {
             this._spawnEnemy();
+            console.log('Emergency enemy spawn triggered');
         }
         
         // If wave is not active and no enemies, start next wave

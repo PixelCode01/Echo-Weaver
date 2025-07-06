@@ -72,7 +72,8 @@ class MobileControls {
     addTouchEventHandlers() {
         // Echo Burst button
         this.echoBurstButton.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent default touch behavior
+            e.preventDefault();
+            e.stopPropagation();
             
             if (this.game.state === 'playing' && this.game.echoBurstCooldown === 0 && this.canTouchNow()) {
                 this.game._activateEchoBurst();
@@ -84,11 +85,12 @@ class MobileControls {
                     this.echoBurstButton.classList.remove('button-pressed');
                 }, 200);
             }
-        });
+        }, { passive: false });
         
         // Wave Mode button
         this.waveModeButton.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent default touch behavior
+            e.preventDefault();
+            e.stopPropagation();
             
             if (this.game.state === 'playing' && this.canTouchNow()) {
                 this.game.cycleWaveMode();
@@ -103,11 +105,12 @@ class MobileControls {
                     this.waveModeButton.classList.remove('button-pressed');
                 }, 200);
             }
-        });
+        }, { passive: false });
         
         // Pause button
         this.pauseButton.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent default touch behavior
+            e.preventDefault();
+            e.stopPropagation();
             
             if (this.game.state === 'playing' && this.canTouchNow()) {
                 // Toggle pause state
@@ -139,15 +142,14 @@ class MobileControls {
                     this.pauseButton.classList.remove('button-pressed');
                 }, 200);
             }
-        });
+        }, { passive: false });
         
         // Prevent default touch behavior on game canvas to avoid unwanted scrolling
         const canvas = document.getElementById('game-canvas');
         if (canvas) {
+            // Remove the old touchmove handler since it's now handled in main.js
             canvas.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 1) {
-                    e.preventDefault();
-                }
+                // This is now handled in main.js with better logic
             }, { passive: false });
         }
     }

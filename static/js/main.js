@@ -390,6 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle touch events for mobile
     canvas.addEventListener('touchstart', (event) => {
         event.preventDefault();
+        event.stopPropagation();
+        
         if (!gamePaused) {
             const touch = event.touches[0];
             const mouseEvent = new MouseEvent('mousedown', {
@@ -413,10 +415,26 @@ document.addEventListener('DOMContentLoaded', () => {
             
             game.lastTapTime = Date.now();
         }
-    });
+    }, { passive: false });
+    
+    canvas.addEventListener('touchmove', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (!gamePaused && event.touches.length === 1) {
+            const touch = event.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            game.handleEvent(mouseEvent);
+        }
+    }, { passive: false });
     
     canvas.addEventListener('touchend', (event) => {
         event.preventDefault();
+        event.stopPropagation();
+        
         if (!gamePaused) {
             const mouseEvent = new MouseEvent('mouseup', {
                 clientX: event.changedTouches[0].clientX,
@@ -424,7 +442,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             game.handleEvent(mouseEvent);
         }
-    });
+    }, { passive: false });
+    
+    // Prevent touch events on the entire document to avoid unwanted behaviors
+    document.addEventListener('touchstart', (event) => {
+        // Only prevent default on game-related elements
+        if (event.target.closest('#game-canvas') || event.target.closest('#mobile-controls')) {
+            event.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (event) => {
+        // Only prevent default on game-related elements
+        if (event.target.closest('#game-canvas') || event.target.closest('#mobile-controls')) {
+            event.preventDefault();
+        }
+    }, { passive: false });
     
     // Handle window resize
     window.addEventListener('resize', () => {
