@@ -1,5 +1,7 @@
 // UniversalControls class - Handles touch/drag cooldown for all devices
 
+console.log('=== UNIVERSAL CONTROLS SCRIPT LOADING ===');
+
 class UniversalControls {
     constructor(game) {
         console.log('=== UNIVERSAL CONTROLS INITIALIZATION ===');
@@ -422,4 +424,7 @@ class UniversalControls {
 }
 
 // Make it globally accessible
-window.UniversalControls = UniversalControls; 
+window.UniversalControls = UniversalControls;
+console.log('=== UNIVERSAL CONTROLS SCRIPT LOADED ===');
+console.log('UniversalControls class available:', typeof UniversalControls);
+console.log('UniversalControls in window:', !!window.UniversalControls); 

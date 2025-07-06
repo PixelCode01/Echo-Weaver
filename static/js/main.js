@@ -681,6 +681,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize universal controls (works on all devices)
     try {
+        // Check if UniversalControls class is available
+        if (typeof UniversalControls === 'undefined') {
+            console.error("UniversalControls class is not defined. Check if universal_controls.js is loaded properly.");
+            console.log("Available global classes:", Object.keys(window).filter(key => key.includes('Control')));
+            return;
+        }
+        
         const universalControls = new UniversalControls(game);
         window.universalControls = universalControls; // Make it globally accessible
         console.log("Universal controls initialized successfully:", universalControls);
@@ -696,20 +703,20 @@ document.addEventListener('DOMContentLoaded', () => {
         originalGameUpdate.call(game);
         
         // Update universal controls
-        if (universalControls && game.state === 'playing') {
-            universalControls.update();
+        if (window.universalControls && game.state === 'playing') {
+            window.universalControls.update();
             // Debug: Log universal controls update
             if (game.score % 120 === 0 && game.score > 0) {
                 console.log('=== UNIVERSAL CONTROLS UPDATE IN GAME LOOP ===');
                 console.log('Game state:', game.state);
                 console.log('Game score:', game.score);
-                console.log('Universal controls exist:', !!universalControls);
+                console.log('Universal controls exist:', !!window.universalControls);
             }
         } else {
             // Debug: Log why universal controls aren't updating
             if (game.score % 120 === 0 && game.score > 0) {
                 console.log('=== UNIVERSAL CONTROLS UPDATE SKIPPED ===');
-                console.log('Universal controls exist:', !!universalControls);
+                console.log('Universal controls exist:', !!window.universalControls);
                 console.log('Game state:', game.state);
                 console.log('Game state is playing:', game.state === 'playing');
             }
