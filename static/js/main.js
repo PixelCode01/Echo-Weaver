@@ -639,79 +639,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Add mobile-specific controls if on a mobile device
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    console.log("Device detection - User Agent:", navigator.userAgent);
-    console.log("Device detection - Is Mobile:", isMobileDevice);
-    console.log("Device detection - Max Touch Points:", navigator.maxTouchPoints);
+    // Universal touch/drag cooldown system for all devices
+    console.log("Initializing universal touch/drag cooldown system");
     
-    if (isMobileDevice) {
-        // Mobile controls are now handled by the MobileControls class
-        console.log("Mobile device detected, initializing mobile controls");
-        
-        try {
-            // Initialize mobile controls
-            const mobileControls = new MobileControls(game);
-            window.mobileControls = mobileControls; // Make it globally accessible
-            console.log("Mobile controls initialized successfully:", mobileControls);
-        } catch (error) {
-            console.error("Failed to initialize mobile controls:", error);
-        }
-        
-        // Update mobile controls in the game loop
-        const originalGameUpdate = game.update;
-        game.update = function() {
-            originalGameUpdate.call(game);
-            
-            // Update mobile controls
-            if (mobileControls && game.state === 'playing') {
-                mobileControls.update();
-                // Debug: Log mobile controls update
-                if (game.score % 120 === 0 && game.score > 0) {
-                    console.log('Mobile controls update called, game state:', game.state);
-                }
-            }
-        };
-    } else {
-        console.log("Desktop device detected, using keyboard controls");
-        
-        // Add keyboard shortcuts for wave modes
-        document.addEventListener('keydown', (e) => {
-            if (game.state === 'playing') {
-                if (e.key === '1') {
-                    game.currentWaveMode = 'normal';
-                    document.getElementById('current-mode').textContent = 'Normal';
-                    
-                    // Add visual feedback
-                    const modeDisplay = document.getElementById('wave-mode');
-                    modeDisplay.classList.add('mode-changed');
-                    setTimeout(() => {
-                        modeDisplay.classList.remove('mode-changed');
-                    }, 500);
-                } else if (e.key === '2') {
-                    game.currentWaveMode = 'focused';
-                    document.getElementById('current-mode').textContent = 'Focused';
-                    
-                    // Add visual feedback
-                    const modeDisplay = document.getElementById('wave-mode');
-                    modeDisplay.classList.add('mode-changed');
-                    setTimeout(() => {
-                        modeDisplay.classList.remove('mode-changed');
-                    }, 500);
-                } else if (e.key === '3') {
-                    game.currentWaveMode = 'wide';
-                    document.getElementById('current-mode').textContent = 'Wide';
-                    
-                    // Add visual feedback
-                    const modeDisplay = document.getElementById('wave-mode');
-                    modeDisplay.classList.add('mode-changed');
-                    setTimeout(() => {
-                        modeDisplay.classList.remove('mode-changed');
-                    }, 500);
-                }
-            }
-        });
+    // Initialize universal controls (works on all devices)
+    try {
+        const universalControls = new UniversalControls(game);
+        window.universalControls = universalControls; // Make it globally accessible
+        console.log("Universal controls initialized successfully:", universalControls);
+    } catch (error) {
+        console.error("Failed to initialize universal controls:", error);
     }
+    
+    // Update universal controls in the game loop
+    const originalGameUpdate = game.update;
+    game.update = function() {
+        originalGameUpdate.call(game);
+        
+        // Update universal controls
+        if (universalControls && game.state === 'playing') {
+            universalControls.update();
+            // Debug: Log universal controls update
+            if (game.score % 120 === 0 && game.score > 0) {
+                console.log('Universal controls update called, game state:', game.state);
+            }
+        }
+    };
+    
+    // Add keyboard shortcuts for wave modes (desktop)
+    document.addEventListener('keydown', (e) => {
+        if (game.state === 'playing') {
+            if (e.key === '1') {
+                game.currentWaveMode = 'normal';
+                document.getElementById('current-mode').textContent = 'Normal';
+                
+                // Add visual feedback
+                const modeDisplay = document.getElementById('wave-mode');
+                modeDisplay.classList.add('mode-changed');
+                setTimeout(() => {
+                    modeDisplay.classList.remove('mode-changed');
+                }, 500);
+            } else if (e.key === '2') {
+                game.currentWaveMode = 'focused';
+                document.getElementById('current-mode').textContent = 'Focused';
+                
+                // Add visual feedback
+                const modeDisplay = document.getElementById('wave-mode');
+                modeDisplay.classList.add('mode-changed');
+                setTimeout(() => {
+                    modeDisplay.classList.remove('mode-changed');
+                }, 500);
+            } else if (e.key === '3') {
+                game.currentWaveMode = 'wide';
+                document.getElementById('current-mode').textContent = 'Wide';
+                
+                // Add visual feedback
+                const modeDisplay = document.getElementById('wave-mode');
+                modeDisplay.classList.add('mode-changed');
+                setTimeout(() => {
+                    modeDisplay.classList.remove('mode-changed');
+                }, 500);
+            }
+        }
+    });
     
     // Add pause functionality
     document.addEventListener('keydown', (e) => {

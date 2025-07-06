@@ -811,7 +811,7 @@ body, html {
 }
 
 /* Mobile controls */
-.mobile-control-button {
+.mobile-control-button, .universal-control-button {
     position: absolute;
     width: 60px;
     height: 60px;
@@ -893,7 +893,7 @@ body, html {
 }
 
 /* Mobile controls */
-#mobile-controls {
+#mobile-controls, #universal-controls {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -947,7 +947,7 @@ body, html {
     opacity: 1;
 }
 
-#mobile-mode-indicator {
+#mobile-mode-indicator, #universal-mode-indicator {
     position: fixed;
     bottom: 20px;
     left: 20px;
@@ -963,7 +963,7 @@ body, html {
 }
 
 /* Mobile cooldown progress bar */
-.mobile-cooldown-bar {
+.mobile-cooldown-bar, .universal-cooldown-bar {
     position: fixed;
     bottom: 60px;
     left: 50%;
@@ -990,7 +990,7 @@ body, html {
     border-radius: 4px;
 }
 
-.mobile-cooldown-label {
+.mobile-cooldown-label, .universal-cooldown-label {
     position: fixed;
     bottom: 75px;
     left: 50%;
