@@ -2,6 +2,11 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded');
+    console.log('=== SCRIPT LOADING CHECK ===');
+    console.log('UniversalControls in window:', !!window.UniversalControls);
+    console.log('UniversalControls type:', typeof window.UniversalControls);
+    console.log('All window properties containing "Control":', Object.keys(window).filter(key => key.includes('Control')));
+    console.log('All window properties containing "Universal":', Object.keys(window).filter(key => key.includes('Universal')));
     
     // Detect device type and show appropriate instructions
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -680,21 +685,39 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Game score at initialization:", game.score);
     
     // Initialize universal controls (works on all devices)
-    try {
-        // Check if UniversalControls class is available
-        if (typeof window.UniversalControls === 'undefined') {
-            console.error("UniversalControls class is not defined. Check if universal_controls.js is loaded properly.");
-            console.log("Available global classes:", Object.keys(window).filter(key => key.includes('Control')));
-            return;
+    function initializeUniversalControls() {
+        try {
+            // Check if UniversalControls class is available
+            if (typeof window.UniversalControls === 'undefined') {
+                console.error("UniversalControls class is not defined. Check if universal_controls.js is loaded properly.");
+                console.log("Available global classes:", Object.keys(window).filter(key => key.includes('Control')));
+                return false;
+            }
+            
+            const universalControls = new window.UniversalControls(game);
+            window.universalControls = universalControls; // Make it globally accessible
+            console.log("Universal controls initialized successfully:", universalControls);
+            console.log("Universal controls added to window:", !!window.universalControls);
+            return true;
+        } catch (error) {
+            console.error("Failed to initialize universal controls:", error);
+            console.error("Error stack:", error.stack);
+            return false;
         }
-        
-        const universalControls = new window.UniversalControls(game);
-        window.universalControls = universalControls; // Make it globally accessible
-        console.log("Universal controls initialized successfully:", universalControls);
-        console.log("Universal controls added to window:", !!window.universalControls);
-    } catch (error) {
-        console.error("Failed to initialize universal controls:", error);
-        console.error("Error stack:", error.stack);
+    }
+    
+    // Try to initialize immediately
+    let universalControlsInitialized = initializeUniversalControls();
+    
+    // If not initialized, try again after a short delay (in case script is still loading)
+    if (!universalControlsInitialized) {
+        console.log("Universal controls not available immediately, retrying in 100ms...");
+        setTimeout(() => {
+            universalControlsInitialized = initializeUniversalControls();
+            if (!universalControlsInitialized) {
+                console.error("Universal controls failed to initialize after retry");
+            }
+        }, 100);
     }
     
     // Update universal controls in the game loop
