@@ -9,23 +9,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
     <style>
-        /* Override body overflow for guide page */
-        body.guide-page, html.guide-page {
+        /* Reset body and html for guide page - more specific to override main CSS */
+        html.guide-page, body.guide-page {
             overflow: auto !important;
             height: auto !important;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            position: static !important;
+            width: 100% !important;
         }
         
-        /* Ensure the guide page can scroll */
-        body.guide-page {
-            overflow-y: scroll !important;
-        }
-        
-        /* Force scroll on all elements */
-        body.guide-page * {
+        /* Ensure the guide container can scroll */
+        .guide-container {
             overflow: visible !important;
+            position: relative !important;
         }
         
         /* Debug: Add visible border to see if styles are applied */
@@ -187,6 +182,12 @@
         // Debug script to check CSS conflicts
         console.log('Guide page loaded');
         
+        // Force enable scrolling
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto';
+        document.body.style.height = 'auto';
+        document.documentElement.style.height = 'auto';
+        
         // Check if body has guide-page class
         console.log('Body classes:', document.body.className);
         console.log('Body overflow:', getComputedStyle(document.body).overflow);
@@ -202,6 +203,12 @@
             console.log('Attempting to scroll to bottom...');
             window.scrollTo(0, document.documentElement.scrollHeight);
         }, 1000);
+        
+        // Additional scroll fix
+        window.addEventListener('load', () => {
+            document.body.style.overflow = 'auto';
+            document.documentElement.style.overflow = 'auto';
+        });
     </script>
 </body>
 </html> 
