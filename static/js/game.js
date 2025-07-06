@@ -287,6 +287,22 @@ class Game {
     update() {
         if (this.state !== 'playing') return;
         
+        // Debug: Log game state every 120 frames (about 2 seconds)
+        if (this.score % 120 === 0 && this.score > 0) {
+            console.log('=== GAME STATE DEBUG ===');
+            console.log('Score:', this.score);
+            console.log('Enemies on screen:', this.enemies.length);
+            console.log('Waves active:', this.waves.length);
+            console.log('Wave manager state:', {
+                currentWave: this.waveManager.currentWave,
+                waveActive: this.waveManager.waveActive,
+                enemiesToSpawn: this.waveManager.enemiesToSpawn,
+                spawnedEnemiesCount: this.waveManager.spawnedEnemiesCount,
+                spawnTimer: this.waveManager.spawnTimer
+            });
+            console.log('Min enemies required:', Math.max(1, Math.min(8, Math.floor(this.score / 50) + 1)));
+        }
+        
         // Update wave manager
         this.waveManager.update();
         
@@ -296,6 +312,7 @@ class Game {
         // If we have too few enemies, spawn more immediately
         if (this.enemies.length < minEnemiesOnScreen) {
             const enemiesToSpawn = minEnemiesOnScreen - this.enemies.length;
+            console.log(`Spawning ${enemiesToSpawn} enemies due to low count (${this.enemies.length}/${minEnemiesOnScreen})`);
             for (let i = 0; i < enemiesToSpawn; i++) {
                 this._spawnEnemy();
             }
@@ -304,11 +321,12 @@ class Game {
         // Emergency failsafe: If no enemies for too long, force spawn
         if (this.enemies.length === 0) {
             this._spawnEnemy();
-            console.log('Emergency enemy spawn triggered');
+            console.log('Emergency enemy spawn triggered - no enemies on screen');
         }
         
         // If wave is not active and no enemies, start next wave
         if (!this.waveManager.waveActive && this.enemies.length === 0) {
+            console.log('Starting next wave due to no enemies and no active wave');
             this.waveManager.startNextWave();
         }
         
@@ -337,6 +355,14 @@ class Game {
             console.log('Timeout-based enemy spawn triggered');
             this._spawnEnemy();
             this.lastEnemySpawnTime = currentTime;
+        }
+        
+        // Additional failsafe: If wave manager seems stuck, reset it
+        if (this.waveManager.waveActive && this.enemies.length === 0 && this.waveManager.spawnedEnemiesCount >= this.waveManager.enemiesToSpawn) {
+            console.log('Wave manager appears stuck, resetting wave state');
+            this.waveManager.waveActive = false;
+            this.waveManager.spawnedEnemiesCount = 0;
+            this.waveManager.spawnTimer = 0;
         }
         
         // Update enemies if time is not stopped

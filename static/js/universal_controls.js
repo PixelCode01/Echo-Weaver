@@ -152,18 +152,27 @@ window.UniversalControls = class UniversalControls {
             this.interactionCooldownBar.style.display = 'block';
             this.interactionCooldownLabel.style.display = 'block';
             
-            // Add visual indicator for interaction cooldown with color change
+            // Add visual indicator for interaction cooldown with color change and pulsing effect
             if (progress < 50) {
-                this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+                this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+                this.interactionCooldownBar.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.5)';
             } else if (progress < 80) {
-                this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 165, 0, 0.5)';
+                this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 165, 0, 0.7)';
+                this.interactionCooldownBar.style.boxShadow = '0 0 10px rgba(255, 165, 0, 0.5)';
             } else {
-                this.interactionCooldownBar.style.backgroundColor = 'rgba(0, 255, 0, 0.5)';
+                this.interactionCooldownBar.style.backgroundColor = 'rgba(0, 255, 0, 0.7)';
+                this.interactionCooldownBar.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
             }
             
-            // Update label with time remaining
+            // Add pulsing animation for better visibility
+            const pulseIntensity = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+            this.interactionCooldownBar.style.opacity = pulseIntensity;
+            
+            // Update label with time remaining and make it more prominent
             const remainingTime = Math.ceil((requiredCooldown - timeSinceLastInteraction) / 100);
-            this.interactionCooldownLabel.innerHTML = `Interaction Cooldown (${remainingTime}s)`;
+            this.interactionCooldownLabel.innerHTML = `⏱️ COOLDOWN: ${remainingTime}s`;
+            this.interactionCooldownLabel.style.fontSize = '14px';
+            this.interactionCooldownLabel.style.color = progress < 50 ? '#ff4444' : progress < 80 ? '#ffaa00' : '#44ff44';
         } else {
             this.interactionCooldownBar.style.display = 'none';
             this.interactionCooldownLabel.style.display = 'none';
@@ -235,6 +244,36 @@ window.UniversalControls = class UniversalControls {
         this.lastInteractionTime = Date.now();
         this.canInteract = false;
         console.log('Interaction recorded, cooldown started');
+        
+        // Add visual feedback - flash the screen briefly
+        this.addCooldownFeedback();
+    }
+    
+    // Add visual and audio feedback for cooldown
+    addCooldownFeedback() {
+        // Flash the cooldown bar
+        if (this.interactionCooldownBar) {
+            this.interactionCooldownBar.style.transform = 'translateX(-50%) scale(1.2)';
+            this.interactionCooldownBar.style.transition = 'transform 0.1s ease-out';
+            
+            setTimeout(() => {
+                if (this.interactionCooldownBar) {
+                    this.interactionCooldownBar.style.transform = 'translateX(-50%) scale(1)';
+                }
+            }, 100);
+        }
+        
+        // Flash the label
+        if (this.interactionCooldownLabel) {
+            this.interactionCooldownLabel.style.transform = 'translateX(-50%) scale(1.1)';
+            this.interactionCooldownLabel.style.transition = 'transform 0.1s ease-out';
+            
+            setTimeout(() => {
+                if (this.interactionCooldownLabel) {
+                    this.interactionCooldownLabel.style.transform = 'translateX(-50%) scale(1)';
+                }
+            }, 100);
+        }
     }
     
     // Reset interaction cooldown (call this when game resets)
