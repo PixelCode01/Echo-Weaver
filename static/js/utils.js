@@ -30,6 +30,15 @@ class Vector {
     }
 
     distanceTo(v) {
+        // Safety check for undefined or null vectors
+        if (!v || typeof v.x === 'undefined' || typeof v.y === 'undefined' || 
+            typeof this.x === 'undefined' || typeof this.y === 'undefined') {
+            console.error('Vector.distanceTo called with invalid parameters:', {
+                this: { x: this.x, y: this.y },
+                v: v ? { x: v.x, y: v.y } : 'null/undefined'
+            });
+            return Infinity; // Return a safe default value
+        }
         return Math.sqrt(Math.pow(this.x - v.x, 2) + Math.pow(this.y - v.y, 2));
     }
 

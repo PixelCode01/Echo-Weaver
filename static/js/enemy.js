@@ -867,17 +867,24 @@ class VortexEnemy extends Enemy {
             
             // Apply vortex effect to waves
             for (let wave of window.game.waves) {
-                // Check if wave and wave.position exist before accessing
-                if (wave && wave.position && typeof wave.position.x !== 'undefined' && typeof wave.position.y !== 'undefined') {
-                    const distance = this.position.distanceTo(wave.position);
-                    if (distance < this.vortexRadius) {
-                        const pullStrength = (1 - distance / this.vortexRadius) * this.vortexStrength * 0.5;
-                        const pullDirection = new Vector(
-                            this.position.x - wave.position.x,
-                            this.position.y - wave.position.y
-                        ).normalize();
-                        
-                        wave.position = wave.position.add(pullDirection.multiply(pullStrength));
+                // Comprehensive safety check for both this enemy and wave positions
+                if (wave && wave.position && typeof wave.position.x !== 'undefined' && typeof wave.position.y !== 'undefined' &&
+                    this.position && typeof this.position.x !== 'undefined' && typeof this.position.y !== 'undefined') {
+                    try {
+                        const distance = this.position.distanceTo(wave.position);
+                        if (distance < this.vortexRadius) {
+                            const pullStrength = (1 - distance / this.vortexRadius) * this.vortexStrength * 0.5;
+                            const pullDirection = new Vector(
+                                this.position.x - wave.position.x,
+                                this.position.y - wave.position.y
+                            ).normalize();
+                            
+                            wave.position = wave.position.add(pullDirection.multiply(pullStrength));
+                        }
+                    } catch (error) {
+                        console.error('VortexEnemy wave interaction error:', error);
+                        console.error('This enemy position:', this.position);
+                        console.error('Wave position:', wave.position);
                     }
                 }
             }
