@@ -126,6 +126,9 @@ class Enemy {
     }
 
     collidesWith(other) {
+        if (!other || !other.position || typeof other.position.x === 'undefined' || typeof other.position.y === 'undefined') {
+            return false;
+        }
         return this.position.distanceTo(other.position) < this.radius + other.radius;
     }
     
@@ -148,7 +151,7 @@ class Enemy {
         // Find nearby enemies and damage them
         for (let i = 0; i < window.game.enemies.length; i++) {
             const enemy = window.game.enemies[i];
-            if (enemy === this) continue;
+            if (enemy === this || !enemy || !enemy.position || typeof enemy.position.x === 'undefined' || typeof enemy.position.y === 'undefined') continue;
             
             const distance = this.position.distanceTo(enemy.position);
             if (distance < SETTINGS.CHAIN_REACTION_RADIUS) {
@@ -662,8 +665,13 @@ class SwarmEnemy extends Enemy {
             this.minions[i].update(core, speed * 1.2, enemyTrails);
             
             // Remove minions that are too far or destroyed
-            const distance = this.position.distanceTo(this.minions[i].position);
-            if (distance > 200 || !this.minions[i].active) {
+            if (this.minions[i] && this.minions[i].position && typeof this.minions[i].position.x !== 'undefined' && typeof this.minions[i].position.y !== 'undefined') {
+                const distance = this.position.distanceTo(this.minions[i].position);
+                if (distance > 200 || !this.minions[i].active) {
+                    this.minions.splice(i, 1);
+                }
+            } else {
+                // Remove minion if position is invalid
                 this.minions.splice(i, 1);
             }
         }
@@ -769,7 +777,7 @@ class TimeBomberEnemy extends Enemy {
             // Damage nearby enemies
             for (let i = window.game.enemies.length - 1; i >= 0; i--) {
                 const enemy = window.game.enemies[i];
-                if (enemy !== this) {
+                if (enemy !== this && enemy && enemy.position && typeof enemy.position.x !== 'undefined' && typeof enemy.position.y !== 'undefined') {
                     const distance = this.position.distanceTo(enemy.position);
                     if (distance < this.radius * 3) {
                         window.game.enemies.splice(i, 1);
@@ -843,7 +851,7 @@ class VortexEnemy extends Enemy {
         // Apply vortex effect to nearby enemies
         if (window.game) {
             for (let enemy of window.game.enemies) {
-                if (enemy !== this) {
+                if (enemy !== this && enemy && enemy.position && typeof enemy.position.x !== 'undefined' && typeof enemy.position.y !== 'undefined') {
                     const distance = this.position.distanceTo(enemy.position);
                     if (distance < this.vortexRadius) {
                         const pullStrength = (1 - distance / this.vortexRadius) * this.vortexStrength;
@@ -859,15 +867,18 @@ class VortexEnemy extends Enemy {
             
             // Apply vortex effect to waves
             for (let wave of window.game.waves) {
-                const distance = this.position.distanceTo(wave.position);
-                if (distance < this.vortexRadius) {
-                    const pullStrength = (1 - distance / this.vortexRadius) * this.vortexStrength * 0.5;
-                    const pullDirection = new Vector(
-                        this.position.x - wave.position.x,
-                        this.position.y - wave.position.y
-                    ).normalize();
-                    
-                    wave.position = wave.position.add(pullDirection.multiply(pullStrength));
+                // Check if wave and wave.position exist before accessing
+                if (wave && wave.position && typeof wave.position.x !== 'undefined' && typeof wave.position.y !== 'undefined') {
+                    const distance = this.position.distanceTo(wave.position);
+                    if (distance < this.vortexRadius) {
+                        const pullStrength = (1 - distance / this.vortexRadius) * this.vortexStrength * 0.5;
+                        const pullDirection = new Vector(
+                            this.position.x - wave.position.x,
+                            this.position.y - wave.position.y
+                        ).normalize();
+                        
+                        wave.position = wave.position.add(pullDirection.multiply(pullStrength));
+                    }
                 }
             }
         }
