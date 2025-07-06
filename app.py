@@ -404,10 +404,16 @@ def log_request():
 @app.after_request
 def add_cors_headers(response):
     """Add CORS headers to all responses"""
-    # Add CORS headers for WebAssembly content
-    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
-    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-    response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
+    # Only add WebAssembly CORS headers for specific routes
+    if '/pygbag/' in request.path or '/play' in request.path or '/wasm-test' in request.path:
+        response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+        response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
+    else:
+        # For regular content, add standard CORS headers
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
 @app.route('/static/pygbag/<path:filename>')
