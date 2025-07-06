@@ -57,11 +57,11 @@ window.UniversalControls = class UniversalControls {
     createUniversalControls() {
         console.log('=== CREATING UNIVERSAL CONTROLS UI ===');
         
-        // Create container for universal controls (hidden)
+        // Create container for universal controls (visible for cooldown bar)
         this.controlsContainer = document.createElement('div');
         this.controlsContainer.id = 'universal-controls';
-        this.controlsContainer.style.display = 'none'; // Hide the container
-        console.log('Controls container created (hidden):', this.controlsContainer);
+        this.controlsContainer.style.display = 'block'; // Show the container for cooldown bar
+        console.log('Controls container created (visible):', this.controlsContainer);
         
         if (!this.gameScreen) {
             console.error('Game screen not found! Cannot append controls.');
@@ -80,6 +80,12 @@ window.UniversalControls = class UniversalControls {
         this.interactionCooldownBar.style.left = '50%';
         this.interactionCooldownBar.style.transform = 'translateX(-50%)';
         this.interactionCooldownBar.style.zIndex = '1000';
+        this.interactionCooldownBar.style.width = '200px';
+        this.interactionCooldownBar.style.height = '10px';
+        this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+        this.interactionCooldownBar.style.border = '2px solid rgba(255, 255, 255, 0.5)';
+        this.interactionCooldownBar.style.borderRadius = '5px';
+        this.interactionCooldownBar.style.display = 'none'; // Start hidden
         this.controlsContainer.appendChild(this.interactionCooldownBar);
         console.log('Interaction cooldown bar created and positioned');
         
@@ -93,6 +99,11 @@ window.UniversalControls = class UniversalControls {
         this.interactionCooldownLabel.style.left = '50%';
         this.interactionCooldownLabel.style.transform = 'translateX(-50%)';
         this.interactionCooldownLabel.style.zIndex = '1000';
+        this.interactionCooldownLabel.style.color = 'white';
+        this.interactionCooldownLabel.style.fontSize = '12px';
+        this.interactionCooldownLabel.style.fontWeight = 'bold';
+        this.interactionCooldownLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
+        this.interactionCooldownLabel.style.display = 'none'; // Start hidden
         this.controlsContainer.appendChild(this.interactionCooldownLabel);
         
         console.log('=== UNIVERSAL CONTROLS UI CREATION COMPLETE ===');

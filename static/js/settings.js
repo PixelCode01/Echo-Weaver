@@ -44,9 +44,9 @@ const SETTINGS = {
     SPEED_LIMIT_AFTER_200: 3.5,  // Max speed after score 200
     
     // Mobile touch cooldown settings (new)
-    MOBILE_TOUCH_COOLDOWN_BASE: 200,  // Base cooldown in ms (reduced for better responsiveness)
-    MOBILE_TOUCH_COOLDOWN_MAX: 800,   // Maximum cooldown in ms (reduced to keep game playable)
-    MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR: 0.3,  // How much score affects cooldown (reduced for better balance)
+    MOBILE_TOUCH_COOLDOWN_BASE: 50,   // Base cooldown in ms (very low for responsiveness)
+    MOBILE_TOUCH_COOLDOWN_MAX: 200,   // Maximum cooldown in ms (low to keep game playable)
+    MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR: 0.1,  // How much score affects cooldown (very low for better balance)
     
     // Boss enemy settings
     BOSS_ENEMY_RADIUS: 40,
