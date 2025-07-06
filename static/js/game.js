@@ -240,6 +240,11 @@ class Game {
         // Update wave manager
         this.waveManager.update();
         
+        // Failsafe: Always ensure at least one enemy is present
+        if (this.enemies.length === 0) {
+            this._spawnEnemy();
+        }
+        
         // If wave is not active and no enemies, start next wave
         if (!this.waveManager.waveActive && this.enemies.length === 0) {
             this.waveManager.startNextWave();

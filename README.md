@@ -1,177 +1,70 @@
 # Echo Weaver
 
-A web-based sound wave game where you defend your core against enemies using sound waves.
+Defend the core by creating powerful sound waves! Play now: [https://pixel01.pythonanywhere.com](https://pixel01.pythonanywhere.com)
 
-## Game Features
-
-- Create sound waves by clicking and dragging
-- Three different wave modes: Normal, Focused, and Wide
-- Echo Burst special ability
-- Power-ups that enhance your abilities
-- Increasing difficulty with each wave
-- High score tracking
-
-## Deployment Instructions for PythonAnywhere
-
-### Quick Deployment Using the Package
-
-For a quick deployment, you can use the pre-packaged deployment file:
-
-1. Download the `echo_weaver_pythonanywhere.zip` file from this repository
-2. Upload it to your PythonAnywhere account
-3. Extract the ZIP file: `unzip echo_weaver_pythonanywhere.zip -d echo_weaver`
-4. Set up a virtual environment:
-   ```bash
-   cd echo_weaver
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-5. Configure a new web app in the PythonAnywhere Web tab
-6. Set the WSGI configuration file to point to `wsgi.py`
-7. Add static file mapping: `/static/` -> `/home/yourusername/echo_weaver/static/`
-8. Reload the web app
-
-### Manual Deployment
-
-### Prerequisites
-
-- A PythonAnywhere account
-- Git installed on PythonAnywhere
-- Your repository hosted on GitHub
-
-### Deployment Steps
-
-1. **Log in to PythonAnywhere**
-
-2. **Open a Bash console**
-
-3. **Clone the repository**
-   ```bash
-   git clone https://github.com/Pixel01/Echo-Weaver.git
-   ```
-
-4. **Set up a virtual environment**
-   ```bash
-   cd Echo-Weaver
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-
-5. **Configure the web app**
-   - Go to the Web tab in PythonAnywhere
-   - Click "Add a new web app"
-   - Choose your domain name
-   - Select "Manual configuration"
-   - Choose Python version (3.8 or newer)
-
-6. **Configure the WSGI file**
-   - In the Web tab, find the link to the WSGI configuration file
-   - Replace the content with:
-   ```python
-   import sys
-   import os
-   
-   path = '/home/Pixel01/Echo-Weaver'
-   if path not in sys.path:
-       sys.path.append(path)
-   
-   from app import app as application
-   ```
-
-7. **Set up static file mappings**
-   - In the Web tab, under "Static Files"
-   - Add the following mappings:
-     - URL: `/static/` -> Directory: `/home/Pixel01/Echo-Weaver/static/`
-
-8. **Start the web app**
-   - Click the "Reload" button in the Web tab
-
-### Updating the App
-
-To update the app with new changes:
-
-1. **Open a Bash console**
-2. **Navigate to your project directory**
-   ```bash
-   cd Echo-Weaver
-   ```
-3. **Pull the latest changes**
-   ```bash
-   git pull origin main
-   ```
-4. **Reload the web app**
-   - Go to the Web tab and click "Reload"
-
-## Development
-
-### Local Setup
-
-1. Clone the repository
-2. Install dependencies: `pip install -r requirements.txt`
-3. Run the development server: `python run.py`
-
-### Game Controls
-
-**Desktop:**
-- Click and drag to create sound waves
-- Press 1, 2, 3 to switch between wave modes
-- Press Space for Echo Burst
-
-**Mobile:**
-- Touch and drag to create sound waves
-- Tap the numbered buttons to switch wave modes
-- Double tap the core for Echo Burst
-
-## License
-
-All rights reserved.
-
-## Description
-
-Echo Weaver is an engaging arcade game where you protect a central core from waves of enemies by drawing sound waves. The game features:
-
-- Dynamic wave-drawing combat system
-- Multiple enemy types with unique behaviors
-- Power-ups with special abilities
-- Combo and fever mechanics for high scores
-- Beautiful visual effects and animations
+## About
+Echo Weaver is a fast-paced arcade defense game. Your goal is to protect the glowing core at the center of the screen by creating sound waves to destroy incoming enemies. Survive as long as you can, rack up combos, and climb the leaderboard!
 
 ## How to Play
+- Enemies spawn from the edges and move toward the core.
+- Draw a line (mouse or touch) and release to unleash a sound wave.
+- Use different wave modes for different situations.
+- Collect power-ups for temporary boosts.
+- Use Echo Burst to clear nearby enemies in emergencies.
+- The game gets harder as your score increases!
 
-1. Click and drag to create sound waves that destroy enemies
-2. Press 1, 2, 3 to switch between wave modes (Normal, Focused, Wide)
-3. Press SPACE for Echo Burst (clears nearby enemies, has cooldown)
-4. Collect power-ups for temporary boosts
-5. Survive as long as possible and achieve the highest score!
+## Controls
+- **Mouse:** Click and drag to draw a line, release to unleash a wave.
+- **Touch:** Tap and drag to draw a line, release to unleash a wave.
+- **1, 2, 3:** Switch between wave modes (Normal, Focused, Wide).
+- **Triple-tap (mobile):** Cycle through wave modes.
+- **SPACE:** Echo Burst (clears nearby enemies).
+- **Double-tap core (mobile):** Echo Burst.
 
-## Enemy Types
+## Progress Bars
+- **Fever Meter:** Fills as you build combos. When full, you enter Fever Mode for extra power.
+- **Echo Burst Cooldown:** Shows when you can use Echo Burst again.
+- **Touch Cooldown (mobile):** Shows when you can draw the next wave. The bar fills up as you wait.
 
-- **Basic Enemy**: Standard enemy that moves directly toward the core
-- **Zigzag Enemy**: Moves in a zigzag pattern, making it harder to hit
-- **Ghost Enemy**: Requires multiple hits to destroy
-- **Charger Enemy**: Charges at high speed when close to the core
-- **Splitter Enemy**: Splits into smaller enemies when hit
-- **Shielded Enemy**: Protected by a shield that must be broken first
+## Enemy Types (by Score Range)
+- **0-10:** Basic Enemy – Simple movement
+- **10-20:** Zigzag Enemy – Moves in zigzag pattern
+- **20-45:** Ghost Enemy – Requires multiple hits
+- **45-90:** Charger Enemy – Charges at high speed
+- **90-150:** Splitter Enemy – Splits into smaller enemies
+- **150-220:** Shielded Enemy – Has a protective shield
+- **220-300:** Teleporter Enemy – Teleports randomly
+- **300-400:** Reflector Enemy – Reflects waves back
+- **400-500:** Swarm Enemy – Spawns minions
+- **500-600:** TimeBomber Enemy – Explodes after timer
+- **600-700:** Vortex Enemy – Creates pulling vortex
+- **700-800:** Speedster Enemy – Very fast movement
+- **800-900:** SlowTank Enemy – Slow but armored
+- **900+:** Boss Enemy – Large, powerful enemies
 
-## Power-ups
+## Powerups
+- **Invincibility:** Temporary invincibility for the core.
+- **Wave Boost:** Increases wave damage and speed.
+- **Slow Time:** Slows down all enemies.
+- **Screen Clear:** Destroys all enemies on screen.
+- **Wide Waves:** Increases wave width.
+- **Time Stop:** Freezes all enemies briefly.
+- **Wave Magnet:** Waves attract enemies.
+- **Chain Reaction:** Enemy explosions chain to others.
+- **Multi Wave:** Creates multiple waves at once.
 
-- **Invincibility**: Makes your core temporarily invulnerable
-- **Wave Boost**: Enhances your wave power
-- **Slow Time**: Slows down enemy movement
-- **Clear Screen**: Destroys all enemies on screen
-- **Wave Width**: Creates wider waves
-- **Time Stop**: Freezes all enemies temporarily
-- **Wave Magnet**: Pulls enemies toward your waves
+## Scoring, Combos & Achievements
+- Defeat enemies to earn points. Bosses give extra points!
+- Destroying enemies quickly builds combos for bonus points and fills the Fever Meter.
+- Critical hits and powerups can boost your score even more.
+- Unlock achievements for high combos, defeating bosses, and surviving longer!
 
-## Technologies Used
+## Tips
+- Use Focused mode for tough enemies and Wide mode for groups.
+- Save Echo Burst for emergencies when you're surrounded.
+- Collect power-ups as soon as you see them—they can turn the tide!
+- On mobile, watch the cooldown bar and plan your moves.
+- Keep an eye on the Fever Meter for big damage boosts.
 
-- **Frontend**: HTML5, CSS3, JavaScript (Canvas API)
-- **Backend**: Flask (Python)
-- **Deployment**: PythonAnywhere
-
-## Acknowledgments
-
-- Original Pygame version converted to web-based implementation
-- Inspired by arcade wave-based shooters
+## Play Now
+Play Echo Weaver instantly at: [https://pixel01.pythonanywhere.com](https://pixel01.pythonanywhere.com)

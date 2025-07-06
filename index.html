@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Echo Weaver</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="pygame-canvas"></canvas>
+    <script type="module">
+        import { Pygame } from 'https://cdn.jsdelivr.net/npm/pygame-wasm@latest/dist/pygame.js';
+
+        const pygame = new Pygame({
+            canvas: document.getElementById('pygame-canvas'),
+            python_entrypoint: 'main.py', // Your main game file
+            files: [
+                // List all your game files here
+                'main.py',
+                'game.py',
+                'settings.py',
+                'player.py',
+                'enemy.py',
+                'wave.py',
+                'utils.py',
+                'particle.py',
+                'powerup.py',
+                'sound_manager.py',
+                'wave_manager.py',
+                'high_score.py',
+                'leaderboard.py',
+                'screen_shake.py',
+                'combo_manager.py',
+                'fever_manager.py',
+                'message_display.py',
+                'background_particle.py',
+                'enemy_trail.py',
+                'damage_number.py',
+                'impact_effect.py',
+                'highscore.txt', // Include your high score file
+                // Include all assets (sounds, sprites)
+                'assets/sounds/create_wave.wav',
+                'assets/sounds/echo_burst.wav',
+                'assets/sounds/enemy_hit.wav',
+                'assets/sounds/game_over.wav',
+                'assets/sounds/music.ogg',
+                'assets/sounds/powerup_collect.wav',
+                'assets/sprites/core.png'
+            ],
+            // Optional: If you have a requirements.txt
+            // requirements: 'requirements.txt'
+        });
+        pygame.run();
+    </script>
+</body>
+</html>
