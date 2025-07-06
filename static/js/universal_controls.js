@@ -2,14 +2,24 @@
 
 class UniversalControls {
     constructor(game) {
+        console.log('=== UNIVERSAL CONTROLS INITIALIZATION ===');
         console.log('UniversalControls constructor called with game:', game);
+        console.log('Game state:', game?.state);
+        console.log('Game score:', game?.score);
+        
         this.game = game;
         this.gameScreen = document.getElementById('game-screen');
         console.log('Game screen element:', this.gameScreen);
+        console.log('Game screen exists:', !!this.gameScreen);
         
         // Touch/drag cooldown system
         this.lastInteractionTime = 0;
         this.canInteract = true;
+        
+        console.log('Initial cooldown state:', {
+            lastInteractionTime: this.lastInteractionTime,
+            canInteract: this.canInteract
+        });
         
         // Create universal control UI
         this.createUniversalControls();
@@ -22,13 +32,25 @@ class UniversalControls {
             max: SETTINGS.MOBILE_TOUCH_COOLDOWN_MAX,
             factor: SETTINGS.MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR
         });
+        
+        console.log('=== UNIVERSAL CONTROLS INITIALIZATION COMPLETE ===');
     }
     
     createUniversalControls() {
+        console.log('=== CREATING UNIVERSAL CONTROLS UI ===');
+        
         // Create container for universal controls
         this.controlsContainer = document.createElement('div');
         this.controlsContainer.id = 'universal-controls';
+        console.log('Controls container created:', this.controlsContainer);
+        
+        if (!this.gameScreen) {
+            console.error('Game screen not found! Cannot append controls.');
+            return;
+        }
+        
         this.gameScreen.appendChild(this.controlsContainer);
+        console.log('Controls container appended to game screen');
         
         // Create Echo Burst button
         this.echoBurstButton = document.createElement('div');
@@ -41,6 +63,7 @@ class UniversalControls {
         this.echoBurstButton.style.right = '20px';
         this.echoBurstButton.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.echoBurstButton);
+        console.log('Echo Burst button created and positioned');
         
         // Create Wave Mode button
         this.waveModeButton = document.createElement('div');
@@ -87,6 +110,7 @@ class UniversalControls {
         this.interactionCooldownBar.style.transform = 'translateX(-50%)';
         this.interactionCooldownBar.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.interactionCooldownBar);
+        console.log('Interaction cooldown bar created and positioned');
         
         // Create interaction cooldown label
         this.interactionCooldownLabel = document.createElement('div');
@@ -99,6 +123,17 @@ class UniversalControls {
         this.interactionCooldownLabel.style.transform = 'translateX(-50%)';
         this.interactionCooldownLabel.style.zIndex = '1000';
         this.controlsContainer.appendChild(this.interactionCooldownLabel);
+        
+        console.log('=== UNIVERSAL CONTROLS UI CREATION COMPLETE ===');
+        console.log('All elements created:', {
+            container: !!this.controlsContainer,
+            echoBurst: !!this.echoBurstButton,
+            waveMode: !!this.waveModeButton,
+            pause: !!this.pauseButton,
+            modeIndicator: !!this.modeIndicator,
+            cooldownBar: !!this.interactionCooldownBar,
+            cooldownLabel: !!this.interactionCooldownLabel
+        });
     }
     
     addEventHandlers() {
@@ -312,6 +347,17 @@ class UniversalControls {
     
     // Call this in the game loop to update universal controls
     update() {
+        // Debug: Check if update is being called
+        if (this.game && this.game.score % 60 === 0 && this.game.score > 0) {
+            console.log('=== UNIVERSAL CONTROLS UPDATE CALLED ===');
+            console.log('Game state:', this.game.state);
+            console.log('Game score:', this.game.score);
+            console.log('Controls exist:', {
+                cooldownBar: !!this.interactionCooldownBar,
+                cooldownLabel: !!this.interactionCooldownLabel
+            });
+        }
+        
         this.updateCooldownDisplay();
     }
     
@@ -342,7 +388,20 @@ class UniversalControls {
         const timeSinceLastInteraction = now - this.lastInteractionTime;
         const requiredCooldown = this.calculateInteractionCooldown();
         
-        return timeSinceLastInteraction >= requiredCooldown;
+        const canInteract = timeSinceLastInteraction >= requiredCooldown;
+        
+        // Debug logging for cooldown checks
+        if (this.game && this.game.score % 30 === 0 && this.game.score > 0) {
+            console.log('=== COOLDOWN CHECK DEBUG ===');
+            console.log('Current time:', now);
+            console.log('Last interaction time:', this.lastInteractionTime);
+            console.log('Time since last interaction:', timeSinceLastInteraction);
+            console.log('Required cooldown:', requiredCooldown);
+            console.log('Can interact:', canInteract);
+            console.log('Game score:', this.game.score);
+        }
+        
+        return canInteract;
     }
     
     // Record interaction and start cooldown

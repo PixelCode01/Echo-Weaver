@@ -374,6 +374,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Game input events
     canvas.addEventListener('mousedown', (event) => {
+        console.log('=== MOUSE DOWN EVENT ===');
+        console.log('Game paused:', gamePaused);
+        console.log('Universal controls exist:', !!window.universalControls);
+        
         if (!gamePaused) {
             // Check universal controls cooldown
             if (window.universalControls && !window.universalControls.canInteractNow()) {
@@ -381,11 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
+            console.log('Mouse click allowed, processing...');
             game.handleEvent(event);
             
             // Record interaction for universal controls
             if (window.universalControls) {
                 window.universalControls.recordInteraction();
+                console.log('Interaction recorded for universal controls');
             }
         }
     });
@@ -407,12 +413,18 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         event.stopPropagation();
         
+        console.log('=== TOUCH START EVENT ===');
+        console.log('Game paused:', gamePaused);
+        console.log('Universal controls exist:', !!window.universalControls);
+        
         if (!gamePaused) {
             // Check universal controls cooldown
             if (window.universalControls && !window.universalControls.canInteractNow()) {
                 console.log('Touch blocked by universal controls cooldown');
                 return;
             }
+            
+            console.log('Touch allowed, processing...');
             
             const touch = event.touches[0];
             const mouseEvent = new MouseEvent('mousedown', {
@@ -424,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Record interaction for universal controls
             if (window.universalControls) {
                 window.universalControls.recordInteraction();
+                console.log('Interaction recorded for universal controls');
             }
             
             // Mobile triple-tap detection for wave mode switching
@@ -662,15 +675,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Universal touch/drag cooldown system for all devices
-    console.log("Initializing universal touch/drag cooldown system");
+    console.log("=== INITIALIZING UNIVERSAL CONTROLS ===");
+    console.log("Game state at initialization:", game.state);
+    console.log("Game score at initialization:", game.score);
     
     // Initialize universal controls (works on all devices)
     try {
         const universalControls = new UniversalControls(game);
         window.universalControls = universalControls; // Make it globally accessible
         console.log("Universal controls initialized successfully:", universalControls);
+        console.log("Universal controls added to window:", !!window.universalControls);
     } catch (error) {
         console.error("Failed to initialize universal controls:", error);
+        console.error("Error stack:", error.stack);
     }
     
     // Update universal controls in the game loop
@@ -683,7 +700,18 @@ document.addEventListener('DOMContentLoaded', () => {
             universalControls.update();
             // Debug: Log universal controls update
             if (game.score % 120 === 0 && game.score > 0) {
-                console.log('Universal controls update called, game state:', game.state);
+                console.log('=== UNIVERSAL CONTROLS UPDATE IN GAME LOOP ===');
+                console.log('Game state:', game.state);
+                console.log('Game score:', game.score);
+                console.log('Universal controls exist:', !!universalControls);
+            }
+        } else {
+            // Debug: Log why universal controls aren't updating
+            if (game.score % 120 === 0 && game.score > 0) {
+                console.log('=== UNIVERSAL CONTROLS UPDATE SKIPPED ===');
+                console.log('Universal controls exist:', !!universalControls);
+                console.log('Game state:', game.state);
+                console.log('Game state is playing:', game.state === 'playing');
             }
         }
     };

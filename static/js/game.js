@@ -197,6 +197,11 @@ class Game {
     }
     
     handleEvent(event) {
+        console.log('=== GAME HANDLE EVENT ===');
+        console.log('Event type:', event.type);
+        console.log('Game state:', this.state);
+        console.log('Universal controls exist:', !!window.universalControls);
+        
         if (this.state === 'playing') {
             // Check universal controls cooldown for wave creation
             if ((event.type === 'mousedown' || event.type === 'mouseup') && 
@@ -220,6 +225,10 @@ class Game {
                 const minDistance = 20;
                 
                 if (distance >= minDistance) {
+                    console.log('=== WAVE CREATION ===');
+                    console.log('Distance:', distance, 'Min distance:', minDistance);
+                    console.log('Wave mode:', this.currentWaveMode);
+                    
                     // Determine wave parameters based on current mode
                     let waveParams = SETTINGS.WAVE_MODE_NORMAL;
                     if (this.currentWaveMode === 'focused') {
@@ -240,12 +249,15 @@ class Game {
                     
                     this.waves.push(newWave);
                     this._playSound('wave_create');
+                    console.log('Wave created successfully');
                     
                     // Record interaction for universal controls
                     if (window.universalControls) {
                         window.universalControls.recordInteraction();
+                        console.log('Interaction recorded in game handleEvent');
                     }
                 } else {
+                    console.log('Wave creation blocked: distance too short');
                     // Show visual feedback for invalid attempt
                     this.invalidWaveAttempt = {
                         start: this.startPos,
