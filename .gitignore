@@ -153,4 +153,4 @@ wave.py
 wave_manager.py
 
 # Local development files
-index.html
+# index.html  # Commented out to allow templates/index.html

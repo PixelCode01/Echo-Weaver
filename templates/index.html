@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Echo Weaver - A web-based arcade game where you defend a core by creating destructive sound waves">
+    <meta name="theme-color" content="#050505">
+    <title>Echo Weaver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+    <style>
+        /* Ensure proper screen display */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            z-index: 10;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>ECHO WEAVER</h1>
+            <div class="instructions">
+                <p>Defend the core by creating sound waves!</p>
+                
+                <!-- Desktop Instructions -->
+                <div class="desktop-instructions">
+                    <p>Mouse: Click and drag to draw a line, release to unleash a wave.</p>
+                    <p>Keyboard: Press 1, 2, 3 to switch between wave modes (Normal, Focused, Wide).</p>
+                    <p>Keyboard: Press SPACE for Echo Burst (clears nearby enemies).</p>
+                </div>
+                
+                <!-- Mobile Instructions -->
+                <div class="mobile-instructions">
+                    <p>Touch: Tap and drag to draw a line, release to unleash a wave.</p>
+                    <p>Triple-tap quickly anywhere to cycle wave modes.</p>
+                    <p>Double-tap the core for Echo Burst (clears nearby enemies).</p>
+                </div>
+                
+                <p>Collect power-ups for temporary boosts.</p>
+                <p><strong>Progress Bars:</strong> Bottom left shows Fever Meter (fills with combos) and Echo Burst Cooldown.</p>
+            </div>
+            <div class="name-input-container">
+                <input type="text" id="player-name" maxlength="15" placeholder="Enter your name">
+            </div>
+            <button id="start-button" class="glow-button">START GAME</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <canvas id="game-canvas"></canvas>
+            <div id="hud">
+                <div id="score-display">Score: <span id="score">0</span></div>
+                <div id="wave-display">Wave: <span id="wave">1</span></div>
+                <div id="highscore-display">High Score: <span id="highscore">0</span></div>
+                <div id="combo-display">Combo: <span id="combo">0</span></div>
+            </div>
+            <div id="wave-mode"><span id="current-mode">Normal</span></div>
+            <div id="fever-meter-container">
+                <div id="fever-meter"></div>
+                <div class="meter-label">Fever Meter</div>
+            </div>
+            <div id="echo-cooldown-container">
+                <div id="echo-cooldown"></div>
+                <div class="meter-label">Echo Burst Cooldown</div>
+            </div>
+            <div id="powerup-timers"></div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>GAME OVER</h1>
+            <div id="final-score">Final Score: <span>0</span></div>
+            
+            <div id="player-name-container">
+                <h2>Enter Your Name:</h2>
+                <input type="text" id="game-over-player-name" maxlength="15" placeholder="Your name">
+                <button id="submit-score" class="glow-button">Submit Score</button>
+            </div>
+            
+            <div id="leaderboard">
+                <h2>Leaderboard</h2>
+                <div id="leaderboard-entries"></div>
+            </div>
+            
+            <button id="restart-button" class="glow-button">Play Again</button>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/enemy.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/wave.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/particle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/powerup.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
