@@ -3,10 +3,24 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded');
     console.log('=== SCRIPT LOADING CHECK ===');
+    console.log('Document ready state:', document.readyState);
     console.log('UniversalControls in window:', !!window.UniversalControls);
     console.log('UniversalControls type:', typeof window.UniversalControls);
     console.log('All window properties containing "Control":', Object.keys(window).filter(key => key.includes('Control')));
     console.log('All window properties containing "Universal":', Object.keys(window).filter(key => key.includes('Universal')));
+    console.log('SETTINGS available:', typeof SETTINGS);
+    console.log('Game class available:', typeof Game);
+    console.log('Script loading order check - all scripts loaded');
+    console.log('Complete script load order:', window.scriptLoadOrder);
+    console.log('=== COMPREHENSIVE UNIVERSAL CONTROLS DIAGNOSTIC ===');
+    console.log('1. UniversalControls in window:', !!window.UniversalControls);
+    console.log('2. UniversalControls type:', typeof window.UniversalControls);
+    console.log('3. UniversalControls constructor:', window.UniversalControls);
+    console.log('4. All window properties:', Object.keys(window).filter(key => key.includes('Control') || key.includes('Universal')));
+    console.log('5. Script load order:', window.scriptLoadOrder);
+    console.log('6. Document ready state:', document.readyState);
+    console.log('7. SETTINGS loaded:', typeof SETTINGS);
+    console.log('8. Game class loaded:', typeof Game);
     
     // Detect device type and show appropriate instructions
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 

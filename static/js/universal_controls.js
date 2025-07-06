@@ -3,6 +3,19 @@
 console.log('=== UNIVERSAL CONTROLS SCRIPT LOADING ===');
 console.log('Script loading timestamp:', Date.now());
 console.log('Window object available:', !!window);
+console.log('Document ready state:', document.readyState);
+console.log('SETTINGS available:', typeof SETTINGS);
+console.log('Game class available:', typeof Game);
+
+// Track script loading order
+window.scriptLoadOrder = window.scriptLoadOrder || [];
+window.scriptLoadOrder.push('universal_controls.js');
+console.log('Script load order so far:', window.scriptLoadOrder);
+
+// Check for any existing errors
+if (window.UniversalControls) {
+    console.warn('UniversalControls already exists in window!');
+}
 
 // Make UniversalControls available globally
 window.UniversalControls = class UniversalControls {
@@ -428,4 +441,7 @@ window.UniversalControls = class UniversalControls {
 
 console.log('=== UNIVERSAL CONTROLS SCRIPT LOADED ===');
 console.log('UniversalControls class available:', typeof window.UniversalControls);
-console.log('UniversalControls in window:', !!window.UniversalControls); 
+console.log('UniversalControls in window:', !!window.UniversalControls);
+console.log('Script execution completed successfully');
+console.log('Final window check - UniversalControls:', !!window.UniversalControls);
+console.log('Final window check - typeof:', typeof window.UniversalControls); 

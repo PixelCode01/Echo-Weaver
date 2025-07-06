@@ -1,4 +1,9 @@
 // Game settings
+console.log('=== SETTINGS.JS LOADING ===');
+window.scriptLoadOrder = window.scriptLoadOrder || [];
+window.scriptLoadOrder.push('settings.js');
+console.log('Script load order so far:', window.scriptLoadOrder);
+
 const SETTINGS = {
     // Canvas dimensions
     WIDTH: window.innerWidth,
