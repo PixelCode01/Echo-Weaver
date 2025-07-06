@@ -23,6 +23,24 @@
             overflow-y: scroll !important;
         }
         
+        /* Force scroll on all elements */
+        body.guide-page * {
+            overflow: visible !important;
+        }
+        
+        /* Debug: Add visible border to see if styles are applied */
+        body.guide-page::before {
+            content: 'GUIDE PAGE STYLES LOADED';
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            padding: 5px;
+            z-index: 9999;
+            font-size: 12px;
+        }
+        
         .guide-container { 
             max-width: 800px; 
             margin: 0 auto; 
@@ -164,5 +182,26 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        // Debug script to check CSS conflicts
+        console.log('Guide page loaded');
+        
+        // Check if body has guide-page class
+        console.log('Body classes:', document.body.className);
+        console.log('Body overflow:', getComputedStyle(document.body).overflow);
+        console.log('Body height:', getComputedStyle(document.body).height);
+        
+        // Check if scrolling is possible
+        console.log('Document height:', document.documentElement.scrollHeight);
+        console.log('Window height:', window.innerHeight);
+        console.log('Can scroll:', document.documentElement.scrollHeight > window.innerHeight);
+        
+        // Force scroll test
+        setTimeout(() => {
+            console.log('Attempting to scroll to bottom...');
+            window.scrollTo(0, document.documentElement.scrollHeight);
+        }, 1000);
+    </script>
 </body>
 </html> 

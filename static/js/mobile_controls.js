@@ -2,8 +2,10 @@
 
 class MobileControls {
     constructor(game) {
+        console.log('MobileControls constructor called with game:', game);
         this.game = game;
         this.gameScreen = document.getElementById('game-screen');
+        console.log('Game screen element:', this.gameScreen);
         
         // Touch cooldown system
         this.touchCooldown = 0;
@@ -16,7 +18,11 @@ class MobileControls {
         // Add touch event handlers
         this.addTouchEventHandlers();
         
-        console.log('Mobile controls initialized');
+        console.log('Mobile controls initialized with cooldown settings:', {
+            base: SETTINGS.MOBILE_TOUCH_COOLDOWN_BASE,
+            max: SETTINGS.MOBILE_TOUCH_COOLDOWN_MAX,
+            factor: SETTINGS.MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR
+        });
     }
     
     createMobileControls() {
@@ -155,6 +161,15 @@ class MobileControls {
     }
     
     updateCooldownDisplay() {
+        // Debug: Check if elements exist
+        if (!this.touchCooldownBar || !this.touchCooldownLabel) {
+            console.error('Touch cooldown elements not found:', {
+                bar: this.touchCooldownBar,
+                label: this.touchCooldownLabel
+            });
+            return;
+        }
+        
         // Update Echo Burst cooldown visual
         if (this.game.echoBurstCooldown > 0) {
             const cooldownPercent = (this.game.echoBurstCooldown / SETTINGS.ECHO_BURST_COOLDOWN) * 100;
@@ -169,6 +184,18 @@ class MobileControls {
         const now = Date.now();
         const timeSinceLastTouch = now - this.lastTouchTime;
         const requiredCooldown = this.calculateTouchCooldown();
+        
+        // Debug: Log cooldown calculations every 60 frames
+        if (this.game.score % 60 === 0 && this.game.score > 0) {
+            console.log('Touch cooldown debug:', {
+                now,
+                lastTouchTime: this.lastTouchTime,
+                timeSinceLastTouch,
+                requiredCooldown,
+                canTouch: this.canTouch,
+                gameScore: this.game.score
+            });
+        }
         
         if (timeSinceLastTouch < requiredCooldown) {
             const progress = (timeSinceLastTouch / requiredCooldown) * 100;

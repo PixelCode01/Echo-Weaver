@@ -640,13 +640,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Add mobile-specific controls if on a mobile device
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log("Device detection - User Agent:", navigator.userAgent);
+    console.log("Device detection - Is Mobile:", isMobileDevice);
+    console.log("Device detection - Max Touch Points:", navigator.maxTouchPoints);
+    
+    if (isMobileDevice) {
         // Mobile controls are now handled by the MobileControls class
-        console.log("Mobile device detected, using mobile controls");
+        console.log("Mobile device detected, initializing mobile controls");
         
-        // Initialize mobile controls
-        const mobileControls = new MobileControls(game);
-        window.mobileControls = mobileControls; // Make it globally accessible
+        try {
+            // Initialize mobile controls
+            const mobileControls = new MobileControls(game);
+            window.mobileControls = mobileControls; // Make it globally accessible
+            console.log("Mobile controls initialized successfully:", mobileControls);
+        } catch (error) {
+            console.error("Failed to initialize mobile controls:", error);
+        }
         
         // Update mobile controls in the game loop
         const originalGameUpdate = game.update;
@@ -656,6 +666,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update mobile controls
             if (mobileControls && game.state === 'playing') {
                 mobileControls.update();
+                // Debug: Log mobile controls update
+                if (game.score % 120 === 0 && game.score > 0) {
+                    console.log('Mobile controls update called, game state:', game.state);
+                }
             }
         };
     } else {
