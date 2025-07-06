@@ -86,7 +86,6 @@ class Game {
             update: () => {
                 // Score-based enemy spawning - ensure enemies always spawn
                 const score = this.score;
-                const scoreIncrease = score - this.waveManager.lastScoreCheck;
                 
                 // Base spawn rate based on score
                 let baseSpawnRate = SETTINGS.ENEMY_SPAWN_RATE;
@@ -103,6 +102,7 @@ class Game {
                 
                 // Spawn enemies if we have too few
                 if (this.enemies.length < minEnemiesOnScreen) {
+                    console.log(`Spawning enemy due to low count: ${this.enemies.length}/${minEnemiesOnScreen}`);
                     this._spawnEnemy();
                 }
                 
@@ -110,6 +110,7 @@ class Game {
                 this.waveManager.spawnTimer++;
                 if (this.waveManager.spawnTimer >= baseSpawnRate) {
                     this.waveManager.spawnTimer = 0;
+                    console.log(`Spawning enemy due to timer: baseSpawnRate=${baseSpawnRate}`);
                     this._spawnEnemy();
                 }
                 
@@ -122,20 +123,29 @@ class Game {
                     this.waveManager.currentWave = newWave;
                     document.getElementById('wave').textContent = this.waveManager.currentWave;
                     
-                                    // Increase enemy speed with score (with limits)
-                let baseSpeed = SETTINGS.ENEMY_SPEED + (this.waveManager.currentWave - 1) * 0.15;
-                
-                // Apply speed limits based on score
-                if (this.score <= 100) {
-                    // Limit to 1.5x till score 100
-                    this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_100);
-                } else if (this.score <= 200) {
-                    // Limit to 2.0x till score 200
-                    this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_200);
-                } else {
-                    // After score 200, use normal max speed
-                    this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_AFTER_200);
+                    // Increase enemy speed with score (with limits)
+                    let baseSpeed = SETTINGS.ENEMY_SPEED + (this.waveManager.currentWave - 1) * 0.15;
+                    
+                    // Apply speed limits based on score
+                    if (this.score <= 100) {
+                        // Limit to 1.5x till score 100
+                        this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_100);
+                    } else if (this.score <= 200) {
+                        // Limit to 2.0x till score 200
+                        this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_200);
+                    } else {
+                        // After score 200, use normal max speed
+                        this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_AFTER_200);
+                    }
+                    
+                    console.log(`Wave updated to ${newWave}, enemy speed: ${this.waveManager.enemySpeed}`);
                 }
+                
+                // Emergency failsafe: If no enemies for too long, force spawn
+                if (this.enemies.length === 0 && this.waveManager.spawnTimer > baseSpawnRate * 2) {
+                    console.log('Emergency spawn triggered - no enemies for too long');
+                    this._spawnEnemy();
+                    this.waveManager.spawnTimer = 0;
                 }
             }
         };
@@ -363,6 +373,35 @@ class Game {
             this.waveManager.waveActive = false;
             this.waveManager.spawnedEnemiesCount = 0;
             this.waveManager.spawnTimer = 0;
+        }
+        
+        // Comprehensive stuck detection system
+        const stuckDetectionTime = Date.now();
+        const timeSinceLastEnemySpawn = stuckDetectionTime - this.lastEnemySpawnTime;
+        const timeSinceLastScore = stuckDetectionTime - (this.lastScoreTime || stuckDetectionTime);
+        
+        // Track last score time
+        if (!this.lastScoreTime) this.lastScoreTime = stuckDetectionTime;
+        
+        // Detect if game is stuck
+        if (this.enemies.length === 0 && timeSinceLastEnemySpawn > 5000) { // 5 seconds without enemies
+            console.log('=== GAME STUCK DETECTED ===');
+            console.log('Time since last enemy spawn:', timeSinceLastEnemySpawn);
+            console.log('Time since last score:', timeSinceLastScore);
+            console.log('Wave manager state:', {
+                currentWave: this.waveManager.currentWave,
+                waveActive: this.waveManager.waveActive,
+                enemiesToSpawn: this.waveManager.enemiesToSpawn,
+                spawnedEnemiesCount: this.waveManager.spawnedEnemiesCount,
+                spawnTimer: this.waveManager.spawnTimer
+            });
+            console.log('Forcing enemy spawn...');
+            
+            // Force spawn multiple enemies
+            for (let i = 0; i < 3; i++) {
+                this._spawnEnemy();
+            }
+            this.lastEnemySpawnTime = stuckDetectionTime;
         }
         
         // Update enemies if time is not stopped
@@ -809,6 +848,9 @@ class Game {
     }
     
     _handleEnemyDefeat(enemy, damage = 0) {
+        // Debug: Log enemy defeat
+        console.log(`Enemy defeated: type=${enemy.constructor.name}, score=${this.score}, enemies remaining=${this.enemies.length}`);
+        
         // Add combo
         this.comboManager.addHit();
         
@@ -822,6 +864,9 @@ class Game {
         
         // Increase score with combo bonus
         this.score += baseScore + this.comboManager.getBonus();
+        
+        // Update last score time for stuck detection
+        this.lastScoreTime = Date.now();
         
         // Play sound
         this._playSound('enemy_hit');
