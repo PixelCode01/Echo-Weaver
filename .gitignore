@@ -111,7 +111,7 @@ dmypy.json
 # Game specific
 *.save
 temp_*
-highscores/*.json
+# highscores/*.json  # Commented out to allow highscores.json for web deployment
 highscores/backup/
 
 # Pygame specific
@@ -129,9 +129,9 @@ enemy.py
 wave.py
 particle.py
 powerup.py
-assets/
+# assets/  # Commented out to allow static/assets/ for web deployment
 sprites/
-sounds/
+# sounds/  # Commented out to allow static/assets/sounds/ for web deployment
 pygame_assets/
 
 # Local Python files not needed for web deployment
