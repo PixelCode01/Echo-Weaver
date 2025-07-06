@@ -375,7 +375,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Game input events
     canvas.addEventListener('mousedown', (event) => {
         if (!gamePaused) {
+            // Check universal controls cooldown
+            if (window.universalControls && !window.universalControls.canInteractNow()) {
+                console.log('Mouse click blocked by universal controls cooldown');
+                return;
+            }
+            
             game.handleEvent(event);
+            
+            // Record interaction for universal controls
+            if (window.universalControls) {
+                window.universalControls.recordInteraction();
+            }
         }
     });
     
@@ -397,12 +408,23 @@ document.addEventListener('DOMContentLoaded', () => {
         event.stopPropagation();
         
         if (!gamePaused) {
+            // Check universal controls cooldown
+            if (window.universalControls && !window.universalControls.canInteractNow()) {
+                console.log('Touch blocked by universal controls cooldown');
+                return;
+            }
+            
             const touch = event.touches[0];
             const mouseEvent = new MouseEvent('mousedown', {
                 clientX: touch.clientX,
                 clientY: touch.clientY
             });
             game.handleEvent(mouseEvent);
+            
+            // Record interaction for universal controls
+            if (window.universalControls) {
+                window.universalControls.recordInteraction();
+            }
             
             // Mobile triple-tap detection for wave mode switching
             if (game.lastTapTime && (Date.now() - game.lastTapTime) < 300) {

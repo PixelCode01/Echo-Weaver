@@ -198,6 +198,13 @@ class Game {
     
     handleEvent(event) {
         if (this.state === 'playing') {
+            // Check universal controls cooldown for wave creation
+            if ((event.type === 'mousedown' || event.type === 'mouseup') && 
+                window.universalControls && !window.universalControls.canInteractNow()) {
+                console.log('Wave creation blocked by universal controls cooldown');
+                return;
+            }
+            
             if (event.type === 'mousedown') {
                 this.startPos = { x: event.clientX, y: event.clientY };
             } else if (event.type === 'mouseup' && this.startPos) {
@@ -233,6 +240,11 @@ class Game {
                     
                     this.waves.push(newWave);
                     this._playSound('wave_create');
+                    
+                    // Record interaction for universal controls
+                    if (window.universalControls) {
+                        window.universalControls.recordInteraction();
+                    }
                 } else {
                     // Show visual feedback for invalid attempt
                     this.invalidWaveAttempt = {
@@ -1274,6 +1286,11 @@ class Game {
         // Reset mobile controls if they exist
         if (window.mobileControls) {
             window.mobileControls.resetTouchCooldown();
+        }
+        
+        // Reset universal controls if they exist
+        if (window.universalControls) {
+            window.universalControls.resetInteractionCooldown();
         }
         
         // Don't reset playerName to preserve it between games
