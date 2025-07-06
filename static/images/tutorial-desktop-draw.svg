@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <defs>
+    <linearGradient id="mouseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#cccccc" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Mouse -->
+  <path d="M30,20 C25,20 20,25 20,35 L20,50 C20,60 25,65 30,65 L50,65 C55,65 60,60 60,50 L60,35 C60,25 55,20 50,20 Z" fill="url(#mouseGradient)" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Mouse buttons -->
+  <path d="M20,35 L60,35" stroke="#555555" stroke-width="1"/>
+  
+  <!-- Mouse wheel -->
+  <circle cx="40" cy="30" r="3" fill="#555555"/>
+  
+  <!-- Cursor -->
+  <circle cx="40" cy="40" r="2" fill="#0066ff" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="cy" values="40;30;40" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Draw line animation -->
+  <line x1="40" y1="40" x2="60" y2="60" stroke="#0066ff" stroke-width="2" stroke-dasharray="3,3">
+    <animate attributeName="x2" values="40;60;40" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="40;60;40" dur="2s" repeatCount="indefinite"/>
+  </line>
+</svg> 

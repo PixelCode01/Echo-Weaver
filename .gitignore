@@ -1,0 +1,156 @@
+# Development files
+devlog.md
+ASSETS.md
+DEPLOYMENT.md
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_GUIDE.md
+SUMMARY.md
+pythonanywhere_*.py
+pythonanywhere_*.zip
+pythonanywhere_*.txt
+setup_pythonanywhere.py
+commit_web_deploy.sh
+test_deployment.py
+verify_assets*.py
+deploy_files/
+pythonanywhere_setup/
+deploy_package/
+echo_weaver_web.zip
+*.bak
+*.tmp
+generate_favicon.py
+run_local.py
+run.sh
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.pythonenv
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Flask
+instance/
+.webassets-cache
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Web deployment
+.pythonanywhere.com
+*.wsgi.bak
+
+# Game specific
+*.save
+temp_*
+highscores/*.json
+highscores/backup/
+
+# Pygame specific
+pygame_*.exe
+pygame_*.dll
+pygame_*.so
+
+# Unused files from original game
+main.py
+game.py
+settings.py
+utils.py
+core.py
+enemy.py
+wave.py
+particle.py
+powerup.py
+assets/
+sprites/
+sounds/
+pygame_assets/
+
+# Local Python files not needed for web deployment
+background_particle.py
+combo_manager.py
+damage_number.py
+enemy.py
+enemy_trail.py
+fever_manager.py
+high_score.py
+highscore.txt
+impact_effect.py
+leaderboard.py
+message_display.py
+player.py
+screen_shake.py
+sound_manager.py
+wave.py
+wave_manager.py
+
+# Local development files
+index.html

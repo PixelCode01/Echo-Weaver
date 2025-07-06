@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <title>WebAssembly Test</title>
+</head>
+<body>
+    <h1>WebAssembly Test</h1>
+    <div id="status">Testing WebAssembly support...</div>
+    
+    <script>
+        // Check if WebAssembly is supported
+        if (typeof WebAssembly === 'object') {
+            document.getElementById('status').textContent = 'WebAssembly is supported!';
+            
+            // Check if SharedArrayBuffer is available (needed for threading)
+            try {
+                const test = new SharedArrayBuffer(1);
+                document.getElementById('status').textContent += '\nSharedArrayBuffer is supported!';
+            } catch (e) {
+                document.getElementById('status').textContent += '\nSharedArrayBuffer is NOT supported. Error: ' + e.message;
+            }
+            
+            // Check CORS headers
+            document.getElementById('status').textContent += '\nChecking CORS headers...';
+            
+            const headers = {
+                'COEP': document.querySelector('meta[http-equiv="Cross-Origin-Embedder-Policy"]')?.content,
+                'COOP': document.querySelector('meta[http-equiv="Cross-Origin-Opener-Policy"]')?.content
+            };
+            
+            document.getElementById('status').textContent += '\nCOEP: ' + (headers.COEP || 'Not set');
+            document.getElementById('status').textContent += '\nCOOP: ' + (headers.COOP || 'Not set');
+            
+        } else {
+            document.getElementById('status').textContent = 'WebAssembly is NOT supported in this browser!';
+        }
+    </script>
+</body>
+</html> 

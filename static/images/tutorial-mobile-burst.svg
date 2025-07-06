@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Mobile screen -->
+  <rect x="15" y="10" width="50" height="60" rx="5" ry="5" fill="#111122" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Core -->
+  <circle cx="40" cy="40" r="8" fill="#0066ff" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#0066ff;#80c0ff;#0066ff" dur="1s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Animated rings -->
+  <circle cx="40" cy="40" r="12" fill="none" stroke="#0066ff" stroke-width="1" opacity="0">
+    <animate attributeName="r" values="8;20;8" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.8;0" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="40" cy="40" r="16" fill="none" stroke="#0066ff" stroke-width="1" opacity="0">
+    <animate attributeName="r" values="8;24;8" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.5;0" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Finger double tap animation -->
+  <circle cx="40" cy="40" r="5" fill="#ffffff" opacity="0">
+    <animate attributeName="opacity" values="0;0.7;0;0.7;0" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="5;6;5;6;5" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Double tap text -->
+  <text x="40" y="75" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">Double Tap Core</text>
+</svg> 

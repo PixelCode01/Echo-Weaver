@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Weaver</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1>Echo Weaver</h1>
+            
+            <div class="instructions">
+                <p>Welcome to Echo Weaver, a game where sound waves are your weapon against the void.</p>
+                <p>Draw sound waves by clicking and dragging to destroy enemies before they reach your core.</p>
+                <p>Collect powerups to enhance your abilities and survive as long as possible!</p>
+            </div>
+            
+            <div class="name-input-container">
+                <input type="text" id="player-name" placeholder="Enter your name" maxlength="20">
+            </div>
+            
+            <button id="start-button" class="glow-button">Start Game</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <canvas id="game-canvas"></canvas>
+            
+            <div id="hud">
+                <div class="hud-item">
+                    <i class="fas fa-star"></i>
+                    Score: <span id="score">0</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-trophy"></i>
+                    High Score: <span id="highscore">0</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-layer-group"></i>
+                    Wave: <span id="wave">1</span>
+                </div>
+                <div class="hud-item">
+                    <i class="fas fa-bolt"></i>
+                    Combo: <span id="combo">0</span>
+                </div>
+            </div>
+            
+            <div id="wave-mode">
+                <i class="fas fa-broadcast-tower"></i>
+                Mode: <span id="current-mode">Normal</span>
+            </div>
+            
+            <div id="powerup-timers"></div>
+            
+            <div id="echo-cooldown-container">
+                <div id="echo-cooldown"></div>
+            </div>
+            
+            <div id="fever-meter-container">
+                <div id="fever-meter"></div>
+            </div>
+            
+            <div class="tutorial-overlay hidden" id="tutorial-overlay">
+                <div class="tutorial-content">
+                    <div class="tutorial-step" data-step="1">
+                        <h3>Welcome to Echo Weaver</h3>
+                        <p>Defend your core against incoming enemies using sound waves.</p>
+                        <div class="tutorial-image desktop-draw"></div>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="2">
+                        <h3>Create Sound Waves</h3>
+                        <p>Click and drag to create directional sound waves that destroy enemies.</p>
+                        <div class="tutorial-interactive">
+                            <div class="interactive-demo desktop-draw"></div>
+                        </div>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="3">
+                        <h3>Wave Modes</h3>
+                        <p>Press 1, 2, or 3 to switch between Normal, Focused, and Wide wave modes.</p>
+                        <div class="tutorial-image desktop-keys"></div>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="4">
+                        <h3>Echo Burst</h3>
+                        <p>Press SPACE to activate Echo Burst when available - destroys nearby enemies!</p>
+                        <div class="tutorial-image desktop-space"></div>
+                    </div>
+                    <button class="glow-button tutorial-next">Next</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1>Game Over</h1>
+            
+            <div id="final-score">
+                <i class="fas fa-star"></i> Your Score: <span>0</span>
+            </div>
+            
+            <div id="player-name-container">
+                <input type="text" id="game-over-player-name" placeholder="Enter your name" maxlength="20">
+            </div>
+            
+            <div class="button-container">
+                <button id="submit-score" class="glow-button">Submit Score</button>
+                <button id="restart-button" class="glow-button">Play Again</button>
+            </div>
+            
+            <div id="leaderboard">
+                <h2><i class="fas fa-trophy"></i> Leaderboard</h2>
+                <div id="leaderboard-entries">
+                    <!-- Leaderboard entries will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load scripts -->
+    <script src="/static/js/settings.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/particle.js"></script>
+    <script src="/static/js/powerup.js"></script>
+    <script src="/static/js/enemy.js"></script>
+    <script src="/static/js/wave.js"></script>
+    <script src="/static/js/core.js"></script>
+    <script src="/static/js/game.js"></script>
+    <script src="/static/js/mobile-controls.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 

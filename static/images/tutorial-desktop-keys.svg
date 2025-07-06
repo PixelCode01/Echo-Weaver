@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Key 1 -->
+  <rect x="15" y="30" width="15" height="15" rx="2" ry="2" fill="#333333" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#333333;#0066ff;#333333" dur="3s" begin="0s" repeatCount="indefinite"/>
+  </rect>
+  <text x="22.5" y="42" font-family="Arial" font-size="12" text-anchor="middle" fill="#ffffff">1</text>
+  
+  <!-- Key 2 -->
+  <rect x="32.5" y="30" width="15" height="15" rx="2" ry="2" fill="#333333" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#333333;#333333;#0066ff;#333333;#333333" dur="3s" begin="0s" repeatCount="indefinite"/>
+  </rect>
+  <text x="40" y="42" font-family="Arial" font-size="12" text-anchor="middle" fill="#ffffff">2</text>
+  
+  <!-- Key 3 -->
+  <rect x="50" y="30" width="15" height="15" rx="2" ry="2" fill="#333333" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#333333;#333333;#333333;#0066ff;#333333" dur="3s" begin="0s" repeatCount="indefinite"/>
+  </rect>
+  <text x="57.5" y="42" font-family="Arial" font-size="12" text-anchor="middle" fill="#ffffff">3</text>
+  
+  <!-- Wave mode text -->
+  <text x="40" y="60" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">Switch Wave Modes</text>
+</svg> 

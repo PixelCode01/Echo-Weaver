@@ -1,0 +1,205 @@
+/* Additional CSS for Echo Weaver Web Game */
+
+/* Game-specific animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+    100% { box-shadow: 0 0 5px rgba(78, 205, 196, 0.3); }
+}
+
+/* Enhanced button styles */
+.game-button {
+    background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 10px 5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    animation: glow 2s infinite;
+}
+
+.game-button:active {
+    transform: translateY(0);
+}
+
+.game-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.game-button:hover::before {
+    left: 100%;
+}
+
+/* Canvas hover effects */
+#game-canvas:hover {
+    box-shadow: 0 0 30px rgba(78, 205, 196, 0.4);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+    .game-container {
+        padding: 10px;
+        margin: 5px;
+    }
+    
+    #game-canvas {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .control-grid {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .control-item {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Loading animation enhancement */
+.loading-dots {
+    display: inline-block;
+}
+
+.loading-dots::after {
+    content: '';
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+}
+
+/* Accessibility improvements */
+.game-button:focus,
+#game-canvas:focus {
+    outline: 2px solid #4ecdc4;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .game-container {
+        border: 2px solid white;
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .control-section {
+        border: 1px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Additional responsive styles for better mobile and tablet support */
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .game-container {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 10px;
+    }
+    
+    .control-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #game-frame {
+        height: 500px; /* Smaller height on mobile */
+    }
+    
+    .start-button {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    #game-frame {
+        height: 400px; /* Even smaller height on phones */
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Performance optimizations */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improve scrolling experience */
+html, body {
+    scroll-behavior: smooth;
+    overscroll-behavior: none; /* Prevent bounce effect on some browsers */
+}
+
+/* Game frame-specific enhancements */
+#game-frame {
+    transition: height 0.3s ease;
+    will-change: transform; /* GPU acceleration hint */
+    transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Button hover improvements */
+.start-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Improved focus states for accessibility */
+button:focus, a:focus, input:focus {
+    outline: 2px solid #4ecdc4;
+    outline-offset: 2px;
+}

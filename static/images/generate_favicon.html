@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Favicon</title>
+</head>
+<body>
+    <h1>Echo Weaver Favicon Generator</h1>
+    <p>Right-click on the canvas and select "Save image as..." to save the favicon.</p>
+    <canvas id="faviconCanvas" width="32" height="32"></canvas>
+    
+    <script>
+        // Get the canvas element
+        const canvas = document.getElementById('faviconCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Draw the core (blue circle)
+        ctx.fillStyle = '#0066ff';
+        ctx.beginPath();
+        ctx.arc(16, 16, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw concentric circles (sound waves)
+        for (let i = 0; i < 3; i++) {
+            const radius = 16 - (i * 3);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 - i * 0.2})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(16, 16, radius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        
+        // Convert canvas to data URL
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Create a link to download the image
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'favicon.ico';
+        link.textContent = 'Download Favicon';
+        document.body.appendChild(link);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Mobile screen -->
+  <rect x="15" y="10" width="50" height="60" rx="5" ry="5" fill="#111122" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Mode buttons -->
+  <rect x="20" y="50" width="10" height="10" rx="2" ry="2" fill="#0066ff" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#0066ff;#333333;#333333;#0066ff" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="25" y="58" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">1</text>
+  
+  <rect x="35" y="50" width="10" height="10" rx="2" ry="2" fill="#333333" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#333333;#0066ff;#333333;#333333" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="40" y="58" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">2</text>
+  
+  <rect x="50" y="50" width="10" height="10" rx="2" ry="2" fill="#333333" stroke="#ffffff" stroke-width="1">
+    <animate attributeName="fill" values="#333333;#333333;#0066ff;#333333" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="55" y="58" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">3</text>
+  
+  <!-- Finger touch animation -->
+  <circle cx="25" cy="50" r="4" fill="#ffffff" opacity="0">
+    <animate attributeName="opacity" values="0;0.7;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="25;40;55;25" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Tap buttons text -->
+  <text x="40" y="75" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">Tap to Change Mode</text>
+</svg> 
