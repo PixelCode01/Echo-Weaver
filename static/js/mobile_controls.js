@@ -176,8 +176,18 @@ class MobileControls {
             this.touchCooldownBar.style.display = 'block';
             this.touchCooldownLabel.style.display = 'block';
             
-            // Add visual indicator for touch cooldown
-            this.touchCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+            // Add visual indicator for touch cooldown with color change
+            if (progress < 50) {
+                this.touchCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+            } else if (progress < 80) {
+                this.touchCooldownBar.style.backgroundColor = 'rgba(255, 165, 0, 0.5)';
+            } else {
+                this.touchCooldownBar.style.backgroundColor = 'rgba(0, 255, 0, 0.5)';
+            }
+            
+            // Update label with time remaining
+            const remainingTime = Math.ceil((requiredCooldown - timeSinceLastTouch) / 100);
+            this.touchCooldownLabel.innerHTML = `Touch Cooldown (${remainingTime}s)`;
         } else {
             this.touchCooldownBar.style.display = 'none';
             this.touchCooldownLabel.style.display = 'none';
@@ -196,9 +206,19 @@ class MobileControls {
         const maxCooldown = SETTINGS.MOBILE_TOUCH_COOLDOWN_MAX;
         const scoreFactor = SETTINGS.MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR;
         
-        // Increase cooldown with score, but cap it
+        // Increase cooldown with score, but cap it to keep game playable
         const scoreBasedIncrease = Math.min(this.game.score * scoreFactor, maxCooldown - baseCooldown);
-        return baseCooldown + scoreBasedIncrease;
+        const totalCooldown = baseCooldown + scoreBasedIncrease;
+        
+        // Ensure cooldown never exceeds maximum to keep game playable
+        const finalCooldown = Math.min(totalCooldown, maxCooldown);
+        
+        // Debug logging (only in development)
+        if (this.game.score % 50 === 0 && this.game.score > 0) {
+            console.log(`Touch Cooldown Debug - Score: ${this.game.score}, Base: ${baseCooldown}ms, Score Increase: ${scoreBasedIncrease}ms, Final: ${finalCooldown}ms`);
+        }
+        
+        return finalCooldown;
     }
     
     // Check if touch is allowed
@@ -214,5 +234,15 @@ class MobileControls {
     recordTouch() {
         this.lastTouchTime = Date.now();
         this.canTouch = false;
+        console.log('Touch recorded, cooldown started');
+    }
+    
+    // Reset touch cooldown (call this when game resets)
+    resetTouchCooldown() {
+        this.lastTouchTime = 0;
+        this.canTouch = true;
+        this.touchCooldownBar.style.display = 'none';
+        this.touchCooldownLabel.style.display = 'none';
+        console.log('Touch cooldown reset');
     }
 } 

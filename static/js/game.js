@@ -1270,6 +1270,12 @@ class Game {
         this.startPos = null;
         this.invalidWaveAttempt = null;
         this.lastEnemySpawnTime = Date.now();
+        
+        // Reset mobile controls if they exist
+        if (window.mobileControls) {
+            window.mobileControls.resetTouchCooldown();
+        }
+        
         // Don't reset playerName to preserve it between games
         
         // Reset wave manager

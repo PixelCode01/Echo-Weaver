@@ -646,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Initialize mobile controls
         const mobileControls = new MobileControls(game);
+        window.mobileControls = mobileControls; // Make it globally accessible
         
         // Update mobile controls in the game loop
         const originalGameUpdate = game.update;
