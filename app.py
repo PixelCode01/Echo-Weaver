@@ -304,6 +304,34 @@ def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy'})
 
+@app.route('/test-universal-controls')
+def test_universal_controls():
+    """Test route to check if universal_controls.js is accessible"""
+    logger.info("Testing universal_controls.js accessibility")
+    try:
+        full_path = os.path.join(os.getcwd(), 'static', 'js', 'universal_controls.js')
+        logger.info(f"Looking for universal_controls.js at: {full_path}")
+        logger.info(f"File exists: {os.path.exists(full_path)}")
+        
+        if os.path.exists(full_path):
+            with open(full_path, 'r') as f:
+                content = f.read(100)  # Read first 100 characters
+            return jsonify({
+                'file_exists': True,
+                'file_size': os.path.getsize(full_path),
+                'content_preview': content,
+                'path': full_path
+            })
+        else:
+            return jsonify({
+                'file_exists': False,
+                'error': 'File not found',
+                'path': full_path
+            })
+    except Exception as e:
+        logger.error(f"Error testing universal_controls.js: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/diagnose')
 def diagnose():
     """Diagnostic route to check system status"""
