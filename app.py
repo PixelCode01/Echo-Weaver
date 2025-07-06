@@ -2,6 +2,7 @@ from flask import Flask, render_template, send_from_directory, jsonify, request,
 import os
 import logging
 import json
+import sys
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Secret key for sessions
@@ -23,13 +24,55 @@ if not os.path.exists(HIGHSCORE_FILE):
 def index():
     """Serve the main game page"""
     logger.info("Serving index page")
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Error rendering index.html: {e}")
+        # Fallback: return a simple HTML response
+        return '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Echo Weaver</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #000; color: #fff; }
+                .container { max-width: 600px; margin: 0 auto; }
+                h1 { color: #00ff00; }
+                .error { color: #ff0000; background: #300; padding: 20px; border-radius: 10px; margin: 20px 0; }
+                .info { color: #00ffff; background: #003; padding: 20px; border-radius: 10px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>ECHO WEAVER</h1>
+                <div class="error">
+                    <h2>Template Error</h2>
+                    <p>Error: ''' + str(e) + '''</p>
+                    <p>This is a fallback page. The template system is not working properly.</p>
+                </div>
+                <div class="info">
+                    <h3>Debug Information</h3>
+                    <p>Current working directory: ''' + os.getcwd() + '''</p>
+                    <p>Templates directory exists: ''' + str(os.path.exists('templates')) + '''</p>
+                    <p>Index.html exists: ''' + str(os.path.exists('templates/index.html')) + '''</p>
+                </div>
+                <p><a href="/diagnose" style="color: #00ff00;">Click here for detailed diagnostics</a></p>
+            </div>
+        </body>
+        </html>
+        ''', 200
 
 @app.route('/game')
 def game():
     """Alternative route for the game"""
     logger.info("Serving game page via /game route")
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Error rendering game page: {e}")
+        return index()  # Use the same fallback as index route
 
 @app.route('/play')
 def play_direct():
@@ -226,29 +269,42 @@ def health_check():
 
 @app.route('/diagnose')
 def diagnose():
-    """Diagnostic route to check WebAssembly files"""
+    """Diagnostic route to check system status"""
     logger.info("Running diagnostics")
-    results = {}
     
-    # Check if key files exist
-    pygbag_dir = os.path.join(os.getcwd(), 'static', 'pygbag')
-    results['pygbag_dir_exists'] = os.path.isdir(pygbag_dir)
+    diagnostic_info = {
+        'current_working_directory': os.getcwd(),
+        'python_version': sys.version,
+        'flask_version': Flask.__version__,
+        'app_root_path': app.root_path,
+        'app_instance_path': app.instance_path,
+        'app_template_folder': app.template_folder,
+        'app_static_folder': app.static_folder,
+        'templates_dir_exists': os.path.exists('templates'),
+        'static_dir_exists': os.path.exists('static'),
+        'index_template_exists': os.path.exists('templates/index.html'),
+        'play_template_exists': os.path.exists('templates/play.html'),
+        'app_py_exists': os.path.exists('app.py'),
+        'wsgi_py_exists': os.path.exists('wsgi.py'),
+        'requirements_exists': os.path.exists('requirements.txt'),
+        'highscore_file_exists': os.path.exists(HIGHSCORE_FILE),
+        'highscore_file_size': os.path.getsize(HIGHSCORE_FILE) if os.path.exists(HIGHSCORE_FILE) else 0,
+        'directory_contents': {
+            'root': os.listdir('.') if os.path.exists('.') else [],
+            'templates': os.listdir('templates') if os.path.exists('templates') else [],
+            'static': os.listdir('static') if os.path.exists('static') else []
+        }
+    }
     
-    if results['pygbag_dir_exists']:
-        results['files'] = {}
-        key_files = ['index.html', 'echo_weaver.apk', 'favicon.png']
-        for file in key_files:
-            file_path = os.path.join(pygbag_dir, file)
-            results['files'][file] = {
-                'exists': os.path.exists(file_path),
-                'size': os.path.getsize(file_path) if os.path.exists(file_path) else 0
-            }
+    # Try to render a simple template to test template system
+    try:
+        test_template = render_template_string('<h1>Template Test</h1>')
+        diagnostic_info['template_system_working'] = True
+    except Exception as e:
+        diagnostic_info['template_system_working'] = False
+        diagnostic_info['template_error'] = str(e)
     
-    # Check directory contents
-    if results['pygbag_dir_exists']:
-        results['directory_contents'] = os.listdir(pygbag_dir)
-    
-    return jsonify(results)
+    return jsonify(diagnostic_info)
 
 @app.route('/wasm-test')
 def wasm_test():
@@ -262,8 +318,41 @@ def wasm_test():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    """Custom 404 error page"""
-    return render_template('index.html'), 200  # Return the game page instead of 404
+    """Handle 404 errors by returning the game page"""
+    logger.info(f"404 error for path: {request.path}")
+    try:
+        return render_template('index.html'), 200  # Return the game page instead of 404
+    except Exception as template_error:
+        logger.error(f"Error rendering template in 404 handler: {template_error}")
+        # Fallback to simple HTML response
+        return '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Echo Weaver - Page Not Found</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #000; color: #fff; }
+                .container { max-width: 600px; margin: 0 auto; }
+                h1 { color: #00ff00; }
+                .error { color: #ff0000; background: #300; padding: 20px; border-radius: 10px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>ECHO WEAVER</h1>
+                <div class="error">
+                    <h2>Page Not Found</h2>
+                    <p>The requested page was not found: ''' + request.path + '''</p>
+                    <p>Template error: ''' + str(template_error) + '''</p>
+                </div>
+                <p><a href="/" style="color: #00ff00;">Go to Home Page</a></p>
+                <p><a href="/diagnose" style="color: #00ffff;">View Diagnostics</a></p>
+            </div>
+        </body>
+        </html>
+        ''', 200
 
 @app.errorhandler(500)
 def server_error(e):
