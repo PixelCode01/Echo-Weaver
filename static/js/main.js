@@ -682,13 +682,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize universal controls (works on all devices)
     try {
         // Check if UniversalControls class is available
-        if (typeof UniversalControls === 'undefined') {
+        if (typeof window.UniversalControls === 'undefined') {
             console.error("UniversalControls class is not defined. Check if universal_controls.js is loaded properly.");
             console.log("Available global classes:", Object.keys(window).filter(key => key.includes('Control')));
             return;
         }
         
-        const universalControls = new UniversalControls(game);
+        const universalControls = new window.UniversalControls(game);
         window.universalControls = universalControls; // Make it globally accessible
         console.log("Universal controls initialized successfully:", universalControls);
         console.log("Universal controls added to window:", !!window.universalControls);

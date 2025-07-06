@@ -2,7 +2,8 @@
 
 console.log('=== UNIVERSAL CONTROLS SCRIPT LOADING ===');
 
-class UniversalControls {
+// Make UniversalControls available globally
+window.UniversalControls = class UniversalControls {
     constructor(game) {
         console.log('=== UNIVERSAL CONTROLS INITIALIZATION ===');
         console.log('UniversalControls constructor called with game:', game);
@@ -423,8 +424,6 @@ class UniversalControls {
     }
 }
 
-// Make it globally accessible
-window.UniversalControls = UniversalControls;
 console.log('=== UNIVERSAL CONTROLS SCRIPT LOADED ===');
-console.log('UniversalControls class available:', typeof UniversalControls);
+console.log('UniversalControls class available:', typeof window.UniversalControls);
 console.log('UniversalControls in window:', !!window.UniversalControls); 
