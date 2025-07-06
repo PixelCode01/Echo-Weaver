@@ -57,10 +57,11 @@ window.UniversalControls = class UniversalControls {
     createUniversalControls() {
         console.log('=== CREATING UNIVERSAL CONTROLS UI ===');
         
-        // Create container for universal controls
+        // Create container for universal controls (hidden)
         this.controlsContainer = document.createElement('div');
         this.controlsContainer.id = 'universal-controls';
-        console.log('Controls container created:', this.controlsContainer);
+        this.controlsContainer.style.display = 'none'; // Hide the container
+        console.log('Controls container created (hidden):', this.controlsContainer);
         
         if (!this.gameScreen) {
             console.error('Game screen not found! Cannot append controls.');
@@ -68,57 +69,9 @@ window.UniversalControls = class UniversalControls {
         }
         
         this.gameScreen.appendChild(this.controlsContainer);
-        console.log('Controls container appended to game screen');
+        console.log('Controls container appended to game screen (hidden)');
         
-        // Create Echo Burst button
-        this.echoBurstButton = document.createElement('div');
-        this.echoBurstButton.id = 'echo-burst-button';
-        this.echoBurstButton.className = 'universal-control-button';
-        this.echoBurstButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
-        this.echoBurstButton.setAttribute('data-tooltip', 'Echo Burst');
-        this.echoBurstButton.style.position = 'fixed';
-        this.echoBurstButton.style.bottom = '80px';
-        this.echoBurstButton.style.right = '20px';
-        this.echoBurstButton.style.zIndex = '1000';
-        this.controlsContainer.appendChild(this.echoBurstButton);
-        console.log('Echo Burst button created and positioned');
-        
-        // Create Wave Mode button
-        this.waveModeButton = document.createElement('div');
-        this.waveModeButton.id = 'wave-mode-button';
-        this.waveModeButton.className = 'universal-control-button';
-        this.waveModeButton.innerHTML = '<i class="fas fa-sync"></i>';
-        this.waveModeButton.setAttribute('data-tooltip', 'Change Wave Mode');
-        this.waveModeButton.style.position = 'fixed';
-        this.waveModeButton.style.bottom = '20px';
-        this.waveModeButton.style.right = '100px';
-        this.waveModeButton.style.zIndex = '1000';
-        this.controlsContainer.appendChild(this.waveModeButton);
-        
-        // Create Pause button
-        this.pauseButton = document.createElement('div');
-        this.pauseButton.id = 'pause-button';
-        this.pauseButton.className = 'universal-control-button';
-        this.pauseButton.innerHTML = '<i class="fas fa-pause"></i>';
-        this.pauseButton.setAttribute('data-tooltip', 'Pause Game');
-        this.pauseButton.style.position = 'fixed';
-        this.pauseButton.style.bottom = '20px';
-        this.pauseButton.style.right = '20px';
-        this.pauseButton.style.zIndex = '1000';
-        this.controlsContainer.appendChild(this.pauseButton);
-        
-        // Create current mode indicator
-        this.modeIndicator = document.createElement('div');
-        this.modeIndicator.id = 'universal-mode-indicator';
-        this.modeIndicator.innerHTML = '<span>Normal</span>';
-        this.modeIndicator.style.position = 'fixed';
-        this.modeIndicator.style.bottom = '20px';
-        this.modeIndicator.style.left = '20px';
-        this.modeIndicator.style.zIndex = '1000';
-        this.modeIndicator.style.display = 'block';
-        this.controlsContainer.appendChild(this.modeIndicator);
-        
-        // Create interaction cooldown progress bar
+        // Create interaction cooldown progress bar (only this will be visible)
         this.interactionCooldownBar = document.createElement('div');
         this.interactionCooldownBar.id = 'interaction-cooldown-bar';
         this.interactionCooldownBar.className = 'universal-cooldown-bar';
@@ -145,160 +98,14 @@ window.UniversalControls = class UniversalControls {
         console.log('=== UNIVERSAL CONTROLS UI CREATION COMPLETE ===');
         console.log('All elements created:', {
             container: !!this.controlsContainer,
-            echoBurst: !!this.echoBurstButton,
-            waveMode: !!this.waveModeButton,
-            pause: !!this.pauseButton,
-            modeIndicator: !!this.modeIndicator,
             cooldownBar: !!this.interactionCooldownBar,
             cooldownLabel: !!this.interactionCooldownLabel
         });
     }
     
     addEventHandlers() {
-        // Echo Burst button - works with both touch and click
-        this.echoBurstButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (this.game.state === 'playing' && this.game.echoBurstCooldown === 0 && this.canInteractNow()) {
-                this.game._activateEchoBurst();
-                this.recordInteraction();
-                
-                // Add visual feedback
-                this.echoBurstButton.classList.add('button-pressed');
-                setTimeout(() => {
-                    this.echoBurstButton.classList.remove('button-pressed');
-                }, 200);
-            }
-        });
-        
-        this.echoBurstButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (this.game.state === 'playing' && this.game.echoBurstCooldown === 0 && this.canInteractNow()) {
-                this.game._activateEchoBurst();
-                this.recordInteraction();
-                
-                // Add visual feedback
-                this.echoBurstButton.classList.add('button-pressed');
-                setTimeout(() => {
-                    this.echoBurstButton.classList.remove('button-pressed');
-                }, 200);
-            }
-        }, { passive: false });
-        
-        // Wave Mode button - works with both touch and click
-        this.waveModeButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (this.game.state === 'playing' && this.canInteractNow()) {
-                this.game.cycleWaveMode();
-                this.recordInteraction();
-                
-                // Update mode indicator
-                this.modeIndicator.innerHTML = `<span>${this.game.currentWaveMode}</span>`;
-                
-                // Add visual feedback
-                this.waveModeButton.classList.add('button-pressed');
-                setTimeout(() => {
-                    this.waveModeButton.classList.remove('button-pressed');
-                }, 200);
-            }
-        });
-        
-        this.waveModeButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (this.game.state === 'playing' && this.canInteractNow()) {
-                this.game.cycleWaveMode();
-                this.recordInteraction();
-                
-                // Update mode indicator
-                this.modeIndicator.innerHTML = `<span>${this.game.currentWaveMode}</span>`;
-                
-                // Add visual feedback
-                this.waveModeButton.classList.add('button-pressed');
-                setTimeout(() => {
-                    this.waveModeButton.classList.remove('button-pressed');
-                }, 200);
-            }
-        }, { passive: false });
-        
-        // Pause button - works with both touch and click
-        this.pauseButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (this.game.state === 'playing' && this.canInteractNow()) {
-                // Toggle pause state
-                window.gamePaused = !window.gamePaused;
-                this.recordInteraction();
-                
-                // Update button icon
-                if (window.gamePaused) {
-                    this.pauseButton.innerHTML = '<i class="fas fa-play"></i>';
-                    
-                    // Show pause message
-                    const pauseMessage = document.createElement('div');
-                    pauseMessage.id = 'pause-message';
-                    pauseMessage.innerHTML = '<h2>Game Paused</h2><p>Click play to resume</p>';
-                    this.gameScreen.appendChild(pauseMessage);
-                } else {
-                    this.pauseButton.innerHTML = '<i class="fas fa-pause"></i>';
-                    
-                    // Remove pause message
-                    const pauseMessage = document.getElementById('pause-message');
-                    if (pauseMessage) {
-                        pauseMessage.remove();
-                    }
-                }
-                
-                // Add visual feedback
-                this.pauseButton.classList.add('button-pressed');
-                setTimeout(() => {
-                    this.pauseButton.classList.remove('button-pressed');
-                }, 200);
-            }
-        });
-        
-        this.pauseButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (this.game.state === 'playing' && this.canInteractNow()) {
-                // Toggle pause state
-                window.gamePaused = !window.gamePaused;
-                this.recordInteraction();
-                
-                // Update button icon
-                if (window.gamePaused) {
-                    this.pauseButton.innerHTML = '<i class="fas fa-play"></i>';
-                    
-                    // Show pause message
-                    const pauseMessage = document.createElement('div');
-                    pauseMessage.id = 'pause-message';
-                    pauseMessage.innerHTML = '<h2>Game Paused</h2><p>Tap play to resume</p>';
-                    this.gameScreen.appendChild(pauseMessage);
-                } else {
-                    this.pauseButton.innerHTML = '<i class="fas fa-pause"></i>';
-                    
-                    // Remove pause message
-                    const pauseMessage = document.getElementById('pause-message');
-                    if (pauseMessage) {
-                        pauseMessage.remove();
-                    }
-                }
-                
-                // Add visual feedback
-                this.pauseButton.classList.add('button-pressed');
-                setTimeout(() => {
-                    this.pauseButton.classList.remove('button-pressed');
-                }, 200);
-            }
-        }, { passive: false });
+        // No event handlers needed since buttons are removed
+        console.log('Universal controls event handlers skipped - buttons removed');
     }
     
     updateCooldownDisplay() {
@@ -309,16 +116,6 @@ window.UniversalControls = class UniversalControls {
                 label: this.interactionCooldownLabel
             });
             return;
-        }
-        
-        // Update Echo Burst cooldown visual
-        if (this.game.echoBurstCooldown > 0) {
-            const cooldownPercent = (this.game.echoBurstCooldown / SETTINGS.ECHO_BURST_COOLDOWN) * 100;
-            this.echoBurstButton.style.opacity = 0.5;
-            this.echoBurstButton.style.background = `conic-gradient(rgba(0, 0, 0, 0.5) ${cooldownPercent}%, var(--accent-color) ${cooldownPercent}%)`;
-        } else {
-            this.echoBurstButton.style.opacity = 1;
-            this.echoBurstButton.style.background = 'var(--accent-color)';
         }
         
         // Update interaction cooldown progress bar
