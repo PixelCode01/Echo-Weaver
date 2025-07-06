@@ -121,6 +121,10 @@
     </div>
     
     <!-- Load scripts -->
+    <script>
+        console.log('=== TEMPLATE SCRIPT EXECUTION START ===');
+        console.log('Settings.js about to load');
+    </script>
     <script src="/static/js/settings.js"></script>
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/particle.js"></script>
@@ -131,18 +135,27 @@
     <script src="/static/js/game.js"></script>
     <script src="/static/js/mobile-controls.js"></script>
     <script>
+        console.log('=== DYNAMIC SCRIPT LOADING STARTED ===');
+        console.log('Current time:', new Date().toISOString());
+        
         // Dynamic script loading with cache busting
         const script = document.createElement('script');
         script.src = '/static/js/universal_controls.js?v=5&t=' + Date.now();
+        console.log('Script URL:', script.src);
+        
         script.onload = function() {
             console.log('=== UNIVERSAL_CONTROLS.JS NETWORK LOADED ===');
             console.log('Script loaded dynamically at:', new Date().toISOString());
         };
-        script.onerror = function() {
+        script.onerror = function(error) {
             console.error('=== UNIVERSAL_CONTROLS.JS NETWORK ERROR ===');
             console.error('Failed to load universal_controls.js');
+            console.error('Error details:', error);
         };
+        
+        console.log('About to append script to document.head');
         document.head.appendChild(script);
+        console.log('Script appended to document.head');
     </script>
     <script src="/static/js/main.js"></script>
 </body>
