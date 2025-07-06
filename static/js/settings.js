@@ -33,6 +33,16 @@ const SETTINGS = {
     ENEMIES_PER_WAVE_INCREMENT: 2,
     SPECIAL_ENEMY_CHANCE: 0.3,
     
+    // Speed limiting settings (new)
+    SPEED_LIMIT_100: 1.5,  // Max 1.5x speed till score 100
+    SPEED_LIMIT_200: 2.0,  // Max 2.0x speed till score 200
+    SPEED_LIMIT_AFTER_200: 3.5,  // Max speed after score 200
+    
+    // Mobile touch cooldown settings (new)
+    MOBILE_TOUCH_COOLDOWN_BASE: 350,  // Base cooldown in ms
+    MOBILE_TOUCH_COOLDOWN_MAX: 1000,  // Maximum cooldown in ms
+    MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR: 0.5,  // How much score affects cooldown
+    
     // Boss enemy settings
     BOSS_ENEMY_RADIUS: 40,
     BOSS_ENEMY_HEALTH: 20,

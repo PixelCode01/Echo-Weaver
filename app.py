@@ -74,6 +74,43 @@ def game():
         logger.error(f"Error rendering game page: {e}")
         return index()  # Use the same fallback as index route
 
+@app.route('/guide')
+def guide():
+    """Serve the game guide page"""
+    logger.info("Serving game guide page")
+    try:
+        return render_template('guide.html')
+    except Exception as e:
+        logger.error(f"Error rendering guide page: {e}")
+        # Fallback: return a simple HTML response
+        return '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Echo Weaver - Game Guide</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #000; color: #fff; }
+                .container { max-width: 600px; margin: 0 auto; }
+                h1 { color: #00ff00; }
+                .error { color: #ff0000; background: #300; padding: 20px; border-radius: 10px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>ECHO WEAVER - GAME GUIDE</h1>
+                <div class="error">
+                    <h2>Guide Template Error</h2>
+                    <p>Error: ''' + str(e) + '''</p>
+                    <p>The guide template is not loading properly.</p>
+                </div>
+                <p><a href="/" style="color: #00ff00;">← Back to Game</a></p>
+            </div>
+        </body>
+        </html>
+        ''', 200
+
 @app.route('/play')
 def play_direct():
     """Direct route to the WebAssembly game"""

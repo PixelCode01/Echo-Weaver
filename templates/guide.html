@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Echo Weaver Game Guide - Complete guide to gameplay, controls, and strategies">
+    <meta name="theme-color" content="#050505">
+    <title>Echo Weaver - Game Guide</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+    <style>
+        .guide-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .guide-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .guide-header h1 {
+            color: #00ff00;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .guide-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid #00ffff;
+        }
+        
+        .guide-section h2 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .guide-section h3 {
+            color: #ff00ff;
+            margin: 15px 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        
+        .control-item {
+            background: rgba(255, 0, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff00ff;
+        }
+        
+        .control-item strong {
+            color: #ffff00;
+        }
+        
+        .enemy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .enemy-item {
+            background: rgba(255, 0, 85, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff0055;
+        }
+        
+        .enemy-item h4 {
+            color: #ff0055;
+            margin-bottom: 8px;
+        }
+        
+        .powerup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .powerup-item {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #00ff00;
+        }
+        
+        .powerup-item h4 {
+            color: #00ff00;
+            margin-bottom: 8px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background: #00ff00;
+            color: #000;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: #00cc00;
+            transform: scale(1.05);
+        }
+        
+        .tip-box {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .tip-box h4 {
+            color: #ffff00;
+            margin-bottom: 10px;
+        }
+        
+        .score-ranges {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .score-ranges h4 {
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+        
+        .score-range-item {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .guide-container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <div class="guide-header">
+            <h1>ECHO WEAVER</h1>
+            <h2>Complete Game Guide</h2>
+            <a href="/" class="back-button">← Back to Game</a>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🎮 How to Play</h2>
+            <p>Defend the core at the center of the screen by creating destructive sound waves. Enemies will spawn from the edges and try to reach the core. Use your waves to destroy them before they can damage the core!</p>
+            
+            <div class="tip-box">
+                <h4>💡 Pro Tip</h4>
+                <p>The core pulses with a cyan glow. Keep it safe at all costs - if enemies reach it, the game is over!</p>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🖱️ Desktop Controls</h2>
+            <div class="control-grid">
+                <div class="control-item">
+                    <strong>Mouse:</strong> Click and drag to draw a line, release to unleash a wave
+                </div>
+                <div class="control-item">
+                    <strong>1, 2, 3:</strong> Switch between wave modes (Normal, Focused, Wide)
+                </div>
+                <div class="control-item">
+                    <strong>SPACE:</strong> Echo Burst (clears nearby enemies)
+                </div>
+                <div class="control-item">
+                    <strong>ESC:</strong> Pause/Resume game
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>📱 Mobile Controls</h2>
+            <div class="control-grid">
+                <div class="control-item">
+                    <strong>Touch & Drag:</strong> Draw a line, release to unleash a wave
+                </div>
+                <div class="control-item">
+                    <strong>Triple-tap:</strong> Cycle through wave modes
+                </div>
+                <div class="control-item">
+                    <strong>Double-tap Core:</strong> Echo Burst
+                </div>
+                <div class="control-item">
+                    <strong>Touch Cooldown:</strong> 350ms-1000ms (increases with score)
+                </div>
+            </div>
+            
+            <div class="tip-box">
+                <h4>📱 Mobile Tip</h4>
+                <p>Watch the Touch Cooldown bar - it shows when you can interact again. The cooldown increases as your score gets higher!</p>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🌊 Wave Modes</h2>
+            <div class="control-grid">
+                <div class="control-item">
+                    <strong>Normal Mode:</strong> Balanced damage and width
+                </div>
+                <div class="control-item">
+                    <strong>Focused Mode:</strong> High damage, narrow width
+                </div>
+                <div class="control-item">
+                    <strong>Wide Mode:</strong> Lower damage, wide area
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>👾 Enemy Types (by Score Range)</h2>
+            <div class="score-ranges">
+                <h4>Enemy Progression</h4>
+                <div class="score-range-item"><strong>0-10:</strong> Basic Enemy - Simple movement</div>
+                <div class="score-range-item"><strong>10-20:</strong> Zigzag Enemy - Moves in zigzag pattern</div>
+                <div class="score-range-item"><strong>20-45:</strong> Ghost Enemy - Requires multiple hits</div>
+                <div class="score-range-item"><strong>45-90:</strong> Charger Enemy - Charges at high speed</div>
+                <div class="score-range-item"><strong>90-150:</strong> Splitter Enemy - Splits into smaller enemies</div>
+                <div class="score-range-item"><strong>150-220:</strong> Shielded Enemy - Has protective shield</div>
+                <div class="score-range-item"><strong>220-300:</strong> Teleporter Enemy - Teleports randomly</div>
+                <div class="score-range-item"><strong>300-400:</strong> Reflector Enemy - Reflects waves back</div>
+                <div class="score-range-item"><strong>400-500:</strong> Swarm Enemy - Spawns minions</div>
+                <div class="score-range-item"><strong>500-600:</strong> TimeBomber Enemy - Explodes after timer</div>
+                <div class="score-range-item"><strong>600-700:</strong> Vortex Enemy - Creates pulling vortex</div>
+                <div class="score-range-item"><strong>700-800:</strong> Speedster Enemy - Very fast movement</div>
+                <div class="score-range-item"><strong>800-900:</strong> SlowTank Enemy - Slow but armored</div>
+                <div class="score-range-item"><strong>900+:</strong> Boss Enemy - Large, powerful enemies</div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>⚡ Power-ups</h2>
+            <div class="powerup-grid">
+                <div class="powerup-item">
+                    <h4>🛡️ Invincibility (Yellow)</h4>
+                    <p>Temporary invincibility for the core</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>🚀 Wave Boost (Green)</h4>
+                    <p>Increases wave damage and speed</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>⏰ Slow Time (Blue)</h4>
+                    <p>Slows down all enemies</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>💥 Screen Clear (Red)</h4>
+                    <p>Destroys all enemies on screen</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>📏 Wide Waves (Cyan)</h4>
+                    <p>Increases wave width</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>⏸️ Time Stop (Purple)</h4>
+                    <p>Freezes all enemies briefly</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>🧲 Wave Magnet (Orange)</h4>
+                    <p>Waves attract enemies</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>⚡ Chain Reaction (Pink)</h4>
+                    <p>Enemy explosions chain to others</p>
+                </div>
+                <div class="powerup-item">
+                    <h4>✨ Multi Wave (White)</h4>
+                    <p>Creates multiple waves at once</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🎯 Game Mechanics</h2>
+            
+            <h3>Speed Limits</h3>
+            <p>The game uses progressive speed limits to keep it manageable:</p>
+            <ul>
+                <li><strong>Score 0-100:</strong> Maximum 1.5x speed</li>
+                <li><strong>Score 100-200:</strong> Maximum 2.0x speed</li>
+                <li><strong>Score 200+:</strong> Full speed progression</li>
+            </ul>
+            
+            <h3>Combo System</h3>
+            <p>Destroying enemies quickly builds combos:</p>
+            <ul>
+                <li>Combos increase damage and score</li>
+                <li>Higher combos fill the Fever Meter</li>
+                <li>Fever Mode provides massive damage boost</li>
+            </ul>
+            
+            <h3>Echo Burst</h3>
+            <p>Your ultimate ability with a cooldown:</p>
+            <ul>
+                <li>Clears all enemies in a large radius</li>
+                <li>Has a cooldown timer</li>
+                <li>Perfect for emergency situations</li>
+            </ul>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🏆 Scoring & Achievements</h2>
+            
+            <h3>Score Multipliers</h3>
+            <ul>
+                <li>Base enemy kill: 1 point</li>
+                <li>Combo bonus: +10% per combo level</li>
+                <li>Critical hits: 2x damage and score</li>
+                <li>Boss enemies: 10 points</li>
+            </ul>
+            
+            <h3>Achievements</h3>
+            <ul>
+                <li><strong>Boss Slayer:</strong> Defeat a boss enemy</li>
+                <li><strong>Combo Master:</strong> Achieve high combo streaks</li>
+                <li><strong>Wave Master:</strong> Use all wave modes effectively</li>
+                <li><strong>Survivor:</strong> Survive for extended periods</li>
+            </ul>
+        </div>
+        
+        <div class="guide-section">
+            <h2>💡 Advanced Strategies</h2>
+            
+            <div class="tip-box">
+                <h4>🎯 Wave Mode Strategy</h4>
+                <p>Use Focused mode for single powerful enemies, Wide mode for groups, and Normal mode for general gameplay.</p>
+            </div>
+            
+            <div class="tip-box">
+                <h4>⚡ Power-up Timing</h4>
+                <p>Save power-ups for difficult situations. Screen Clear is perfect when overwhelmed, while Wave Boost works great for boss fights.</p>
+            </div>
+            
+            <div class="tip-box">
+                <h4>🔄 Combo Management</h4>
+                <p>Maintain combos by destroying enemies quickly. The Fever Meter provides massive damage boosts when full.</p>
+            </div>
+            
+            <div class="tip-box">
+                <h4>🎮 Mobile Optimization</h4>
+                <p>Plan your touches carefully due to cooldown. Use the progress bar to time your interactions perfectly.</p>
+            </div>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🎵 Sound Effects</h2>
+            <p>The game includes immersive sound effects:</p>
+            <ul>
+                <li><strong>Wave Creation:</strong> When you create a wave</li>
+                <li><strong>Enemy Hit:</strong> When enemies are damaged</li>
+                <li><strong>Power-up Collect:</strong> When collecting power-ups</li>
+                <li><strong>Echo Burst:</strong> When using Echo Burst</li>
+                <li><strong>Game Over:</strong> When the game ends</li>
+            </ul>
+        </div>
+        
+        <div class="guide-section">
+            <h2>🔧 Technical Information</h2>
+            <p><strong>Game Engine:</strong> HTML5 Canvas with JavaScript</p>
+            <p><strong>Performance:</strong> Optimized for 60 FPS on most devices</p>
+            <p><strong>Mobile Support:</strong> Touch controls with adaptive cooldown system</p>
+            <p><strong>Browser Compatibility:</strong> Modern browsers with Web Audio API support</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="/" class="back-button">🎮 Start Playing Now!</a>
+        </div>
+    </div>
+</body>
+</html> 

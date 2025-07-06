@@ -115,13 +115,20 @@ class Game {
                     this.waveManager.currentWave = newWave;
                     document.getElementById('wave').textContent = this.waveManager.currentWave;
                     
-                    // Increase enemy speed with score
-                    this.waveManager.enemySpeed = SETTINGS.ENEMY_SPEED + 
-                        (this.waveManager.currentWave - 1) * 0.15;
-                        
-                    if (this.waveManager.enemySpeed > SETTINGS.ENEMY_MAX_SPEED) {
-                        this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED;
-                    }
+                                    // Increase enemy speed with score (with limits)
+                let baseSpeed = SETTINGS.ENEMY_SPEED + (this.waveManager.currentWave - 1) * 0.15;
+                
+                // Apply speed limits based on score
+                if (this.score <= 100) {
+                    // Limit to 1.5x till score 100
+                    this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_100);
+                } else if (this.score <= 200) {
+                    // Limit to 2.0x till score 200
+                    this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_200);
+                } else {
+                    // After score 200, use normal max speed
+                    this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_AFTER_200);
+                }
                 }
             }
         };

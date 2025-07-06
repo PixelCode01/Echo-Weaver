@@ -5,6 +5,11 @@ class MobileControls {
         this.game = game;
         this.gameScreen = document.getElementById('game-screen');
         
+        // Touch cooldown system
+        this.touchCooldown = 0;
+        this.lastTouchTime = 0;
+        this.canTouch = true;
+        
         // Create mobile control buttons
         this.createMobileControls();
         
@@ -49,6 +54,19 @@ class MobileControls {
         this.modeIndicator.id = 'mobile-mode-indicator';
         this.modeIndicator.innerHTML = '<span>Normal</span>';
         this.controlsContainer.appendChild(this.modeIndicator);
+        
+        // Create touch cooldown progress bar
+        this.touchCooldownBar = document.createElement('div');
+        this.touchCooldownBar.id = 'touch-cooldown-bar';
+        this.touchCooldownBar.className = 'mobile-cooldown-bar';
+        this.controlsContainer.appendChild(this.touchCooldownBar);
+        
+        // Create touch cooldown label
+        this.touchCooldownLabel = document.createElement('div');
+        this.touchCooldownLabel.id = 'touch-cooldown-label';
+        this.touchCooldownLabel.className = 'mobile-cooldown-label';
+        this.touchCooldownLabel.innerHTML = 'Touch Cooldown';
+        this.controlsContainer.appendChild(this.touchCooldownLabel);
     }
     
     addTouchEventHandlers() {
@@ -56,8 +74,9 @@ class MobileControls {
         this.echoBurstButton.addEventListener('touchstart', (e) => {
             e.preventDefault(); // Prevent default touch behavior
             
-            if (this.game.state === 'playing' && this.game.echoBurstCooldown === 0) {
+            if (this.game.state === 'playing' && this.game.echoBurstCooldown === 0 && this.canTouchNow()) {
                 this.game._activateEchoBurst();
+                this.recordTouch();
                 
                 // Add visual feedback
                 this.echoBurstButton.classList.add('button-pressed');
@@ -71,8 +90,9 @@ class MobileControls {
         this.waveModeButton.addEventListener('touchstart', (e) => {
             e.preventDefault(); // Prevent default touch behavior
             
-            if (this.game.state === 'playing') {
+            if (this.game.state === 'playing' && this.canTouchNow()) {
                 this.game.cycleWaveMode();
+                this.recordTouch();
                 
                 // Update mode indicator
                 this.modeIndicator.innerHTML = `<span>${this.game.currentWaveMode}</span>`;
@@ -89,9 +109,10 @@ class MobileControls {
         this.pauseButton.addEventListener('touchstart', (e) => {
             e.preventDefault(); // Prevent default touch behavior
             
-            if (this.game.state === 'playing') {
+            if (this.game.state === 'playing' && this.canTouchNow()) {
                 // Toggle pause state
                 window.gamePaused = !window.gamePaused;
+                this.recordTouch();
                 
                 // Update button icon
                 if (window.gamePaused) {
@@ -141,10 +162,52 @@ class MobileControls {
             this.echoBurstButton.style.opacity = 1;
             this.echoBurstButton.style.background = 'var(--accent-color)';
         }
+        
+        // Update touch cooldown progress bar
+        const now = Date.now();
+        const timeSinceLastTouch = now - this.lastTouchTime;
+        const requiredCooldown = this.calculateTouchCooldown();
+        
+        if (timeSinceLastTouch < requiredCooldown) {
+            const progress = (timeSinceLastTouch / requiredCooldown) * 100;
+            this.touchCooldownBar.style.width = `${progress}%`;
+            this.touchCooldownBar.style.display = 'block';
+            this.touchCooldownLabel.style.display = 'block';
+        } else {
+            this.touchCooldownBar.style.display = 'none';
+            this.touchCooldownLabel.style.display = 'none';
+            this.canTouch = true;
+        }
     }
     
     // Call this in the game loop to update mobile controls
     update() {
         this.updateCooldownDisplay();
+    }
+    
+    // Calculate touch cooldown based on score
+    calculateTouchCooldown() {
+        const baseCooldown = SETTINGS.MOBILE_TOUCH_COOLDOWN_BASE;
+        const maxCooldown = SETTINGS.MOBILE_TOUCH_COOLDOWN_MAX;
+        const scoreFactor = SETTINGS.MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR;
+        
+        // Increase cooldown with score, but cap it
+        const scoreBasedIncrease = Math.min(this.game.score * scoreFactor, maxCooldown - baseCooldown);
+        return baseCooldown + scoreBasedIncrease;
+    }
+    
+    // Check if touch is allowed
+    canTouchNow() {
+        const now = Date.now();
+        const timeSinceLastTouch = now - this.lastTouchTime;
+        const requiredCooldown = this.calculateTouchCooldown();
+        
+        return timeSinceLastTouch >= requiredCooldown;
+    }
+    
+    // Record touch and start cooldown
+    recordTouch() {
+        this.lastTouchTime = Date.now();
+        this.canTouch = false;
     }
 } 
