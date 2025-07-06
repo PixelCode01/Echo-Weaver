@@ -130,7 +130,20 @@
     <script src="/static/js/core.js"></script>
     <script src="/static/js/game.js"></script>
     <script src="/static/js/mobile-controls.js"></script>
-    <script src="/static/js/universal_controls.js?v=4" onload="console.log('=== UNIVERSAL_CONTROLS.JS NETWORK LOADED ===')" onerror="console.error('=== UNIVERSAL_CONTROLS.JS NETWORK ERROR ===')"></script>
+    <script>
+        // Dynamic script loading with cache busting
+        const script = document.createElement('script');
+        script.src = '/static/js/universal_controls.js?v=5&t=' + Date.now();
+        script.onload = function() {
+            console.log('=== UNIVERSAL_CONTROLS.JS NETWORK LOADED ===');
+            console.log('Script loaded dynamically at:', new Date().toISOString());
+        };
+        script.onerror = function() {
+            console.error('=== UNIVERSAL_CONTROLS.JS NETWORK ERROR ===');
+            console.error('Failed to load universal_controls.js');
+        };
+        document.head.appendChild(script);
+    </script>
     <script src="/static/js/main.js"></script>
 </body>
 </html> 
