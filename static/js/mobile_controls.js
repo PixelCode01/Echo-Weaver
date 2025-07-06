@@ -175,6 +175,9 @@ class MobileControls {
             this.touchCooldownBar.style.width = `${progress}%`;
             this.touchCooldownBar.style.display = 'block';
             this.touchCooldownLabel.style.display = 'block';
+            
+            // Add visual indicator for touch cooldown
+            this.touchCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
         } else {
             this.touchCooldownBar.style.display = 'none';
             this.touchCooldownLabel.style.display = 'none';

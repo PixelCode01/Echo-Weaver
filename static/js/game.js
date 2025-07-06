@@ -20,6 +20,13 @@ class Game {
         this.damageNumbers = [];
         this.impactEffects = [];
         
+        // Anti-stuck mechanism
+        this.lastEnemySpawnTime = Date.now();
+        this.stuckTimeout = 10000; // 10 seconds timeout
+        
+        // Visual feedback for invalid wave attempts
+        this.invalidWaveAttempt = null;
+        
         // Initialize background particles
         for (let i = 0; i < 50; i++) {
             this.backgroundParticles.push(new BackgroundParticle());
@@ -196,26 +203,45 @@ class Game {
             } else if (event.type === 'mouseup' && this.startPos) {
                 const endPos = { x: event.clientX, y: event.clientY };
                 
-                // Determine wave parameters based on current mode
-                let waveParams = SETTINGS.WAVE_MODE_NORMAL;
-                if (this.currentWaveMode === 'focused') {
-                    waveParams = SETTINGS.WAVE_MODE_FOCUSED;
-                } else if (this.currentWaveMode === 'wide') {
-                    waveParams = SETTINGS.WAVE_MODE_WIDE;
-                }
-                
-                // Create a new wave
-                const newWave = new SoundWave(
-                    this.startPos,
-                    endPos,
-                    this.activePowerups['wave_width_active'] || false,
-                    this.activePowerups['wave_magnet_active'] || false,
-                    waveParams.damage_multiplier,
-                    waveParams.width_multiplier
+                // Calculate distance between start and end positions
+                const distance = Math.sqrt(
+                    Math.pow(endPos.x - this.startPos.x, 2) + 
+                    Math.pow(endPos.y - this.startPos.y, 2)
                 );
                 
-                this.waves.push(newWave);
-                this._playSound('wave_create');
+                // Minimum distance required to create a wave (prevents accidental center touches)
+                const minDistance = 20;
+                
+                if (distance >= minDistance) {
+                    // Determine wave parameters based on current mode
+                    let waveParams = SETTINGS.WAVE_MODE_NORMAL;
+                    if (this.currentWaveMode === 'focused') {
+                        waveParams = SETTINGS.WAVE_MODE_FOCUSED;
+                    } else if (this.currentWaveMode === 'wide') {
+                        waveParams = SETTINGS.WAVE_MODE_WIDE;
+                    }
+                    
+                    // Create a new wave
+                    const newWave = new SoundWave(
+                        this.startPos,
+                        endPos,
+                        this.activePowerups['wave_width_active'] || false,
+                        this.activePowerups['wave_magnet_active'] || false,
+                        waveParams.damage_multiplier,
+                        waveParams.width_multiplier
+                    );
+                    
+                    this.waves.push(newWave);
+                    this._playSound('wave_create');
+                } else {
+                    // Show visual feedback for invalid attempt
+                    this.invalidWaveAttempt = {
+                        start: this.startPos,
+                        end: endPos,
+                        timer: 30 // Show for 30 frames
+                    };
+                }
+                
                 this.startPos = null;
             } else if (event.type === 'keydown') {
                 if (event.key === ' ' && this.echoBurstCooldown === 0) {
@@ -260,6 +286,33 @@ class Game {
         // If wave is not active and no enemies, start next wave
         if (!this.waveManager.waveActive && this.enemies.length === 0) {
             this.waveManager.startNextWave();
+        }
+        
+        // Additional failsafe: Ensure game doesn't get stuck by checking for stuck enemies
+        let stuckEnemies = 0;
+        for (const enemy of this.enemies) {
+            if (enemy.position && enemy.position.x === enemy.lastPosition?.x && 
+                enemy.position.y === enemy.lastPosition?.y) {
+                stuckEnemies++;
+            }
+            // Update last position for next check
+            if (enemy.position) {
+                enemy.lastPosition = { x: enemy.position.x, y: enemy.position.y };
+            }
+        }
+        
+        // If too many enemies are stuck, spawn new ones
+        if (stuckEnemies > this.enemies.length * 0.5 && this.enemies.length > 0) {
+            console.log('Too many stuck enemies detected, spawning new ones');
+            this._spawnEnemy();
+        }
+        
+        // Timeout-based failsafe: If no enemies for too long, force spawn
+        const currentTime = Date.now();
+        if (this.enemies.length === 0 && (currentTime - this.lastEnemySpawnTime) > this.stuckTimeout) {
+            console.log('Timeout-based enemy spawn triggered');
+            this._spawnEnemy();
+            this.lastEnemySpawnTime = currentTime;
         }
         
         // Update enemies if time is not stopped
@@ -415,6 +468,24 @@ class Game {
             effect.draw(ctx);
         }
         
+        // Draw invalid wave attempt feedback
+        if (this.invalidWaveAttempt && this.invalidWaveAttempt.timer > 0) {
+            const alpha = this.invalidWaveAttempt.timer / 30;
+            ctx.strokeStyle = `rgba(255, 0, 0, ${alpha})`;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(this.invalidWaveAttempt.start.x, this.invalidWaveAttempt.start.y);
+            ctx.lineTo(this.invalidWaveAttempt.end.x, this.invalidWaveAttempt.end.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            this.invalidWaveAttempt.timer--;
+            if (this.invalidWaveAttempt.timer <= 0) {
+                this.invalidWaveAttempt = null;
+            }
+        }
+        
         // Draw core
         this.core.draw(ctx, this.feverManager.feverActive);
         
@@ -564,7 +635,10 @@ class Game {
                 enemy.spin = (Math.random() - 0.5) * 0.2;
             }
         }
-        if (enemy) this.enemies.push(enemy);
+        if (enemy) {
+            this.enemies.push(enemy);
+            this.lastEnemySpawnTime = Date.now(); // Update spawn time
+        }
     }
     
     _checkCollisions() {
@@ -1194,6 +1268,8 @@ class Game {
         this.echoBurstCooldown = 0;
         this.currentWaveMode = 'normal';
         this.startPos = null;
+        this.invalidWaveAttempt = null;
+        this.lastEnemySpawnTime = Date.now();
         // Don't reset playerName to preserve it between games
         
         // Reset wave manager

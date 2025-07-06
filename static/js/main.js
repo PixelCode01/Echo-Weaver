@@ -132,10 +132,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const deltaTime = timestamp - lastTime;
         lastTime = timestamp;
         
+        // Failsafe: Prevent infinite loops by limiting delta time
+        const maxDeltaTime = 100; // 100ms max
+        const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+        
         // Only update if game is not paused
         if (!gamePaused) {
             // Update with fixed time step
-            accumulator += deltaTime;
+            accumulator += clampedDeltaTime;
             while (accumulator >= timeStep) {
                 game.update();
                 accumulator -= timeStep;
