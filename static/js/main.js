@@ -720,19 +720,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Try to initialize immediately
-    let universalControlsInitialized = initializeUniversalControls();
-    
-    // If not initialized, try again after a short delay (in case script is still loading)
-    if (!universalControlsInitialized) {
-        console.log("Universal controls not available immediately, retrying in 100ms...");
-        setTimeout(() => {
-            universalControlsInitialized = initializeUniversalControls();
-            if (!universalControlsInitialized) {
-                console.error("Universal controls failed to initialize after retry");
+    // Wait for UniversalControls script to load and then initialize
+    function waitForUniversalControls() {
+        if (typeof window.UniversalControls !== 'undefined') {
+            console.log("UniversalControls class found, initializing...");
+            const success = initializeUniversalControls();
+            if (success) {
+                console.log("Universal controls initialized successfully on first try");
+            } else {
+                console.error("Universal controls initialization failed");
             }
-        }, 100);
+        } else {
+            console.log("UniversalControls class not yet available, retrying in 200ms...");
+            setTimeout(waitForUniversalControls, 200);
+        }
     }
+    
+    // Start waiting for UniversalControls to load
+    waitForUniversalControls();
     
     // Update universal controls in the game loop
     const originalGameUpdate = game.update;
