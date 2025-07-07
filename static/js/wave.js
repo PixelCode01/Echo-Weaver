@@ -83,14 +83,29 @@ class SoundWave {
         ctx.translate(this.startPos.x, this.startPos.y);
         ctx.rotate(this.angle);
         
+        // Defensive: Check for non-finite values before drawing
+        const gradY0 = -this.currentWidth / 2;
+        const gradY1 = this.currentWidth / 2;
+        if (!Number.isFinite(this.length) || !Number.isFinite(this.currentWidth) || !Number.isFinite(gradY0) || !Number.isFinite(gradY1)) {
+            console.warn('Non-finite values in SoundWave.draw:', {
+                length: this.length,
+                currentWidth: this.currentWidth,
+                gradY0,
+                gradY1,
+                startPos: this.startPos,
+                endPos: this.endPos
+            });
+            ctx.restore();
+            return;
+        }
         // Draw the main wave rectangle with a gradient
-        const gradient = ctx.createLinearGradient(0, -this.currentWidth / 2, 0, this.currentWidth / 2);
+        const gradient = ctx.createLinearGradient(0, gradY0, 0, gradY1);
         gradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
         gradient.addColorStop(0.5, `rgba(150, 150, 255, ${alpha})`);
         gradient.addColorStop(1, `rgba(255, 255, 255, ${alpha})`);
         
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, -this.currentWidth / 2, this.length, this.currentWidth);
+        ctx.fillRect(0, gradY0, this.length, this.currentWidth);
         
         // Draw inner "rings" or layers
         const numInnerLayers = 2;
@@ -104,6 +119,7 @@ class SoundWave {
             const innerAlpha = alpha * innerAlphaFactor;
             
             if (innerWidth <= 0 || innerLength <= 0) continue;
+            if (!Number.isFinite(innerWidth) || !Number.isFinite(innerLength)) continue;
             
             // Calculate position to center the inner rectangle
             const innerX = (this.length - innerLength) / 2;

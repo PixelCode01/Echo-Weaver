@@ -135,22 +135,22 @@ sprites/
 pygame_assets/
 
 # Local Python files not needed for web deployment
-background_particle.py
-combo_manager.py
-damage_number.py
-enemy.py
-enemy_trail.py
-fever_manager.py
-high_score.py
-highscore.txt
-impact_effect.py
-leaderboard.py
-message_display.py
-player.py
-screen_shake.py
-sound_manager.py
-wave.py
-wave_manager.py
+# background_particle.py
+# combo_manager.py
+# damage_number.py
+# enemy.py
+# enemy_trail.py
+# fever_manager.py
+# high_score.py
+# highscore.txt
+# impact_effect.py
+# leaderboard.py
+# message_display.py
+# player.py
+# screen_shake.py
+# sound_manager.py
+# wave.py
+# wave_manager.py
 
 # Local development files
 # index.html  # Commented out to allow templates/index.html
