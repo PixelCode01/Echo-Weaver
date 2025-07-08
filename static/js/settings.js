@@ -37,6 +37,10 @@ const SETTINGS = {
     ENEMIES_PER_WAVE_BASE: 5,
     ENEMIES_PER_WAVE_INCREMENT: 2,
     SPECIAL_ENEMY_CHANCE: 0.3,
+    // Hard mode settings (after 1k score)
+    ENEMY_MAX_SPEED_HARD: 7.0,
+    ENEMY_SPAWN_RATE_HARD: 30, // faster spawns
+    ENEMIES_PER_WAVE_INCREMENT_HARD: 4,
     
     // Speed limiting settings (new)
     SPEED_LIMIT_100: 1.5,  // Max 1.5x speed till score 100

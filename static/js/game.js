@@ -36,6 +36,7 @@ class Game {
         this.comboManager = new ComboManager();
         this.feverManager = new FeverManager();
         this.screenShake = null;
+        this.hardModeActivated = false; // Add this line to track hard mode activation
         
         this.powerupTimers = {
             'invincibility': 0,
@@ -63,18 +64,23 @@ class Game {
             
             startNextWave: () => {
                 this.waveManager.currentWave++;
+                // Hard mode: more enemies per wave
+                const hardMode = this.score >= 1000;
                 this.waveManager.enemiesToSpawn = SETTINGS.ENEMIES_PER_WAVE_BASE + 
-                    (this.waveManager.currentWave - 1) * SETTINGS.ENEMIES_PER_WAVE_INCREMENT;
+                    (this.waveManager.currentWave - 1) * (hardMode ? SETTINGS.ENEMIES_PER_WAVE_INCREMENT_HARD : SETTINGS.ENEMIES_PER_WAVE_INCREMENT);
                 this.waveManager.spawnedEnemiesCount = 0;
                 this.waveManager.spawnTimer = 0;
                 this.waveManager.waveActive = true;
                 
                 // Update enemy speed for the new wave
-                this.waveManager.enemySpeed = SETTINGS.ENEMY_SPEED + 
-                    (this.waveManager.currentWave - 1) * 0.2;
-                    
-                if (this.waveManager.enemySpeed > SETTINGS.ENEMY_MAX_SPEED) {
-                    this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED;
+                if (hardMode) {
+                    this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED_HARD;
+                } else {
+                    this.waveManager.enemySpeed = SETTINGS.ENEMY_SPEED + 
+                        (this.waveManager.currentWave - 1) * 0.2;
+                    if (this.waveManager.enemySpeed > SETTINGS.ENEMY_MAX_SPEED) {
+                        this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED;
+                    }
                 }
                 
                 console.log(`Starting Wave ${this.waveManager.currentWave} with ${this.waveManager.enemiesToSpawn} enemies.`);
@@ -86,26 +92,24 @@ class Game {
             update: () => {
                 // Score-based enemy spawning - ensure enemies always spawn
                 const score = this.score;
-                
+                const hardMode = score >= 1000;
                 // Base spawn rate based on score
-                let baseSpawnRate = SETTINGS.ENEMY_SPAWN_RATE;
-                
+                let baseSpawnRate = hardMode ? SETTINGS.ENEMY_SPAWN_RATE_HARD : SETTINGS.ENEMY_SPAWN_RATE;
                 // Decrease spawn rate as score increases (more frequent spawning)
-                if (score >= 100) baseSpawnRate = Math.max(30, baseSpawnRate - 10);
-                if (score >= 200) baseSpawnRate = Math.max(20, baseSpawnRate - 10);
-                if (score >= 300) baseSpawnRate = Math.max(15, baseSpawnRate - 5);
-                if (score >= 500) baseSpawnRate = Math.max(10, baseSpawnRate - 5);
-                if (score >= 1000) baseSpawnRate = Math.max(8, baseSpawnRate - 2);
-                
+                if (!hardMode) {
+                    if (score >= 100) baseSpawnRate = Math.max(30, baseSpawnRate - 10);
+                    if (score >= 200) baseSpawnRate = Math.max(20, baseSpawnRate - 10);
+                    if (score >= 300) baseSpawnRate = Math.max(15, baseSpawnRate - 5);
+                    if (score >= 500) baseSpawnRate = Math.max(10, baseSpawnRate - 5);
+                    if (score >= 1000) baseSpawnRate = Math.max(8, baseSpawnRate - 2);
+                }
                 // Ensure minimum enemies on screen based on score
-                const minEnemiesOnScreen = Math.min(8, Math.floor(score / 50) + 1);
-                
+                const minEnemiesOnScreen = Math.min(12, Math.floor(score / 50) + 1 + (hardMode ? 4 : 0));
                 // Spawn enemies if we have too few
                 if (this.enemies.length < minEnemiesOnScreen) {
                     console.log(`Spawning enemy due to low count: ${this.enemies.length}/${minEnemiesOnScreen}`);
                     this._spawnEnemy();
                 }
-                
                 // Regular spawn timer
                 this.waveManager.spawnTimer++;
                 if (this.waveManager.spawnTimer >= baseSpawnRate) {
@@ -113,21 +117,19 @@ class Game {
                     console.log(`Spawning enemy due to timer: baseSpawnRate=${baseSpawnRate}`);
                     this._spawnEnemy();
                 }
-                
                 // Update last score check
                 this.waveManager.lastScoreCheck = score;
-                
                 // Update wave number based on score (for UI purposes)
                 const newWave = Math.floor(score / 50) + 1;
                 if (newWave !== this.waveManager.currentWave) {
                     this.waveManager.currentWave = newWave;
                     document.getElementById('wave').textContent = this.waveManager.currentWave;
-                    
                     // Increase enemy speed with score (with limits)
                     let baseSpeed = SETTINGS.ENEMY_SPEED + (this.waveManager.currentWave - 1) * 0.15;
-                    
                     // Apply speed limits based on score
-                    if (this.score <= 100) {
+                    if (hardMode) {
+                        this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED_HARD;
+                    } else if (this.score <= 100) {
                         // Limit to 1.5x till score 100
                         this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_100);
                     } else if (this.score <= 200) {
@@ -137,10 +139,8 @@ class Game {
                         // After score 200, use normal max speed
                         this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_AFTER_200);
                     }
-                    
                     console.log(`Wave updated to ${newWave}, enemy speed: ${this.waveManager.enemySpeed}`);
                 }
-                
                 // Emergency failsafe: If no enemies for too long, force spawn
                 if (this.enemies.length === 0 && this.waveManager.spawnTimer > baseSpawnRate * 2) {
                     console.log('Emergency spawn triggered - no enemies for too long');
@@ -590,56 +590,108 @@ class Game {
         let enemyType = 'basic';
         const score = this.score;
         let possibleTypes = [];
-        
-        // Define enemy types by score ranges
-        if (score >= 0 && score < 10) {
-            possibleTypes = ['basic'];
-        } else if (score >= 10 && score < 20) {
-            possibleTypes = ['zigzag'];
-        } else if (score >= 20 && score < 45) {
-            possibleTypes = ['ghost'];
-        } else if (score >= 45 && score < 90) {
-            possibleTypes = ['charger'];
-        } else if (score >= 90 && score < 150) {
-            possibleTypes = ['splitter'];
-        } else if (score >= 150 && score < 220) {
-            possibleTypes = ['shielded'];
-        } else if (score >= 220 && score < 300) {
-            possibleTypes = ['teleporter'];
-        } else if (score >= 300 && score < 390) {
-            possibleTypes = ['reflector'];
-        } else if (score >= 390 && score < 490) {
-            possibleTypes = ['swarm'];
-        } else if (score >= 490 && score < 600) {
-            possibleTypes = ['timebomber'];
-        } else if (score >= 600 && score < 720) {
-            possibleTypes = ['vortex'];
-        } else if (score >= 720 && score < 850) {
-            possibleTypes = ['speedster'];
-        } else if (score >= 850 && score < 1000) {
-            possibleTypes = ['slowtank'];
-        } else if (score >= 1000) {
-            possibleTypes = ['boss'];
+        let isBossWave = false;
+        let hardMode = score >= 1000;
+
+        // Hard mode: after 1k score, increase difficulty and variety
+        if (hardMode) {
+            // Show hard mode message once
+            if (!this.hardModeActivated) {
+                this.messageDisplay.addMessage(
+                    'HARD MODE!',
+                    { x: SETTINGS.WIDTH / 2, y: SETTINGS.HEIGHT / 2 },
+                    SETTINGS.YELLOW,
+                    48
+                );
+                this.screenShake = new ScreenShake(10, 60);
+                this._playSound('boss_spawn');
+                this.hardModeActivated = true;
+            }
+            // Boss wave logic: every BOSS_WAVE_INTERVAL waves
+            isBossWave = (this.waveManager.currentWave % SETTINGS.BOSS_WAVE_INTERVAL === 0);
+            if (isBossWave) {
+                possibleTypes = ['boss'];
+            } else {
+                // All tough enemies + rare boss
+                possibleTypes = [
+                    'zigzag','ghost','charger','splitter','shielded','teleporter','reflector',
+                    'swarm','timebomber','vortex','speedster','slowtank','basic'
+                ];
+                // 10% chance to spawn a boss even on non-boss waves
+                if (Math.random() < 0.1) possibleTypes.push('boss');
+            }
+        } else {
+            // Define enemy types by score ranges (original logic)
+            if (score >= 0 && score < 10) {
+                possibleTypes = ['basic'];
+            } else if (score >= 10 && score < 20) {
+                possibleTypes = ['zigzag'];
+            } else if (score >= 20 && score < 45) {
+                possibleTypes = ['ghost'];
+            } else if (score >= 45 && score < 90) {
+                possibleTypes = ['charger'];
+            } else if (score >= 90 && score < 150) {
+                possibleTypes = ['splitter'];
+            } else if (score >= 150 && score < 220) {
+                possibleTypes = ['shielded'];
+            } else if (score >= 220 && score < 300) {
+                possibleTypes = ['teleporter'];
+            } else if (score >= 300 && score < 390) {
+                possibleTypes = ['reflector'];
+            } else if (score >= 390 && score < 490) {
+                possibleTypes = ['swarm'];
+            } else if (score >= 490 && score < 600) {
+                possibleTypes = ['timebomber'];
+            } else if (score >= 600 && score < 720) {
+                possibleTypes = ['vortex'];
+            } else if (score >= 720 && score < 850) {
+                possibleTypes = ['speedster'];
+            } else if (score >= 850 && score < 1000) {
+                possibleTypes = ['slowtank'];
+            } else if (score >= 1000) {
+                possibleTypes = ['boss']; // fallback, but hardMode will override
+            }
         }
 
         // Weight probabilities for harder types as score increases within each range
         let weights = possibleTypes.map(type => {
-            switch(type) {
-                case 'basic': return 10;
-                case 'zigzag': return 8;
-                case 'ghost': return 6;
-                case 'charger': return 5;
-                case 'splitter': return 4;
-                case 'shielded': return 3;
-                case 'teleporter': return 3;
-                case 'reflector': return 2;
-                case 'swarm': return 2;
-                case 'timebomber': return 2;
-                case 'vortex': return 1;
-                case 'speedster': return 1;
-                case 'slowtank': return 1;
-                case 'boss': return 5;
-                default: return 1;
+            if (hardMode) {
+                // In hard mode, make special enemies and bosses more likely
+                switch(type) {
+                    case 'boss': return isBossWave ? 10 : 2;
+                    case 'swarm':
+                    case 'vortex':
+                    case 'reflector':
+                    case 'timebomber':
+                    case 'speedster':
+                    case 'slowtank': return 5;
+                    case 'zigzag':
+                    case 'ghost':
+                    case 'charger':
+                    case 'splitter':
+                    case 'shielded':
+                    case 'teleporter': return 4;
+                    case 'basic': return 1;
+                    default: return 2;
+                }
+            } else {
+                switch(type) {
+                    case 'basic': return 10;
+                    case 'zigzag': return 8;
+                    case 'ghost': return 6;
+                    case 'charger': return 5;
+                    case 'splitter': return 4;
+                    case 'shielded': return 3;
+                    case 'teleporter': return 3;
+                    case 'reflector': return 2;
+                    case 'swarm': return 2;
+                    case 'timebomber': return 2;
+                    case 'vortex': return 1;
+                    case 'speedster': return 1;
+                    case 'slowtank': return 1;
+                    case 'boss': return 5;
+                    default: return 1;
+                }
             }
         });
         
@@ -709,19 +761,20 @@ class Game {
         }
         // Add random speed/spin for extra challenge
         if (enemy && !enemy.isBoss) {
-            // Give each enemy a unique speed variation
+            // Hard mode: increase speed and add more spin
             const baseSpeed = this.waveManager.enemySpeed;
-            const speedVariation = 0.5 + Math.random() * 1.5; // 0.5x to 2x speed
-            enemy.speedMultiplier = speedVariation;
-            
-            // Some enemies get extreme speed variations
-            if (Math.random() < 0.1) { // 10% chance for extreme speed
-                enemy.speedMultiplier = Math.random() < 0.5 ? 0.3 : 3.0; // Very slow or very fast
+            let speedVariation = 0.5 + Math.random() * 1.5;
+            if (hardMode) {
+                speedVariation = 1.5 + Math.random() * 2.5; // 1.5x to 4x speed
             }
-            
+            enemy.speedMultiplier = speedVariation;
+            // Extreme speed chance
+            if (Math.random() < (hardMode ? 0.2 : 0.1)) {
+                enemy.speedMultiplier = Math.random() < 0.5 ? 0.3 : (hardMode ? 5.0 : 3.0);
+            }
             // Add spin property for visual challenge
-            if (score > 100 && Math.random() < 0.3) {
-                enemy.spin = (Math.random() - 0.5) * 0.2;
+            if (score > 100 && Math.random() < (hardMode ? 0.6 : 0.3)) {
+                enemy.spin = (Math.random() - 0.5) * (hardMode ? 0.5 : 0.2);
             }
         }
         if (enemy) {
