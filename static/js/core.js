@@ -122,7 +122,7 @@ class Core {
                 const y = this.position.y + shieldRadius * Math.sin(angle);
                 
                 if (window.game) {
-                    window.game.particles.push(new Particle(
+                    window.game.addParticle(new Particle(
                         new Vector(x, y),
                         'rgba(123, 47, 247, 0.7)'
                     ));
@@ -148,7 +148,7 @@ class Core {
                 const y = this.position.y + feverRadius * Math.sin(angle);
                 
                 if (window.game) {
-                    window.game.particles.push(new Particle(
+                    window.game.addParticle(new Particle(
                         new Vector(x, y),
                         'rgba(255, 62, 127, 0.8)'
                     ));

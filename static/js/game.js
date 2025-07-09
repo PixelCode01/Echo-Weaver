@@ -1,5 +1,12 @@
 // Game class - Manages the game state and logic
 
+// Add caps for clutter control
+const MAX_PARTICLES = 30;
+const MAX_DAMAGE_NUMBERS = 15;
+const MAX_IMPACT_EFFECTS = 10;
+const MAX_ENEMIES = 20;
+const MAX_POWERUPS = 5;
+
 class Game {
     constructor(canvas) {
         // Initialize game properties
@@ -61,9 +68,11 @@ class Game {
             waveActive: false,
             enemySpeed: SETTINGS.ENEMY_SPEED,
             lastScoreCheck: 0,
+            bossSpawned: false, // Add this flag
             
             startNextWave: () => {
                 this.waveManager.currentWave++;
+                this.waveManager.bossSpawned = false; // Reset bossSpawned for every new wave
                 // Hard mode: more enemies per wave
                 const hardMode = this.score >= 1000;
                 this.waveManager.enemiesToSpawn = SETTINGS.ENEMIES_PER_WAVE_BASE + 
@@ -155,6 +164,32 @@ class Game {
         
         // Load high scores
         this._loadHighScores();
+    }
+
+    addParticle(particle) {
+        if (this.particles.length < MAX_PARTICLES) {
+            this.particles.push(particle);
+        }
+    }
+    addDamageNumber(damageNumber) {
+        if (this.damageNumbers.length < MAX_DAMAGE_NUMBERS) {
+            this.damageNumbers.push(damageNumber);
+        }
+    }
+    addImpactEffect(effect) {
+        if (this.impactEffects.length < MAX_IMPACT_EFFECTS) {
+            this.impactEffects.push(effect);
+        }
+    }
+    addEnemy(enemy) {
+        if (this.enemies.length < MAX_ENEMIES) {
+            this.enemies.push(enemy);
+        }
+    }
+    addPowerup(powerup) {
+        if (this.powerups.length < MAX_POWERUPS) {
+            this.powerups.push(powerup);
+        }
     }
     
     // Cookie helper methods
@@ -609,9 +644,15 @@ class Game {
             }
             // Boss wave logic: every BOSS_WAVE_INTERVAL waves
             isBossWave = (this.waveManager.currentWave % SETTINGS.BOSS_WAVE_INTERVAL === 0);
-            if (isBossWave) {
-                possibleTypes = ['boss'];
-            } else {
+            if (hardMode && isBossWave) {
+                if (!this.waveManager.bossSpawned) {
+                    possibleTypes = ['boss'];
+                    this.waveManager.bossSpawned = true;
+                } else {
+                    // Already spawned boss for this wave, do not spawn more
+                    return;
+                }
+            } else if (hardMode) {
                 // All tough enemies + rare boss
                 possibleTypes = [
                     'zigzag','ghost','charger','splitter','shielded','teleporter','reflector',
@@ -649,9 +690,12 @@ class Game {
             } else if (score >= 850 && score < 1000) {
                 possibleTypes = ['slowtank'];
             } else if (score >= 1000) {
-                possibleTypes = ['boss']; // fallback, but hardMode will override
+                possibleTypes = ['boss']; // fallback for non-hard mode
             }
         }
+
+        // Debug: Log possibleTypes and hardMode
+        console.log('[SPAWN ENEMY] Score:', score, 'HardMode:', hardMode, 'isBossWave:', isBossWave, 'PossibleTypes:', possibleTypes);
 
         // Weight probabilities for harder types as score increases within each range
         let weights = possibleTypes.map(type => {
@@ -694,7 +738,6 @@ class Game {
                 }
             }
         });
-        
         // Normalize weights
         let totalWeight = weights.reduce((a,b)=>a+b,0);
         let rand = Math.random() * totalWeight;
@@ -704,6 +747,9 @@ class Game {
             rand -= weights[idx];
         }
         enemyType = possibleTypes[idx] || 'basic';
+
+        // Debug: Log selected enemyType
+        console.log('[SPAWN ENEMY] Selected enemyType:', enemyType);
 
         // Create enemy based on type, with random speed/spin for challenge
         let enemy;
@@ -778,8 +824,13 @@ class Game {
             }
         }
         if (enemy) {
-            this.enemies.push(enemy);
+            this.addEnemy(enemy);
             this.lastEnemySpawnTime = Date.now(); // Update spawn time
+            // Debug: Log enemy creation
+            console.log('[SPAWN ENEMY] Enemy created and pushed:', enemy.constructor.name, 'Total enemies:', this.enemies.length);
+        } else {
+            // Debug: Log failure to create enemy
+            console.error('[SPAWN ENEMY] Failed to create enemy for type:', enemyType);
         }
     }
     
@@ -824,7 +875,7 @@ class Game {
                             );
                         } else {
                             // Show damage number but don't remove boss
-                            this.damageNumbers.push(new DamageNumber(
+                            this.addDamageNumber(new DamageNumber(
                                 enemy.position, 
                                 Math.round(damage), 
                                 SETTINGS.WHITE, 
@@ -832,7 +883,7 @@ class Game {
                             ));
                             
                             // Create impact effect
-                            this.impactEffects.push(new ImpactEffect(
+                            this.addImpactEffect(new ImpactEffect(
                                 enemy.position, 
                                 enemy.color
                             ));
@@ -857,7 +908,7 @@ class Game {
                             this._handleEnemyDefeat(enemy, damage);
                         } else {
                             // Show damage number but don't remove tank
-                            this.damageNumbers.push(new DamageNumber(
+                            this.addDamageNumber(new DamageNumber(
                                 enemy.position, 
                                 Math.round(damage), 
                                 SETTINGS.WHITE, 
@@ -865,7 +916,7 @@ class Game {
                             ));
                             
                             // Create impact effect
-                            this.impactEffects.push(new ImpactEffect(
+                            this.addImpactEffect(new ImpactEffect(
                                 enemy.position, 
                                 enemy.color
                             ));
@@ -878,7 +929,7 @@ class Game {
                         }
                     } else if (enemy instanceof SplitterEnemy) {
                         const newEnemies = enemy.split();
-                        this.enemies.push(...newEnemies);
+                        newEnemies.forEach(e => this.addEnemy(e));
                         this.enemies.splice(j, 1);
                         this._handleEnemyDefeat(enemy, damage);
                     } else {
@@ -926,7 +977,7 @@ class Game {
         
         // Create particles
         for (let i = 0; i < 10; i++) {
-            this.particles.push(new Particle(enemy.position, enemy.color));
+            this.addParticle(new Particle(enemy.position, enemy.color));
         }
         
         // Chance to spawn powerup - increased chance for boss enemies
@@ -940,7 +991,7 @@ class Game {
                 'wave_width', 'time_stop', 'wave_magnet', 'chain_reaction', 'multi_wave'
             ];
             const powerupType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-            this.powerups.push(new PowerUp(enemy.position, powerupType));
+            this.addPowerup(new PowerUp(enemy.position, powerupType));
         }
         
         // Display combo message if available
@@ -971,7 +1022,7 @@ class Game {
         }
         
         // Create damage number
-        this.damageNumbers.push(new DamageNumber(
+        this.addDamageNumber(new DamageNumber(
             enemy.position, 
             Math.round(damage), 
             SETTINGS.WHITE, 
@@ -979,7 +1030,17 @@ class Game {
         ));
         
         // Create impact effect
-        this.impactEffects.push(new ImpactEffect(enemy.position, enemy.color));
+        this.addImpactEffect(new ImpactEffect(enemy.position, enemy.color));
+
+        // === BOSS WAVE PROGRESSION FIX ===
+        // If a boss was defeated and there are no more enemies, end the wave and reset bossSpawned
+        if (enemy instanceof BossEnemy && this.enemies.length === 0) {
+            this.waveManager.waveActive = false;
+            this.waveManager.spawnedEnemiesCount = 0;
+            this.waveManager.spawnTimer = 0;
+            this.waveManager.bossSpawned = false;
+            console.log('Boss defeated, boss wave complete. Ready for next wave.');
+        }
     }
     
     _activatePowerup(powerupType) {
@@ -1085,7 +1146,7 @@ class Game {
         this._playSound('multi_wave');
         
         // Add visual effect
-        this.impactEffects.push(new ImpactEffect(
+        this.addImpactEffect(new ImpactEffect(
             center, 
             SETTINGS.POWERUP_COLOR_MULTI_WAVE,
             SETTINGS.WIDTH / 4
@@ -1109,7 +1170,7 @@ class Game {
         }
         
         // Create impact effect
-        this.impactEffects.push(new ImpactEffect(this.core.position, SETTINGS.ECHO_BURST_COLOR));
+        this.addImpactEffect(new ImpactEffect(this.core.position, SETTINGS.ECHO_BURST_COLOR));
     }
     
     _updatePowerupTimers() {
@@ -1438,6 +1499,7 @@ class Game {
         this.waveManager.spawnTimer = 0;
         this.waveManager.waveActive = false;
         this.waveManager.enemySpeed = SETTINGS.ENEMY_SPEED;
+        this.waveManager.bossSpawned = false; // Reset bossSpawned on reset
         
         // Start first wave
         this.waveManager.startNextWave();

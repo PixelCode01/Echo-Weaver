@@ -161,7 +161,7 @@ class Enemy {
                     SETTINGS.POWERUP_COLOR_CHAIN_REACTION,
                     SETTINGS.CHAIN_REACTION_RADIUS
                 );
-                window.game.impactEffects.push(effect);
+                window.game.addImpactEffect(effect);
                 
                 // Handle enemy defeat
                 window.game.enemies.splice(i, 1);
@@ -516,7 +516,7 @@ class TeleporterEnemy extends Enemy {
                     this.position.x + Math.cos(angle) * this.radius,
                     this.position.y + Math.sin(angle) * this.radius
                 );
-                window.game.particles.push(new Particle(pos, this.color));
+                window.game.addParticle(new Particle(pos, this.color));
             }
         }
     }
@@ -628,7 +628,7 @@ class ReflectorEnemy extends Enemy {
                 
                 // Visual effect
                 for (let i = 0; i < 5; i++) {
-                    window.game.particles.push(new Particle(this.position, this.color));
+                    window.game.addParticle(new Particle(this.position, this.color));
                 }
             }
             
@@ -689,12 +689,12 @@ class SwarmEnemy extends Enemy {
         minion.position.x += Math.cos(angle) * distance;
         minion.position.y += Math.sin(angle) * distance;
         
-        this.minions.push(minion);
+        window.game.addEnemy(minion);
         
         // Visual effect
         if (window.game) {
             for (let i = 0; i < 3; i++) {
-                window.game.particles.push(new Particle(minion.position, minion.color));
+                window.game.addParticle(new Particle(minion.position, minion.color));
             }
         }
     }
@@ -771,7 +771,7 @@ class TimeBomberEnemy extends Enemy {
                     this.position.x + Math.cos(angle) * this.radius * 2,
                     this.position.y + Math.sin(angle) * this.radius * 2
                 );
-                window.game.particles.push(new Particle(pos, this.color));
+                window.game.addParticle(new Particle(pos, this.color));
             }
             
             // Damage nearby enemies
@@ -1205,10 +1205,10 @@ class BossEnemy extends Enemy {
             }
             
             minion.position = position;
-            window.game.enemies.push(minion);
+            window.game.addEnemy(minion);
             
             // Create spawn effect
-            window.game.impactEffects.push(new ImpactEffect(position, minion.color));
+            window.game.addImpactEffect(new ImpactEffect(position, minion.color));
         }
     }
     
