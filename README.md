@@ -68,3 +68,10 @@ Echo Weaver is a fast-paced arcade defense game. Your goal is to protect the glo
 
 ## Play Now
 Play Echo Weaver instantly at: [https://pixel01.pythonanywhere.com](https://pixel01.pythonanywhere.com)
+
+## Development with AI
+This project leveraged AI tools throughout development:
+- **Bug fixes**: AI-assisted debugging for gameplay mechanics and physics
+- **Feature implementation**: AI-generated leaderboard system and CSS enhancements
+- **Documentation**: All game documentation and README content AI-generated
+- **Optimization**: AI-guided performance improvements for mobile/web
