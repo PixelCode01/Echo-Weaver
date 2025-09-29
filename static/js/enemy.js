@@ -1,22 +1,14 @@
-// Enemy classes for the game
-
-// Helper function to draw enemy shapes
 function drawEnemyShape(ctx, fillColor, outlineColor, radius, lineWidth = 2) {
-    // Draw the main body
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
     ctx.fillStyle = fillColor;
     ctx.fill();
-    
-    // Draw outline
     if (outlineColor) {
         ctx.strokeStyle = outlineColor;
         ctx.lineWidth = lineWidth;
         ctx.stroke();
     }
 }
-
-// Base Enemy class
 class Enemy {
     constructor() {
         this.radius = SETTINGS.ENEMY_RADIUS;
@@ -29,23 +21,23 @@ class Enemy {
     }
 
     getRandomEdgePosition() {
-        const edge = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
+        const edge = Math.floor(Math.random() * 4);
         let x, y;
 
         switch (edge) {
-            case 0: // top
+            case 0:
                 x = Math.random() * SETTINGS.WIDTH;
                 y = -this.radius;
                 break;
-            case 1: // right
+            case 1:
                 x = SETTINGS.WIDTH + this.radius;
                 y = Math.random() * SETTINGS.HEIGHT;
                 break;
-            case 2: // bottom
+            case 2:
                 x = Math.random() * SETTINGS.WIDTH;
                 y = SETTINGS.HEIGHT + this.radius;
                 break;
-            case 3: // left
+            case 3:
                 x = -this.radius;
                 y = Math.random() * SETTINGS.HEIGHT;
                 break;
@@ -55,7 +47,6 @@ class Enemy {
     }
 
     update(core, speed, enemyTrails = null) {
-        // Move towards the core
         const dirVec = new Vector(
             core.position.x - this.position.x,
             core.position.y - this.position.y
@@ -65,37 +56,25 @@ class Enemy {
             const normalized = dirVec.normalize();
             this.position = this.position.add(normalized.multiply(speed));
         }
-
-        // Add enemy trail
         if (enemyTrails) {
             enemyTrails.push(new EnemyTrail(this.position, this.color, this.radius / 2));
         }
-        
-        // Update pulse timer for visual effects
         this.pulseTimer = (this.pulseTimer + 1) % 60;
     }
 
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw pulsating effect for visual interest
         const pulseScale = 1 + 0.1 * Math.sin(this.pulseTimer / 60 * 2 * Math.PI);
-        
-        // Draw speed indicator if enemy has speed multiplier
         if (this.speedMultiplier && this.speedMultiplier !== 1) {
             const speedColor = this.speedMultiplier > 1.5 ? '#ff0000' : 
                               this.speedMultiplier > 1.2 ? '#ff6600' : 
                               this.speedMultiplier < 0.7 ? '#0066ff' : '#ffffff';
-            
-            // Draw speed ring
             ctx.beginPath();
             ctx.arc(0, 0, this.radius * 1.4, 0, Math.PI * 2);
             ctx.strokeStyle = speedColor;
             ctx.lineWidth = 2;
             ctx.stroke();
-            
-            // Draw speed arrows for fast enemies
             if (this.speedMultiplier > 1.2) {
                 for (let i = 0; i < 3; i++) {
                     const angle = (i / 3) * Math.PI * 2;
@@ -114,8 +93,6 @@ class Enemy {
         }
         
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw subtle glow
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * pulseScale * 1.2, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 + 0.1 * Math.sin(this.pulseTimer / 60 * 2 * Math.PI)})`;
@@ -133,7 +110,6 @@ class Enemy {
     }
     
     onDestroy() {
-        // Chain reaction effect
         if (SETTINGS.CHAIN_REACTION_ENABLED && 
             window.game && 
             window.game.activePowerups && 
@@ -147,32 +123,25 @@ class Enemy {
     
     triggerChainReaction() {
         if (!window.game) return;
-        
-        // Find nearby enemies and damage them
         for (let i = 0; i < window.game.enemies.length; i++) {
             const enemy = window.game.enemies[i];
             if (enemy === this || !enemy || !enemy.position || typeof enemy.position.x === 'undefined' || typeof enemy.position.y === 'undefined') continue;
             
             const distance = this.position.distanceTo(enemy.position);
             if (distance < SETTINGS.CHAIN_REACTION_RADIUS) {
-                // Create chain reaction effect
                 const effect = new ImpactEffect(
                     this.position,
                     SETTINGS.POWERUP_COLOR_CHAIN_REACTION,
                     SETTINGS.CHAIN_REACTION_RADIUS
                 );
                 window.game.addImpactEffect(effect);
-                
-                // Handle enemy defeat
                 window.game.enemies.splice(i, 1);
                 window.game._handleEnemyDefeat(enemy);
-                i--; // Adjust index since we removed an element
+                i--;
             }
         }
     }
 }
-
-// ZigzagEnemy class - moves in a zigzag pattern
 class ZigzagEnemy extends Enemy {
     constructor() {
         super();
@@ -184,7 +153,6 @@ class ZigzagEnemy extends Enemy {
     }
 
     update(core, speed, enemyTrails = null) {
-        // Move towards the core with zigzag motion
         const dirVec = new Vector(
             core.position.x - this.position.x,
             core.position.y - this.position.y
@@ -192,8 +160,6 @@ class ZigzagEnemy extends Enemy {
         
         if (dirVec.length() > 0) {
             const normalized = dirVec.normalize();
-            
-            // Add zigzag motion
             this.zigzagTimer++;
             const perpendicularVec = new Vector(-normalized.y, normalized.x);
             const zigzagOffset = perpendicularVec.multiply(
@@ -203,24 +169,16 @@ class ZigzagEnemy extends Enemy {
             const moveVec = normalized.add(zigzagOffset);
             this.position = this.position.add(moveVec.multiply(speed));
         }
-
-        // Add enemy trail
         if (enemyTrails) {
             enemyTrails.push(new EnemyTrail(this.position, this.color, this.radius / 2));
         }
-        
-        // Update pulse timer for visual effects
         this.pulseTimer = (this.pulseTimer + 1) % 60;
     }
     
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw the zigzag enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw zigzag pattern indicator
         const zigzagSize = this.radius * 0.7;
         ctx.beginPath();
         ctx.moveTo(-zigzagSize, -zigzagSize/2);
@@ -234,8 +192,6 @@ class ZigzagEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// GhostEnemy class - requires multiple hits to destroy
 class GhostEnemy extends Enemy {
     constructor() {
         super();
@@ -249,11 +205,7 @@ class GhostEnemy extends Enemy {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
         ctx.globalAlpha = this.opacity;
-        
-        // Draw the ghost enemy with transparency
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw hit indicator
         for (let i = 0; i < this.hitsRemaining; i++) {
             ctx.beginPath();
             const x = (i - (SETTINGS.GHOST_ENEMY_HITS_REQUIRED - 1) / 2) * 8;
@@ -261,8 +213,6 @@ class GhostEnemy extends Enemy {
             ctx.fillStyle = SETTINGS.YELLOW;
             ctx.fill();
         }
-        
-        // Draw ghost trail effect
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 1.3, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(150, 150, 255, ${0.3 + 0.2 * Math.sin(this.pulseTimer / 60 * 2 * Math.PI)})`;
@@ -273,14 +223,10 @@ class GhostEnemy extends Enemy {
     }
     
     update(core, speed, enemyTrails = null) {
-        super.update(core, speed * 0.9, enemyTrails); // Ghosts move slightly slower
-        
-        // Fade in and out
+        super.update(core, speed * 0.9, enemyTrails);
         this.opacity = 0.5 + 0.3 * Math.sin(this.pulseTimer / 60 * 2 * Math.PI);
     }
 }
-
-// ChargerEnemy class - charges at the core when close enough
 class ChargerEnemy extends Enemy {
     constructor() {
         super();
@@ -295,7 +241,6 @@ class ChargerEnemy extends Enemy {
         const distToCore = this.position.distanceTo(core.position);
         
         if (!this.isCharging && distToCore < SETTINGS.CHARGER_ENEMY_CHARGE_DISTANCE) {
-            // Start charging
             this.isCharging = true;
             this.chargeDirection = new Vector(
                 core.position.x - this.position.x,
@@ -305,25 +250,16 @@ class ChargerEnemy extends Enemy {
         }
         
         if (this.isCharging) {
-            // Continue charging in the same direction
             const chargeSpeed = speed * SETTINGS.CHARGER_ENEMY_CHARGE_SPEED_MULTIPLIER;
             this.position = this.position.add(this.chargeDirection.multiply(chargeSpeed));
-            
-            // Increment charge timer
             this.chargeTimer++;
-            
-            // Reset charge after a while
             if (this.chargeTimer > 60) {
                 this.isCharging = false;
             }
         } else {
-            // Normal movement towards core
             super.update(core, speed, enemyTrails);
         }
-        
-        // Add enemy trail
         if (enemyTrails) {
-            // Add more trails when charging for visual effect
             const trailCount = this.isCharging ? 3 : 1;
             for (let i = 0; i < trailCount; i++) {
                 enemyTrails.push(new EnemyTrail(this.position, this.color, this.radius / 2));
@@ -334,19 +270,13 @@ class ChargerEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw the charger enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw charging indicator if charging
         if (this.isCharging) {
             ctx.beginPath();
             ctx.arc(0, 0, this.radius * 1.3, 0, Math.PI * 2);
             ctx.strokeStyle = `rgba(255, 100, 0, ${0.5 + 0.5 * Math.sin(Date.now() / 100)})`;
             ctx.lineWidth = 2;
             ctx.stroke();
-            
-            // Draw directional indicator
             if (this.chargeDirection) {
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
@@ -363,8 +293,6 @@ class ChargerEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// SplitterEnemy class - splits into smaller enemies when hit
 class SplitterEnemy extends Enemy {
     constructor(radius = SETTINGS.ENEMY_RADIUS) {
         super();
@@ -376,8 +304,6 @@ class SplitterEnemy extends Enemy {
 
     update(core, speed, enemyTrails = null) {
         super.update(core, speed, enemyTrails);
-        
-        // Rotate the splitter enemy for visual effect
         this.rotationAngle += 0.05;
     }
 
@@ -385,11 +311,7 @@ class SplitterEnemy extends Enemy {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotationAngle);
-        
-        // Draw the splitter enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw split indicator
         ctx.beginPath();
         ctx.moveTo(-this.radius * 0.7, 0);
         ctx.lineTo(this.radius * 0.7, 0);
@@ -409,8 +331,6 @@ class SplitterEnemy extends Enemy {
             for (let i = 0; i < SETTINGS.SPLITTER_ENEMY_COUNT; i++) {
                 const newEnemy = new SplitterEnemy(this.radius * SETTINGS.SPLITTER_ENEMY_RADIUS_MULTIPLIER);
                 newEnemy.position = new Vector(this.position.x, this.position.y);
-                
-                // Add slight randomness to position
                 const angle = Math.random() * Math.PI * 2;
                 const distance = this.radius * 0.5;
                 newEnemy.position.x += Math.cos(angle) * distance;
@@ -423,8 +343,6 @@ class SplitterEnemy extends Enemy {
         return newEnemies;
     }
 }
-
-// ShieldedEnemy class - has a shield that absorbs hits
 class ShieldedEnemy extends Enemy {
     constructor() {
         super();
@@ -442,19 +360,13 @@ class ShieldedEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw the shielded enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw rotating shield
         ctx.rotate(this.shieldRotation);
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 1.4, 0, Math.PI * 2);
         ctx.strokeStyle = SETTINGS.SHIELDED_ENEMY_SHIELD_COLOR;
         ctx.lineWidth = 3;
         ctx.stroke();
-        
-        // Draw shield segments
         for (let i = 0; i < 4; i++) {
             ctx.rotate(Math.PI / 2);
             ctx.beginPath();
@@ -467,14 +379,12 @@ class ShieldedEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// TeleporterEnemy class - teleports around randomly
 class TeleporterEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#8A2BE2'; // Purple
+        this.color = '#8A2BE2';
         this.teleportTimer = 0;
-        this.teleportCooldown = 120; // Teleport every 2 seconds
+        this.teleportCooldown = 120;
         this.teleportRange = 100;
         this.scoreValue = 3;
         this.teleportEffect = 0;
@@ -488,8 +398,6 @@ class TeleporterEnemy extends Enemy {
             this.teleport();
             this.teleportTimer = 0;
         }
-        
-        // Update teleport effect
         if (this.teleportEffect > 0) {
             this.teleportEffect -= 0.1;
         }
@@ -501,14 +409,10 @@ class TeleporterEnemy extends Enemy {
         
         this.position.x += Math.cos(angle) * distance;
         this.position.y += Math.sin(angle) * distance;
-        
-        // Keep within bounds
         this.position.x = Math.max(this.radius, Math.min(SETTINGS.WIDTH - this.radius, this.position.x));
         this.position.y = Math.max(this.radius, Math.min(SETTINGS.HEIGHT - this.radius, this.position.y));
         
         this.teleportEffect = 1;
-        
-        // Create teleport particles
         if (window.game) {
             for (let i = 0; i < 8; i++) {
                 const angle = (Math.PI * 2 * i) / 8;
@@ -524,8 +428,6 @@ class TeleporterEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Teleport effect
         if (this.teleportEffect > 0) {
             ctx.globalAlpha = this.teleportEffect;
             ctx.beginPath();
@@ -534,18 +436,12 @@ class TeleporterEnemy extends Enemy {
             ctx.lineWidth = 3;
             ctx.stroke();
         }
-        
-        // Draw the teleporter enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw teleport indicator
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 0.6, 0, Math.PI * 2);
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.stroke();
-        
-        // Draw teleport cooldown indicator
         const cooldownProgress = this.teleportTimer / this.teleportCooldown;
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 1.2, -Math.PI / 2, -Math.PI / 2 + cooldownProgress * Math.PI * 2);
@@ -556,12 +452,10 @@ class TeleporterEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// ReflectorEnemy class - reflects waves back at the player
 class ReflectorEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#FFD700'; // Gold
+        this.color = '#FFD700';
         this.reflectCooldown = 0;
         this.maxReflectCooldown = 60;
         this.scoreValue = 4;
@@ -574,26 +468,18 @@ class ReflectorEnemy extends Enemy {
         if (this.reflectCooldown > 0) {
             this.reflectCooldown--;
         }
-        
-        // Charge up reflection ability
         this.reflectCharge = Math.min(1, this.reflectCharge + 0.02);
     }
 
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw the reflector enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw reflection surface
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 0.8, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(255, 255, 255, ${0.5 + this.reflectCharge * 0.5})`;
         ctx.lineWidth = 3;
         ctx.stroke();
-        
-        // Draw reflection indicator
         if (this.reflectCharge > 0.5) {
             ctx.beginPath();
             ctx.moveTo(-this.radius * 0.5, -this.radius * 0.5);
@@ -607,45 +493,36 @@ class ReflectorEnemy extends Enemy {
         
         ctx.restore();
     }
-
-    // This will be called when hit by a wave
     reflectWave(wave) {
         if (this.reflectCooldown === 0 && this.reflectCharge > 0.5) {
             this.reflectCooldown = this.maxReflectCooldown;
             this.reflectCharge = 0;
-            
-            // Create a reflected wave back at the player
             if (window.game && window.game.core) {
                 const reflectedWave = new SoundWave(
                     this.position,
                     window.game.core.position,
                     false,
                     false,
-                    1.5, // Reflected waves are stronger
+                    1.5,
                     0.8
                 );
                 window.game.waves.push(reflectedWave);
-                
-                // Visual effect
                 for (let i = 0; i < 5; i++) {
                     window.game.addParticle(new Particle(this.position, this.color));
                 }
             }
-            
-            return true; // Wave was reflected
+            return true;
         }
-        return false; // Wave was not reflected
+        return false;
     }
 }
-
-// SwarmEnemy class - spawns smaller enemies around it
 class SwarmEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#FF4500'; // Orange Red
+        this.color = '#FF4500';
         this.radius = SETTINGS.ENEMY_RADIUS * 1.5;
         this.spawnTimer = 0;
-        this.spawnCooldown = 180; // Spawn every 3 seconds
+        this.spawnCooldown = 180;
         this.maxMinions = 3;
         this.minions = [];
         this.scoreValue = 5;
@@ -659,19 +536,14 @@ class SwarmEnemy extends Enemy {
             this.spawnMinion();
             this.spawnTimer = 0;
         }
-        
-        // Update minions
         for (let i = this.minions.length - 1; i >= 0; i--) {
             this.minions[i].update(core, speed * 1.2, enemyTrails);
-            
-            // Remove minions that are too far or destroyed
             if (this.minions[i] && this.minions[i].position && typeof this.minions[i].position.x !== 'undefined' && typeof this.minions[i].position.y !== 'undefined') {
                 const distance = this.position.distanceTo(this.minions[i].position);
                 if (distance > 200 || !this.minions[i].active) {
                     this.minions.splice(i, 1);
                 }
             } else {
-                // Remove minion if position is invalid
                 this.minions.splice(i, 1);
             }
         }
@@ -682,16 +554,12 @@ class SwarmEnemy extends Enemy {
         minion.radius = SETTINGS.ENEMY_RADIUS * 0.6;
         minion.color = '#FF6347';
         minion.position = new Vector(this.position.x, this.position.y);
-        
-        // Spawn at random angle around the swarm enemy
         const angle = Math.random() * Math.PI * 2;
         const distance = this.radius + 10;
         minion.position.x += Math.cos(angle) * distance;
         minion.position.y += Math.sin(angle) * distance;
         
         window.game.addEnemy(minion);
-        
-        // Visual effect
         if (window.game) {
             for (let i = 0; i < 3; i++) {
                 window.game.addParticle(new Particle(minion.position, minion.color));
@@ -702,19 +570,13 @@ class SwarmEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw the swarm enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw spawn indicator
         const spawnProgress = this.spawnTimer / this.spawnCooldown;
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 1.3, -Math.PI / 2, -Math.PI / 2 + spawnProgress * Math.PI * 2);
         ctx.strokeStyle = '#FF6347';
         ctx.lineWidth = 3;
         ctx.stroke();
-        
-        // Draw minion count indicator
         for (let i = 0; i < this.minions.length; i++) {
             const angle = (Math.PI * 2 * i) / this.maxMinions;
             const x = Math.cos(angle) * this.radius * 0.8;
@@ -727,20 +589,16 @@ class SwarmEnemy extends Enemy {
         }
         
         ctx.restore();
-        
-        // Draw minions
         for (let minion of this.minions) {
             minion.draw(ctx);
         }
     }
 }
-
-// TimeBomberEnemy class - explodes after a certain time
 class TimeBomberEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#FF0000'; // Red
-        this.explosionTimer = 300; // 5 seconds
+        this.color = '#FF0000';
+        this.explosionTimer = 300;
         this.maxExplosionTimer = 300;
         this.scoreValue = 6;
         this.warningPhase = false;
@@ -750,13 +608,9 @@ class TimeBomberEnemy extends Enemy {
         super.update(core, speed * 0.9, enemyTrails);
         
         this.explosionTimer--;
-        
-        // Warning phase when timer is low
         if (this.explosionTimer < 60) {
             this.warningPhase = true;
         }
-        
-        // Explode when timer reaches 0
         if (this.explosionTimer <= 0) {
             this.explode();
         }
@@ -764,7 +618,6 @@ class TimeBomberEnemy extends Enemy {
 
     explode() {
         if (window.game) {
-            // Create explosion effect
             for (let i = 0; i < 20; i++) {
                 const angle = (Math.PI * 2 * i) / 20;
                 const pos = new Vector(
@@ -773,8 +626,6 @@ class TimeBomberEnemy extends Enemy {
                 );
                 window.game.addParticle(new Particle(pos, this.color));
             }
-            
-            // Damage nearby enemies
             for (let i = window.game.enemies.length - 1; i >= 0; i--) {
                 const enemy = window.game.enemies[i];
                 if (enemy !== this && enemy && enemy.position && typeof enemy.position.x !== 'undefined' && typeof enemy.position.y !== 'undefined') {
@@ -785,8 +636,6 @@ class TimeBomberEnemy extends Enemy {
                     }
                 }
             }
-            
-            // Remove this enemy
             const index = window.game.enemies.indexOf(this);
             if (index > -1) {
                 window.game.enemies.splice(index, 1);
@@ -797,19 +646,13 @@ class TimeBomberEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw the time bomber enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw timer indicator
         const timerProgress = this.explosionTimer / this.maxExplosionTimer;
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 1.2, -Math.PI / 2, -Math.PI / 2 + timerProgress * Math.PI * 2);
         ctx.strokeStyle = timerProgress > 0.2 ? '#00ff00' : '#ff0000';
         ctx.lineWidth = 4;
         ctx.stroke();
-        
-        // Warning effect
         if (this.warningPhase) {
             const flash = Math.sin(Date.now() / 100) > 0;
             if (flash) {
@@ -820,8 +663,6 @@ class TimeBomberEnemy extends Enemy {
                 ctx.stroke();
             }
         }
-        
-        // Draw bomb indicator
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 0.4, 0, Math.PI * 2);
         ctx.strokeStyle = '#ffffff';
@@ -831,12 +672,10 @@ class TimeBomberEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// VortexEnemy class - creates a vortex that pulls waves and enemies
 class VortexEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#4B0082'; // Indigo
+        this.color = '#4B0082';
         this.vortexRadius = 80;
         this.vortexStrength = 0.5;
         this.vortexRotation = 0;
@@ -847,8 +686,6 @@ class VortexEnemy extends Enemy {
         super.update(core, speed * 0.5, enemyTrails);
         
         this.vortexRotation += 0.1;
-        
-        // Apply vortex effect to nearby enemies
         if (window.game) {
             for (let enemy of window.game.enemies) {
                 if (enemy !== this && enemy && enemy.position && typeof enemy.position.x !== 'undefined' && typeof enemy.position.y !== 'undefined') {
@@ -864,10 +701,7 @@ class VortexEnemy extends Enemy {
                     }
                 }
             }
-            
-            // Apply vortex effect to waves
             for (let wave of window.game.waves) {
-                // Comprehensive safety check for both this enemy and wave positions
                 if (wave && wave.position && typeof wave.position.x !== 'undefined' && typeof wave.position.y !== 'undefined' &&
                     this.position && typeof this.position.x !== 'undefined' && typeof this.position.y !== 'undefined') {
                     try {
@@ -894,8 +728,6 @@ class VortexEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw vortex effect
         ctx.rotate(this.vortexRotation);
         for (let i = 0; i < 3; i++) {
             ctx.rotate(Math.PI * 2 / 3);
@@ -905,11 +737,7 @@ class VortexEnemy extends Enemy {
             ctx.lineWidth = 2;
             ctx.stroke();
         }
-        
-        // Draw the vortex enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
-        
-        // Draw spiral indicator
         ctx.beginPath();
         for (let i = 0; i < 8; i++) {
             const angle = (i / 8) * Math.PI * 2;
@@ -930,14 +758,12 @@ class VortexEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// SpeedsterEnemy class - extremely fast but fragile
 class SpeedsterEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#FF1493'; // Deep Pink
-        this.speedMultiplier = 4.0; // Very fast
-        this.radius = SETTINGS.ENEMY_RADIUS * 0.8; // Smaller
+        this.color = '#FF1493';
+        this.speedMultiplier = 4.0;
+        this.radius = SETTINGS.ENEMY_RADIUS * 0.8;
         this.scoreValue = 8;
         this.speedTrail = [];
         this.maxTrailLength = 10;
@@ -945,8 +771,6 @@ class SpeedsterEnemy extends Enemy {
 
     update(core, speed, enemyTrails = null) {
         super.update(core, speed * this.speedMultiplier, enemyTrails);
-        
-        // Add to speed trail
         this.speedTrail.push({ x: this.position.x, y: this.position.y });
         if (this.speedTrail.length > this.maxTrailLength) {
             this.speedTrail.shift();
@@ -954,7 +778,6 @@ class SpeedsterEnemy extends Enemy {
     }
 
     draw(ctx) {
-        // Draw speed trail
         if (this.speedTrail.length > 1) {
             ctx.save();
             ctx.globalAlpha = 0.3;
@@ -969,13 +792,8 @@ class SpeedsterEnemy extends Enemy {
             ctx.restore();
         }
         
-        ctx.save();
-        ctx.translate(this.position.x, this.position.y);
         
-        // Draw the speedster enemy
-        drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 2);
         
-        // Draw speed lines
         for (let i = 0; i < 6; i++) {
             const angle = (i / 6) * Math.PI * 2;
             ctx.save();
@@ -993,16 +811,14 @@ class SpeedsterEnemy extends Enemy {
         ctx.restore();
     }
 }
-
-// SlowTankEnemy class - very slow but tough
 class SlowTankEnemy extends Enemy {
     constructor() {
         super();
-        this.color = '#8B4513'; // Saddle Brown
-        this.speedMultiplier = 0.3; // Very slow
-        this.radius = SETTINGS.ENEMY_RADIUS * 2.0; // Much larger
+        this.color = '#8B4513';
+        this.speedMultiplier = 0.3;
+        this.radius = SETTINGS.ENEMY_RADIUS * 2.0;
         this.scoreValue = 10;
-        this.armor = 3; // Takes multiple hits
+        this.armor = 3;
         this.maxArmor = 3;
     }
 
@@ -1013,8 +829,6 @@ class SlowTankEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw armor plates
         for (let i = 0; i < 4; i++) {
             ctx.save();
             ctx.rotate((i / 4) * Math.PI * 2);
@@ -1027,11 +841,7 @@ class SlowTankEnemy extends Enemy {
             ctx.stroke();
             ctx.restore();
         }
-        
-        // Draw the tank enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 3);
-        
-        // Draw armor indicator
         for (let i = 0; i < this.armor; i++) {
             const angle = (i / this.maxArmor) * Math.PI * 2;
             const x = Math.cos(angle) * this.radius * 0.6;
@@ -1049,13 +859,11 @@ class SlowTankEnemy extends Enemy {
     takeDamage(damage) {
         this.armor--;
         if (this.armor <= 0) {
-            return true; // Enemy is defeated
+            return true;
         }
-        return false; // Enemy survives
+        return false;
     }
 }
-
-// BossEnemy class - powerful enemy with high health that appears every few waves
 class BossEnemy extends Enemy {
     constructor() {
         super();
@@ -1071,14 +879,9 @@ class BossEnemy extends Enemy {
     }
 
     update(core, speed, enemyTrails = null) {
-        // Bosses move slower
         super.update(core, speed * SETTINGS.BOSS_ENEMY_SPEED_MULTIPLIER, enemyTrails);
-        
-        // Update rotation angles
         this.rotationAngle += 0.01;
         this.outerRotationAngle -= 0.005;
-        
-        // Add more enemy trails for visual effect
         if (enemyTrails) {
             for (let i = 0; i < 3; i++) {
                 const angle = Math.random() * Math.PI * 2;
@@ -1090,9 +893,7 @@ class BossEnemy extends Enemy {
                 enemyTrails.push(new EnemyTrail(trailPos, this.color, this.radius / 3));
             }
         }
-        
-        // Spawn minions periodically
-        if (Date.now() - this.spawnTime > 5000 && window.game) { // Every 5 seconds
+        if (Date.now() - this.spawnTime > 5000 && window.game) {
             this.spawnMinions();
             this.spawnTime = Date.now();
         }
@@ -1101,8 +902,6 @@ class BossEnemy extends Enemy {
     draw(ctx) {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw outer glow
         const gradient = ctx.createRadialGradient(
             0, 0, this.radius * 0.8,
             0, 0, this.radius * 1.5
@@ -1114,17 +913,11 @@ class BossEnemy extends Enemy {
         ctx.arc(0, 0, this.radius * 1.5, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
         ctx.fill();
-        
-        // Draw the boss enemy
         drawEnemyShape(ctx, this.color, this.outlineColor, this.radius, 3);
-        
-        // Draw inner core
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 0.6, 0, Math.PI * 2);
         ctx.fillStyle = '#000000';
         ctx.fill();
-        
-        // Draw rotating inner energy ring
         ctx.rotate(this.rotationAngle);
         
         for (let i = 0; i < 8; i++) {
@@ -1137,13 +930,9 @@ class BossEnemy extends Enemy {
             ctx.fillStyle = '#ffffff';
             ctx.fill();
         }
-        
-        // Reset rotation and set up for outer ring
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.outerRotationAngle);
-        
-        // Draw rotating outer energy ring
         for (let i = 0; i < 12; i++) {
             const angle = i * (Math.PI / 6);
             const x = this.radius * 0.8 * Math.cos(angle);
@@ -1154,12 +943,8 @@ class BossEnemy extends Enemy {
             ctx.fillStyle = '#ffffff';
             ctx.fill();
         }
-        
-        // Reset transformation
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.translate(this.position.x, this.position.y);
-        
-        // Draw health bar
         const healthBarWidth = this.radius * 2;
         const healthBarHeight = 6;
         const healthPercentage = this.health / this.maxHealth;
@@ -1181,7 +966,6 @@ class BossEnemy extends Enemy {
     spawnMinions() {
         if (!window.game) return;
         
-        // Spawn 2-3 minions around the boss
         const minionCount = 2 + Math.floor(Math.random() * 2);
         
         for (let i = 0; i < minionCount; i++) {
@@ -1191,8 +975,6 @@ class BossEnemy extends Enemy {
                 this.position.x + Math.cos(angle) * distance,
                 this.position.y + Math.sin(angle) * distance
             );
-            
-            // Create a random minion
             let minion;
             const minionType = Math.random();
             
@@ -1206,8 +988,6 @@ class BossEnemy extends Enemy {
             
             minion.position = position;
             window.game.addEnemy(minion);
-            
-            // Create spawn effect
             window.game.addImpactEffect(new ImpactEffect(position, minion.color));
         }
     }
@@ -1220,7 +1000,6 @@ class BossEnemy extends Enemy {
 
 class EnemyTrail {
     constructor(x, y, size, color = null) {
-        // Handle both position as object and separate x,y coordinates
         if (typeof x === 'object' && x !== null) {
             this.position = new Vector(x.x, x.y);
             this.color = y || '#ff0055';
@@ -1245,13 +1024,8 @@ class EnemyTrail {
         ctx.fill();
     }
 }
-
-// Helper function to convert hex color to rgb for rgba usage
 function hexToRgb(hex) {
-    // Remove the # if present
     hex = hex.replace(/^#/, '');
-    
-    // Parse the hex values
     let r, g, b;
     if (hex.length === 3) {
         r = parseInt(hex[0] + hex[0], 16);
@@ -1262,6 +1036,5 @@ function hexToRgb(hex) {
         g = parseInt(hex.substring(2, 4), 16);
         b = parseInt(hex.substring(4, 6), 16);
     }
-    
     return `${r}, ${g}, ${b}`;
 } 

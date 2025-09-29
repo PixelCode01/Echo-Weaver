@@ -1,5 +1,3 @@
-// UniversalControls class - Handles touch/drag cooldown for all devices
-
 console.log('=== UNIVERSAL CONTROLS SCRIPT LOADING ===');
 console.log('Script loading timestamp:', Date.now());
 console.log('Window object available:', !!window);
@@ -7,17 +5,12 @@ console.log('Document ready state:', document.readyState);
 console.log('SETTINGS available:', typeof SETTINGS);
 console.log('Game class available:', typeof Game);
 
-// Track script loading order
 window.scriptLoadOrder = window.scriptLoadOrder || [];
 window.scriptLoadOrder.push('universal_controls.js');
 console.log('Script load order so far:', window.scriptLoadOrder);
-
-// Check for any existing errors
 if (window.UniversalControls) {
     console.warn('UniversalControls already exists in window!');
 }
-
-// Make UniversalControls available globally
 window.UniversalControls = class UniversalControls {
     constructor(game) {
         console.log('=== UNIVERSAL CONTROLS INITIALIZATION ===');
@@ -30,7 +23,6 @@ window.UniversalControls = class UniversalControls {
         console.log('Game screen element:', this.gameScreen);
         console.log('Game screen exists:', !!this.gameScreen);
         
-        // Touch/drag cooldown system
         this.lastInteractionTime = 0;
         this.canInteract = true;
         
@@ -39,10 +31,7 @@ window.UniversalControls = class UniversalControls {
             canInteract: this.canInteract
         });
         
-        // Create universal control UI
         this.createUniversalControls();
-        
-        // Add event handlers for all devices
         this.addEventHandlers();
         
         console.log('Universal controls initialized with cooldown settings:', {
@@ -57,10 +46,9 @@ window.UniversalControls = class UniversalControls {
     createUniversalControls() {
         console.log('=== CREATING UNIVERSAL CONTROLS UI ===');
         
-        // Create container for universal controls (visible for cooldown bar)
         this.controlsContainer = document.createElement('div');
         this.controlsContainer.id = 'universal-controls';
-        this.controlsContainer.style.display = 'block'; // Show the container for cooldown bar
+    this.controlsContainer.style.display = 'block';
         console.log('Controls container created (visible):', this.controlsContainer);
         
         if (!this.gameScreen) {
@@ -71,7 +59,6 @@ window.UniversalControls = class UniversalControls {
         this.gameScreen.appendChild(this.controlsContainer);
         console.log('Controls container appended to game screen (hidden)');
         
-        // Create interaction cooldown progress bar (only this will be visible)
         this.interactionCooldownBar = document.createElement('div');
         this.interactionCooldownBar.id = 'interaction-cooldown-bar';
         this.interactionCooldownBar.className = 'universal-cooldown-bar';
@@ -85,11 +72,10 @@ window.UniversalControls = class UniversalControls {
         this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
         this.interactionCooldownBar.style.border = '2px solid rgba(255, 255, 255, 0.5)';
         this.interactionCooldownBar.style.borderRadius = '5px';
-        this.interactionCooldownBar.style.display = 'none'; // Start hidden
+    this.interactionCooldownBar.style.display = 'none';
         this.controlsContainer.appendChild(this.interactionCooldownBar);
         console.log('Interaction cooldown bar created and positioned');
         
-        // Create interaction cooldown label
         this.interactionCooldownLabel = document.createElement('div');
         this.interactionCooldownLabel.id = 'interaction-cooldown-label';
         this.interactionCooldownLabel.className = 'universal-cooldown-label';
@@ -103,7 +89,7 @@ window.UniversalControls = class UniversalControls {
         this.interactionCooldownLabel.style.fontSize = '12px';
         this.interactionCooldownLabel.style.fontWeight = 'bold';
         this.interactionCooldownLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
-        this.interactionCooldownLabel.style.display = 'none'; // Start hidden
+    this.interactionCooldownLabel.style.display = 'none';
         this.controlsContainer.appendChild(this.interactionCooldownLabel);
         
         console.log('=== UNIVERSAL CONTROLS UI CREATION COMPLETE ===');
@@ -115,12 +101,10 @@ window.UniversalControls = class UniversalControls {
     }
     
     addEventHandlers() {
-        // No event handlers needed since buttons are removed
         console.log('Universal controls event handlers skipped - buttons removed');
     }
     
     updateCooldownDisplay() {
-        // Debug: Check if elements exist
         if (!this.interactionCooldownBar || !this.interactionCooldownLabel) {
             console.error('Interaction cooldown elements not found:', {
                 bar: this.interactionCooldownBar,
@@ -129,12 +113,9 @@ window.UniversalControls = class UniversalControls {
             return;
         }
         
-        // Update interaction cooldown progress bar
         const now = Date.now();
         const timeSinceLastInteraction = now - this.lastInteractionTime;
         const requiredCooldown = this.calculateInteractionCooldown();
-        
-        // Debug: Log cooldown calculations every 60 frames
         if (this.game.score % 60 === 0 && this.game.score > 0) {
             console.log('Interaction cooldown debug:', {
                 now,
@@ -152,7 +133,6 @@ window.UniversalControls = class UniversalControls {
             this.interactionCooldownBar.style.display = 'block';
             this.interactionCooldownLabel.style.display = 'block';
             
-            // Add visual indicator for interaction cooldown with color change and pulsing effect
             if (progress < 50) {
                 this.interactionCooldownBar.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
                 this.interactionCooldownBar.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.5)';
@@ -164,13 +144,10 @@ window.UniversalControls = class UniversalControls {
                 this.interactionCooldownBar.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
             }
             
-            // Add pulsing animation for better visibility
             const pulseIntensity = Math.sin(Date.now() / 200) * 0.3 + 0.7;
             this.interactionCooldownBar.style.opacity = pulseIntensity;
-            
-            // Update label with time remaining and make it more prominent
             const remainingTime = Math.ceil((requiredCooldown - timeSinceLastInteraction) / 100);
-            this.interactionCooldownLabel.innerHTML = `⏱️ COOLDOWN: ${remainingTime}s`;
+            this.interactionCooldownLabel.innerHTML = `COOLDOWN: ${remainingTime}s`;
             this.interactionCooldownLabel.style.fontSize = '14px';
             this.interactionCooldownLabel.style.color = progress < 50 ? '#ff4444' : progress < 80 ? '#ffaa00' : '#44ff44';
         } else {
@@ -180,9 +157,7 @@ window.UniversalControls = class UniversalControls {
         }
     }
     
-    // Call this in the game loop to update universal controls
     update() {
-        // Debug: Check if update is being called
         if (this.game && this.game.score % 60 === 0 && this.game.score > 0) {
             console.log('=== UNIVERSAL CONTROLS UPDATE CALLED ===');
             console.log('Game state:', this.game.state);
@@ -196,20 +171,13 @@ window.UniversalControls = class UniversalControls {
         this.updateCooldownDisplay();
     }
     
-    // Calculate interaction cooldown based on score
     calculateInteractionCooldown() {
         const baseCooldown = SETTINGS.MOBILE_TOUCH_COOLDOWN_BASE;
         const maxCooldown = SETTINGS.MOBILE_TOUCH_COOLDOWN_MAX;
         const scoreFactor = SETTINGS.MOBILE_TOUCH_COOLDOWN_SCORE_FACTOR;
-        
-        // Increase cooldown with score, but cap it to keep game playable
         const scoreBasedIncrease = Math.min(this.game.score * scoreFactor, maxCooldown - baseCooldown);
         const totalCooldown = baseCooldown + scoreBasedIncrease;
-        
-        // Ensure cooldown never exceeds maximum to keep game playable
         const finalCooldown = Math.min(totalCooldown, maxCooldown);
-        
-        // Debug logging (only in development)
         if (this.game.score % 50 === 0 && this.game.score > 0) {
             console.log(`Interaction Cooldown Debug - Score: ${this.game.score}, Base: ${baseCooldown}ms, Score Increase: ${scoreBasedIncrease}ms, Final: ${finalCooldown}ms`);
         }
@@ -217,15 +185,12 @@ window.UniversalControls = class UniversalControls {
         return finalCooldown;
     }
     
-    // Check if interaction is allowed
     canInteractNow() {
         const now = Date.now();
         const timeSinceLastInteraction = now - this.lastInteractionTime;
         const requiredCooldown = this.calculateInteractionCooldown();
         
         const canInteract = timeSinceLastInteraction >= requiredCooldown;
-        
-        // Debug logging for cooldown checks
         if (this.game && this.game.score % 30 === 0 && this.game.score > 0) {
             console.log('=== COOLDOWN CHECK DEBUG ===');
             console.log('Current time:', now);
@@ -239,19 +204,14 @@ window.UniversalControls = class UniversalControls {
         return canInteract;
     }
     
-    // Record interaction and start cooldown
     recordInteraction() {
         this.lastInteractionTime = Date.now();
         this.canInteract = false;
         console.log('Interaction recorded, cooldown started');
-        
-        // Add visual feedback - flash the screen briefly
         this.addCooldownFeedback();
     }
     
-    // Add visual and audio feedback for cooldown
     addCooldownFeedback() {
-        // Flash the cooldown bar
         if (this.interactionCooldownBar) {
             this.interactionCooldownBar.style.transform = 'translateX(-50%) scale(1.2)';
             this.interactionCooldownBar.style.transition = 'transform 0.1s ease-out';
@@ -262,8 +222,6 @@ window.UniversalControls = class UniversalControls {
                 }
             }, 100);
         }
-        
-        // Flash the label
         if (this.interactionCooldownLabel) {
             this.interactionCooldownLabel.style.transform = 'translateX(-50%) scale(1.1)';
             this.interactionCooldownLabel.style.transition = 'transform 0.1s ease-out';
@@ -276,7 +234,6 @@ window.UniversalControls = class UniversalControls {
         }
     }
     
-    // Reset interaction cooldown (call this when game resets)
     resetInteractionCooldown() {
         this.lastInteractionTime = 0;
         this.canInteract = true;

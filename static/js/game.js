@@ -1,6 +1,3 @@
-// Game class - Manages the game state and logic
-
-// Add caps for clutter control
 const MAX_PARTICLES = 30;
 const MAX_DAMAGE_NUMBERS = 15;
 const MAX_IMPACT_EFFECTS = 10;
@@ -9,12 +6,11 @@ const MAX_POWERUPS = 5;
 
 class Game {
     constructor(canvas) {
-        // Initialize game properties
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.width = canvas.width;
         this.height = canvas.height;
-        this.state = 'waiting'; // waiting, playing, game_over
+        this.state = 'waiting';
         this.score = 0;
         this.highScore = 0;
         this.core = new Core(this.width / 2, this.height / 2, 30);
@@ -26,15 +22,9 @@ class Game {
         this.enemyTrails = [];
         this.damageNumbers = [];
         this.impactEffects = [];
-        
-        // Anti-stuck mechanism
         this.lastEnemySpawnTime = Date.now();
-        this.stuckTimeout = 10000; // 10 seconds timeout
-        
-        // Visual feedback for invalid wave attempts
+        this.stuckTimeout = 10000;
         this.invalidWaveAttempt = null;
-        
-        // Initialize background particles
         for (let i = 0; i < 50; i++) {
             this.backgroundParticles.push(new BackgroundParticle());
         }
@@ -43,7 +33,7 @@ class Game {
         this.comboManager = new ComboManager();
         this.feverManager = new FeverManager();
         this.screenShake = null;
-        this.hardModeActivated = false; // Add this line to track hard mode activation
+        this.hardModeActivated = false;
         
         this.powerupTimers = {
             'invincibility': 0,
@@ -68,20 +58,17 @@ class Game {
             waveActive: false,
             enemySpeed: SETTINGS.ENEMY_SPEED,
             lastScoreCheck: 0,
-            bossSpawned: false, // Add this flag
+            bossSpawned: false,
             
             startNextWave: () => {
                 this.waveManager.currentWave++;
-                this.waveManager.bossSpawned = false; // Reset bossSpawned for every new wave
-                // Hard mode: more enemies per wave
+                this.waveManager.bossSpawned = false;
                 const hardMode = this.score >= 1000;
                 this.waveManager.enemiesToSpawn = SETTINGS.ENEMIES_PER_WAVE_BASE + 
                     (this.waveManager.currentWave - 1) * (hardMode ? SETTINGS.ENEMIES_PER_WAVE_INCREMENT_HARD : SETTINGS.ENEMIES_PER_WAVE_INCREMENT);
                 this.waveManager.spawnedEnemiesCount = 0;
                 this.waveManager.spawnTimer = 0;
                 this.waveManager.waveActive = true;
-                
-                // Update enemy speed for the new wave
                 if (hardMode) {
                     this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED_HARD;
                 } else {
@@ -93,18 +80,13 @@ class Game {
                 }
                 
                 console.log(`Starting Wave ${this.waveManager.currentWave} with ${this.waveManager.enemiesToSpawn} enemies.`);
-                
-                // Update UI
                 document.getElementById('wave').textContent = this.waveManager.currentWave;
             },
             
             update: () => {
-                // Score-based enemy spawning - ensure enemies always spawn
                 const score = this.score;
                 const hardMode = score >= 1000;
-                // Base spawn rate based on score
                 let baseSpawnRate = hardMode ? SETTINGS.ENEMY_SPAWN_RATE_HARD : SETTINGS.ENEMY_SPAWN_RATE;
-                // Decrease spawn rate as score increases (more frequent spawning)
                 if (!hardMode) {
                     if (score >= 100) baseSpawnRate = Math.max(30, baseSpawnRate - 10);
                     if (score >= 200) baseSpawnRate = Math.max(20, baseSpawnRate - 10);
@@ -112,45 +94,34 @@ class Game {
                     if (score >= 500) baseSpawnRate = Math.max(10, baseSpawnRate - 5);
                     if (score >= 1000) baseSpawnRate = Math.max(8, baseSpawnRate - 2);
                 }
-                // Ensure minimum enemies on screen based on score
                 const minEnemiesOnScreen = Math.min(12, Math.floor(score / 50) + 1 + (hardMode ? 4 : 0));
-                // Spawn enemies if we have too few
                 if (this.enemies.length < minEnemiesOnScreen) {
                     console.log(`Spawning enemy due to low count: ${this.enemies.length}/${minEnemiesOnScreen}`);
                     this._spawnEnemy();
                 }
-                // Regular spawn timer
                 this.waveManager.spawnTimer++;
                 if (this.waveManager.spawnTimer >= baseSpawnRate) {
                     this.waveManager.spawnTimer = 0;
                     console.log(`Spawning enemy due to timer: baseSpawnRate=${baseSpawnRate}`);
                     this._spawnEnemy();
                 }
-                // Update last score check
                 this.waveManager.lastScoreCheck = score;
-                // Update wave number based on score (for UI purposes)
                 const newWave = Math.floor(score / 50) + 1;
                 if (newWave !== this.waveManager.currentWave) {
                     this.waveManager.currentWave = newWave;
                     document.getElementById('wave').textContent = this.waveManager.currentWave;
-                    // Increase enemy speed with score (with limits)
                     let baseSpeed = SETTINGS.ENEMY_SPEED + (this.waveManager.currentWave - 1) * 0.15;
-                    // Apply speed limits based on score
                     if (hardMode) {
                         this.waveManager.enemySpeed = SETTINGS.ENEMY_MAX_SPEED_HARD;
                     } else if (this.score <= 100) {
-                        // Limit to 1.5x till score 100
                         this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_100);
                     } else if (this.score <= 200) {
-                        // Limit to 2.0x till score 200
                         this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_200);
                     } else {
-                        // After score 200, use normal max speed
                         this.waveManager.enemySpeed = Math.min(baseSpeed, SETTINGS.SPEED_LIMIT_AFTER_200);
                     }
                     console.log(`Wave updated to ${newWave}, enemy speed: ${this.waveManager.enemySpeed}`);
                 }
-                // Emergency failsafe: If no enemies for too long, force spawn
                 if (this.enemies.length === 0 && this.waveManager.spawnTimer > baseSpawnRate * 2) {
                     console.log('Emergency spawn triggered - no enemies for too long');
                     this._spawnEnemy();
@@ -159,10 +130,7 @@ class Game {
             }
         };
         
-        // Start the first wave
         this.waveManager.startNextWave();
-        
-        // Load high scores
         this._loadHighScores();
     }
 
@@ -192,7 +160,6 @@ class Game {
         }
     }
     
-    // Cookie helper methods
     _getCookie(name) {
         const nameEQ = name + '=';
         const ca = document.cookie.split(';');
@@ -213,14 +180,9 @@ class Game {
         }
         document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
     }
-    
-    // Sound handling - this is a placeholder since sounds are managed in main.js
     _loadSounds() {
-        // This is just a placeholder - actual sound loading is done in main.js
         console.log('Sound loading is handled by main.js');
     }
-    
-    // Default sound playing method - will be overridden by main.js
     _playSound(soundName) {
         console.log(`Playing sound: ${soundName} (placeholder - actual sound playing is handled by main.js)`);
     }
@@ -229,15 +191,11 @@ class Game {
         console.log('Starting game');
         this.state = 'playing';
         this.score = 0;
-        this.waveManager.currentWave = 0;  // Will be incremented to 1 in startNextWave
+        this.waveManager.currentWave = 0;
         this.waveManager.startNextWave();
-        
-        // Update UI
         document.getElementById('score').textContent = '0';
         document.getElementById('wave').textContent = '1';
         document.getElementById('combo').textContent = '0';
-        
-        // Play a sound to initialize audio context (helps with mobile devices)
         this._playSound('wave_create');
     }
     
@@ -248,7 +206,6 @@ class Game {
         console.log('Universal controls exist:', !!window.universalControls);
         
         if (this.state === 'playing') {
-            // Check universal controls cooldown for wave creation
             if ((event.type === 'mousedown' || event.type === 'mouseup') && 
                 window.universalControls && !window.universalControls.canInteractNow()) {
                 console.log('Wave creation blocked by universal controls cooldown');
@@ -260,13 +217,11 @@ class Game {
             } else if (event.type === 'mouseup' && this.startPos) {
                 const endPos = { x: event.clientX, y: event.clientY };
                 
-                // Calculate distance between start and end positions
                 const distance = Math.sqrt(
                     Math.pow(endPos.x - this.startPos.x, 2) + 
                     Math.pow(endPos.y - this.startPos.y, 2)
                 );
                 
-                // Minimum distance required to create a wave (prevents accidental center touches)
                 const minDistance = 20;
                 
                 if (distance >= minDistance) {
@@ -274,7 +229,6 @@ class Game {
                     console.log('Distance:', distance, 'Min distance:', minDistance);
                     console.log('Wave mode:', this.currentWaveMode);
                     
-                    // Determine wave parameters based on current mode
                     let waveParams = SETTINGS.WAVE_MODE_NORMAL;
                     if (this.currentWaveMode === 'focused') {
                         waveParams = SETTINGS.WAVE_MODE_FOCUSED;
@@ -282,7 +236,6 @@ class Game {
                         waveParams = SETTINGS.WAVE_MODE_WIDE;
                     }
                     
-                    // Create a new wave
                     const newWave = new SoundWave(
                         this.startPos,
                         endPos,
@@ -296,18 +249,16 @@ class Game {
                     this._playSound('wave_create');
                     console.log('Wave created successfully');
                     
-                    // Record interaction for universal controls
                     if (window.universalControls) {
                         window.universalControls.recordInteraction();
                         console.log('Interaction recorded in game handleEvent');
                     }
                 } else {
                     console.log('Wave creation blocked: distance too short');
-                    // Show visual feedback for invalid attempt
                     this.invalidWaveAttempt = {
                         start: this.startPos,
                         end: endPos,
-                        timer: 30 // Show for 30 frames
+                        timer: 30
                     };
                 }
                 
@@ -332,7 +283,6 @@ class Game {
     update() {
         if (this.state !== 'playing') return;
         
-        // Debug: Log game state every 120 frames (about 2 seconds)
         if (this.score % 120 === 0 && this.score > 0) {
             console.log('=== GAME STATE DEBUG ===');
             console.log('Score:', this.score);
@@ -348,13 +298,8 @@ class Game {
             console.log('Min enemies required:', Math.max(1, Math.min(8, Math.floor(this.score / 50) + 1)));
         }
         
-        // Update wave manager
         this.waveManager.update();
-        
-        // Enhanced failsafe: Always ensure enemies are present and game is playable
         const minEnemiesOnScreen = Math.max(1, Math.min(8, Math.floor(this.score / 50) + 1));
-        
-        // If we have too few enemies, spawn more immediately
         if (this.enemies.length < minEnemiesOnScreen) {
             const enemiesToSpawn = minEnemiesOnScreen - this.enemies.length;
             console.log(`Spawning ${enemiesToSpawn} enemies due to low count (${this.enemies.length}/${minEnemiesOnScreen})`);
@@ -362,64 +307,45 @@ class Game {
                 this._spawnEnemy();
             }
         }
-        
-        // Emergency failsafe: If no enemies for too long, force spawn
         if (this.enemies.length === 0) {
             this._spawnEnemy();
             console.log('Emergency enemy spawn triggered - no enemies on screen');
         }
-        
-        // If wave is not active and no enemies, start next wave
         if (!this.waveManager.waveActive && this.enemies.length === 0) {
             console.log('Starting next wave due to no enemies and no active wave');
             this.waveManager.startNextWave();
         }
-        
-        // Additional failsafe: Ensure game doesn't get stuck by checking for stuck enemies
         let stuckEnemies = 0;
         for (const enemy of this.enemies) {
             if (enemy.position && enemy.position.x === enemy.lastPosition?.x && 
                 enemy.position.y === enemy.lastPosition?.y) {
                 stuckEnemies++;
             }
-            // Update last position for next check
             if (enemy.position) {
                 enemy.lastPosition = { x: enemy.position.x, y: enemy.position.y };
             }
         }
-        
-        // If too many enemies are stuck, spawn new ones
         if (stuckEnemies > this.enemies.length * 0.5 && this.enemies.length > 0) {
             console.log('Too many stuck enemies detected, spawning new ones');
             this._spawnEnemy();
         }
-        
-        // Timeout-based failsafe: If no enemies for too long, force spawn
         const currentTime = Date.now();
         if (this.enemies.length === 0 && (currentTime - this.lastEnemySpawnTime) > this.stuckTimeout) {
             console.log('Timeout-based enemy spawn triggered');
             this._spawnEnemy();
             this.lastEnemySpawnTime = currentTime;
         }
-        
-        // Additional failsafe: If wave manager seems stuck, reset it
         if (this.waveManager.waveActive && this.enemies.length === 0 && this.waveManager.spawnedEnemiesCount >= this.waveManager.enemiesToSpawn) {
             console.log('Wave manager appears stuck, resetting wave state');
             this.waveManager.waveActive = false;
             this.waveManager.spawnedEnemiesCount = 0;
             this.waveManager.spawnTimer = 0;
         }
-        
-        // Comprehensive stuck detection system
         const stuckDetectionTime = Date.now();
         const timeSinceLastEnemySpawn = stuckDetectionTime - this.lastEnemySpawnTime;
         const timeSinceLastScore = stuckDetectionTime - (this.lastScoreTime || stuckDetectionTime);
-        
-        // Track last score time
         if (!this.lastScoreTime) this.lastScoreTime = stuckDetectionTime;
-        
-        // Detect if game is stuck
-        if (this.enemies.length === 0 && timeSinceLastEnemySpawn > 5000) { // 5 seconds without enemies
+        if (this.enemies.length === 0 && timeSinceLastEnemySpawn > 5000) {
             console.log('=== GAME STUCK DETECTED ===');
             console.log('Time since last enemy spawn:', timeSinceLastEnemySpawn);
             console.log('Time since last score:', timeSinceLastScore);
@@ -431,112 +357,78 @@ class Game {
                 spawnTimer: this.waveManager.spawnTimer
             });
             console.log('Forcing enemy spawn...');
-            
-            // Force spawn multiple enemies
             for (let i = 0; i < 3; i++) {
                 this._spawnEnemy();
             }
             this.lastEnemySpawnTime = stuckDetectionTime;
         }
-        
-        // Update enemies if time is not stopped
         if (!this.activePowerups['time_stop_active']) {
-            // Apply slow time effect if active
             const globalSpeedMultiplier = this.activePowerups['slow_time_active'] ? 0.5 : 1;
             
             for (let i = this.enemies.length - 1; i >= 0; i--) {
                 const enemy = this.enemies[i];
-                // Use individual enemy speed multiplier
                 const enemySpeed = this.waveManager.enemySpeed * 
                     (enemy.speedMultiplier || 1) * globalSpeedMultiplier;
                 enemy.update(this.core, enemySpeed, this.enemyTrails);
             }
         }
-        
-        // Update waves
         for (let i = this.waves.length - 1; i >= 0; i--) {
             this.waves[i].update(this.enemies);
             if (!this.waves[i].active) {
                 this.waves.splice(i, 1);
             }
         }
-        
-        // Update particles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             this.particles[i].update();
             if (!this.particles[i].active) {
                 this.particles.splice(i, 1);
             }
         }
-        
-        // Update powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             this.powerups[i].update();
             if (!this.powerups[i].active) {
                 this.powerups.splice(i, 1);
             }
         }
-        
-        // Update enemy trails
         for (let i = this.enemyTrails.length - 1; i >= 0; i--) {
             if (!this.enemyTrails[i].update()) {
                 this.enemyTrails.splice(i, 1);
             }
         }
-        
-        // Update damage numbers
         for (let i = this.damageNumbers.length - 1; i >= 0; i--) {
             this.damageNumbers[i].update();
             if (!this.damageNumbers[i].active) {
                 this.damageNumbers.splice(i, 1);
             }
         }
-        
-        // Update impact effects
         for (let i = this.impactEffects.length - 1; i >= 0; i--) {
             this.impactEffects[i].update();
             if (!this.impactEffects[i].active) {
                 this.impactEffects.splice(i, 1);
             }
         }
-        
-        // Update background particles
         for (let i = 0; i < this.backgroundParticles.length; i++) {
             this.backgroundParticles[i].update();
         }
-        
-        // Update managers
         this.comboManager.update();
         this.feverManager.update();
         this.messageDisplay.update();
-        
-        // Update powerup timers
         this._updatePowerupTimers();
-        
-        // Check for collisions
         this._checkCollisions();
-        
-        // Update echo burst cooldown
         if (this.echoBurstCooldown > 0) {
             this.echoBurstCooldown--;
-            // Update UI
             document.getElementById('echo-cooldown').style.width = 
                 `${(this.echoBurstCooldown / SETTINGS.ECHO_BURST_COOLDOWN) * 100}%`;
         } else if (this.echoBurstCooldown === 0) {
             document.getElementById('echo-cooldown').style.width = '0%';
         }
-        
-        // Update fever meter
         document.getElementById('fever-meter').style.width = 
             `${this.feverManager.getChargePercentage()}%`;
-            
-        // Update score display
         document.getElementById('score').textContent = this.score;
         document.getElementById('combo').textContent = this.comboManager.comboCount;
     }
     
     draw(ctx) {
-        // Apply screen shake if active
         let screenOffset = { x: 0, y: 0 };
         if (this.screenShake) {
             screenOffset = this.screenShake.shake();
@@ -544,55 +436,34 @@ class Game {
                 this.screenShake = null;
             }
         }
-        
-        // Clear screen
         ctx.fillStyle = SETTINGS.BLACK;
         ctx.fillRect(0, 0, SETTINGS.WIDTH, SETTINGS.HEIGHT);
         
-        // Draw background particles
         for (const particle of this.backgroundParticles) {
             particle.draw(ctx);
         }
-        
-        // Draw grid
         drawGrid(ctx, screenOffset);
-        
-        // Draw enemy trails
         for (const trail of this.enemyTrails) {
             trail.draw(ctx);
         }
-        
-        // Draw enemies
         for (const enemy of this.enemies) {
             enemy.draw(ctx);
         }
-        
-        // Draw waves
         for (const wave of this.waves) {
             wave.draw(ctx);
         }
-        
-        // Draw particles
         for (const particle of this.particles) {
             particle.draw(ctx);
         }
-        
-        // Draw powerups
         for (const powerup of this.powerups) {
             powerup.draw(ctx);
         }
-        
-        // Draw damage numbers
         for (const damageNumber of this.damageNumbers) {
             damageNumber.draw(ctx);
         }
-        
-        // Draw impact effects
         for (const effect of this.impactEffects) {
             effect.draw(ctx);
         }
-        
-        // Draw invalid wave attempt feedback
         if (this.invalidWaveAttempt && this.invalidWaveAttempt.timer > 0) {
             const alpha = this.invalidWaveAttempt.timer / 30;
             ctx.strokeStyle = `rgba(255, 0, 0, ${alpha})`;
@@ -609,28 +480,18 @@ class Game {
                 this.invalidWaveAttempt = null;
             }
         }
-        
-        // Draw core
         this.core.draw(ctx, this.feverManager.feverActive);
-        
-        // Draw messages
         this.messageDisplay.draw(ctx);
-        
-        // Draw powerup timers
         this._drawPowerupTimers();
     }
     
     _spawnEnemy() {
-        // Determine enemy type and difficulty based on score
         let enemyType = 'basic';
         const score = this.score;
         let possibleTypes = [];
         let isBossWave = false;
         let hardMode = score >= 1000;
-
-        // Hard mode: after 1k score, increase difficulty and variety
         if (hardMode) {
-            // Show hard mode message once
             if (!this.hardModeActivated) {
                 this.messageDisplay.addMessage(
                     'HARD MODE!',
@@ -642,27 +503,22 @@ class Game {
                 this._playSound('boss_spawn');
                 this.hardModeActivated = true;
             }
-            // Boss wave logic: every BOSS_WAVE_INTERVAL waves
             isBossWave = (this.waveManager.currentWave % SETTINGS.BOSS_WAVE_INTERVAL === 0);
             if (hardMode && isBossWave) {
                 if (!this.waveManager.bossSpawned) {
                     possibleTypes = ['boss'];
                     this.waveManager.bossSpawned = true;
                 } else {
-                    // Already spawned boss for this wave, do not spawn more
                     return;
                 }
             } else if (hardMode) {
-                // All tough enemies + rare boss
                 possibleTypes = [
                     'zigzag','ghost','charger','splitter','shielded','teleporter','reflector',
                     'swarm','timebomber','vortex','speedster','slowtank','basic'
                 ];
-                // 10% chance to spawn a boss even on non-boss waves
                 if (Math.random() < 0.1) possibleTypes.push('boss');
             }
         } else {
-            // Define enemy types by score ranges (original logic)
             if (score >= 0 && score < 10) {
                 possibleTypes = ['basic'];
             } else if (score >= 10 && score < 20) {
@@ -690,17 +546,12 @@ class Game {
             } else if (score >= 850 && score < 1000) {
                 possibleTypes = ['slowtank'];
             } else if (score >= 1000) {
-                possibleTypes = ['boss']; // fallback for non-hard mode
+                possibleTypes = ['boss'];
             }
         }
-
-        // Debug: Log possibleTypes and hardMode
         console.log('[SPAWN ENEMY] Score:', score, 'HardMode:', hardMode, 'isBossWave:', isBossWave, 'PossibleTypes:', possibleTypes);
-
-        // Weight probabilities for harder types as score increases within each range
         let weights = possibleTypes.map(type => {
             if (hardMode) {
-                // In hard mode, make special enemies and bosses more likely
                 switch(type) {
                     case 'boss': return isBossWave ? 10 : 2;
                     case 'swarm':
@@ -738,7 +589,6 @@ class Game {
                 }
             }
         });
-        // Normalize weights
         let totalWeight = weights.reduce((a,b)=>a+b,0);
         let rand = Math.random() * totalWeight;
         let idx = 0;
@@ -747,11 +597,7 @@ class Game {
             rand -= weights[idx];
         }
         enemyType = possibleTypes[idx] || 'basic';
-
-        // Debug: Log selected enemyType
         console.log('[SPAWN ENEMY] Selected enemyType:', enemyType);
-
-        // Create enemy based on type, with random speed/spin for challenge
         let enemy;
         switch (enemyType) {
             case 'zigzag':
@@ -805,37 +651,30 @@ class Game {
                 enemy = new Enemy();
                 break;
         }
-        // Add random speed/spin for extra challenge
         if (enemy && !enemy.isBoss) {
-            // Hard mode: increase speed and add more spin
             const baseSpeed = this.waveManager.enemySpeed;
             let speedVariation = 0.5 + Math.random() * 1.5;
             if (hardMode) {
-                speedVariation = 1.5 + Math.random() * 2.5; // 1.5x to 4x speed
+                speedVariation = 1.5 + Math.random() * 2.5;
             }
             enemy.speedMultiplier = speedVariation;
-            // Extreme speed chance
             if (Math.random() < (hardMode ? 0.2 : 0.1)) {
                 enemy.speedMultiplier = Math.random() < 0.5 ? 0.3 : (hardMode ? 5.0 : 3.0);
             }
-            // Add spin property for visual challenge
             if (score > 100 && Math.random() < (hardMode ? 0.6 : 0.3)) {
                 enemy.spin = (Math.random() - 0.5) * (hardMode ? 0.5 : 0.2);
             }
         }
         if (enemy) {
             this.addEnemy(enemy);
-            this.lastEnemySpawnTime = Date.now(); // Update spawn time
-            // Debug: Log enemy creation
+            this.lastEnemySpawnTime = Date.now();
             console.log('[SPAWN ENEMY] Enemy created and pushed:', enemy.constructor.name, 'Total enemies:', this.enemies.length);
         } else {
-            // Debug: Log failure to create enemy
             console.error('[SPAWN ENEMY] Failed to create enemy for type:', enemyType);
         }
     }
     
     _checkCollisions() {
-        // Check if core is hit by enemy
         if (!this.activePowerups['invincibility_active'] && !this.feverManager.feverActive) {
             for (let i = this.enemies.length - 1; i >= 0; i--) {
                 if (this.enemies[i].collidesWith(this.core)) {
@@ -844,8 +683,6 @@ class Game {
                 }
             }
         }
-        
-        // Check if waves hit enemies
         for (let i = this.waves.length - 1; i >= 0; i--) {
             const wave = this.waves[i];
             
@@ -858,15 +695,11 @@ class Game {
                     if (this.feverManager.feverActive) {
                         damage *= SETTINGS.FEVER_MODE_PLAYER_WAVE_DAMAGE_MULTIPLIER;
                     }
-                    
-                    // Handle boss enemy differently
                     if (enemy instanceof BossEnemy) {
                         const defeated = enemy.takeDamage(damage);
                         if (defeated) {
                             this.enemies.splice(j, 1);
                             this._handleEnemyDefeat(enemy, damage);
-                            
-                            // Achievement for defeating a boss
                             this.messageDisplay.addMessage(
                                 SETTINGS.ACHIEVEMENT_MESSAGES.boss_slayer, 
                                 { x: SETTINGS.WIDTH / 2, y: SETTINGS.HEIGHT / 2 - 50 }, 
@@ -874,15 +707,12 @@ class Game {
                                 36
                             );
                         } else {
-                            // Show damage number but don't remove boss
                             this.addDamageNumber(new DamageNumber(
                                 enemy.position, 
                                 Math.round(damage), 
                                 SETTINGS.WHITE, 
                                 false
                             ));
-                            
-                            // Create impact effect
                             this.addImpactEffect(new ImpactEffect(
                                 enemy.position, 
                                 enemy.color
@@ -895,9 +725,7 @@ class Game {
                             this._handleEnemyDefeat(enemy, damage);
                         }
                     } else if (enemy instanceof ReflectorEnemy) {
-                        // Check if wave was reflected
                         if (!enemy.reflectWave(wave)) {
-                            // If not reflected, destroy the enemy
                             this.enemies.splice(j, 1);
                             this._handleEnemyDefeat(enemy, damage);
                         }
@@ -907,15 +735,12 @@ class Game {
                             this.enemies.splice(j, 1);
                             this._handleEnemyDefeat(enemy, damage);
                         } else {
-                            // Show damage number but don't remove tank
                             this.addDamageNumber(new DamageNumber(
                                 enemy.position, 
                                 Math.round(damage), 
                                 SETTINGS.WHITE, 
                                 false
                             ));
-                            
-                            // Create impact effect
                             this.addImpactEffect(new ImpactEffect(
                                 enemy.position, 
                                 enemy.color
@@ -939,8 +764,6 @@ class Game {
                 }
             }
         }
-        
-        // Check if powerups are collected
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             if (this.powerups[i].collidesWith(this.core)) {
                 const powerupType = this.powerups[i].type;
@@ -952,35 +775,18 @@ class Game {
     }
     
     _handleEnemyDefeat(enemy, damage = 0) {
-        // Debug: Log enemy defeat
         console.log(`Enemy defeated: type=${enemy.constructor.name}, score=${this.score}, enemies remaining=${this.enemies.length}`);
-        
-        // Add combo
         this.comboManager.addHit();
-        
-        // Add fever charge - extra charge during combos
         const feverCharge = SETTINGS.FEVER_MODE_CHARGE_PER_HIT;
         const comboBonus = this.comboManager.comboCount >= 5 ? SETTINGS.COMBO_FEVER_BOOST : 0;
         this.feverManager.addCharge(feverCharge + comboBonus);
-        
-        // Get score value from enemy
         const baseScore = enemy.scoreValue || 1;
-        
-        // Increase score with combo bonus
         this.score += baseScore + this.comboManager.getBonus();
-        
-        // Update last score time for stuck detection
         this.lastScoreTime = Date.now();
-        
-        // Play sound
         this._playSound('enemy_hit');
-        
-        // Create particles
         for (let i = 0; i < 10; i++) {
             this.addParticle(new Particle(enemy.position, enemy.color));
         }
-        
-        // Chance to spawn powerup - increased chance for boss enemies
         const powerupChance = enemy.isBoss ? 
             SETTINGS.POWERUP_SPAWN_CHANCE * 2 : 
             SETTINGS.POWERUP_SPAWN_CHANCE;
@@ -993,8 +799,6 @@ class Game {
             const powerupType = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
             this.addPowerup(new PowerUp(enemy.position, powerupType));
         }
-        
-        // Display combo message if available
         const comboMsg = this.comboManager.getComboMessage();
         if (comboMsg) {
             this.messageDisplay.addMessage(
@@ -1003,8 +807,6 @@ class Game {
                 SETTINGS.YELLOW, 
                 24
             );
-            
-            // Achievement for high combos
             if (this.comboManager.comboCount >= 20) {
                 this.messageDisplay.addMessage(
                     SETTINGS.ACHIEVEMENT_MESSAGES.combo_master, 
@@ -1014,26 +816,17 @@ class Game {
                 );
             }
         }
-        
-        // Check for critical hit
         const isCritical = Math.random() < SETTINGS.CRITICAL_HIT_CHANCE;
         if (isCritical) {
             damage *= SETTINGS.CRITICAL_HIT_MULTIPLIER;
         }
-        
-        // Create damage number
         this.addDamageNumber(new DamageNumber(
             enemy.position, 
             Math.round(damage), 
             SETTINGS.WHITE, 
             isCritical
         ));
-        
-        // Create impact effect
         this.addImpactEffect(new ImpactEffect(enemy.position, enemy.color));
-
-        // === BOSS WAVE PROGRESSION FIX ===
-        // If a boss was defeated and there are no more enemies, end the wave and reset bossSpawned
         if (enemy instanceof BossEnemy && this.enemies.length === 0) {
             this.waveManager.waveActive = false;
             this.waveManager.spawnedEnemiesCount = 0;
@@ -1044,7 +837,6 @@ class Game {
     }
     
     _activatePowerup(powerupType) {
-        // Display message
         const message = SETTINGS.POWERUP_MESSAGES[powerupType] || '';
         this.messageDisplay.addMessage(
             message, 
@@ -1052,8 +844,6 @@ class Game {
             SETTINGS.YELLOW, 
             36
         );
-        
-        // Apply powerup effect
         switch (powerupType) {
             case 'invincibility':
                 this.powerupTimers['invincibility'] = SETTINGS.POWERUP_DURATION_INVINCIBILITY;
@@ -1072,7 +862,6 @@ class Game {
                 break;
                 
             case 'clear_screen':
-                // Destroy all enemies
                 for (const enemy of this.enemies) {
                     this._handleEnemyDefeat(enemy);
                 }
@@ -1103,25 +892,22 @@ class Game {
             case 'multi_wave':
                 this.powerupTimers['multi_wave'] = SETTINGS.POWERUP_DURATION_MULTI_WAVE;
                 this.activePowerups['multi_wave_active'] = true;
-                
-                // Create multiple waves in different directions
                 this._createMultiWaves();
                 break;
         }
     }
     
     _createMultiWaves() {
-        // Create 8 waves in different directions
         const center = { x: this.core.position.x, y: this.core.position.y };
         const directions = [
-            { x: 1, y: 0 },    // right
-            { x: 1, y: 1 },    // down-right
-            { x: 0, y: 1 },    // down
-            { x: -1, y: 1 },   // down-left
-            { x: -1, y: 0 },   // left
-            { x: -1, y: -1 },  // up-left
-            { x: 0, y: -1 },   // up
-            { x: 1, y: -1 }    // up-right
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+            { x: 0, y: 1 },
+            { x: -1, y: 1 },
+            { x: -1, y: 0 },
+            { x: -1, y: -1 },
+            { x: 0, y: -1 },
+            { x: 1, y: -1 }
         ];
         
         for (const dir of directions) {
@@ -1141,11 +927,7 @@ class Game {
             
             this.waves.push(wave);
         }
-        
-        // Play sound
         this._playSound('multi_wave');
-        
-        // Add visual effect
         this.addImpactEffect(new ImpactEffect(
             center, 
             SETTINGS.POWERUP_COLOR_MULTI_WAVE,
@@ -1156,11 +938,7 @@ class Game {
     _activateEchoBurst() {
         this.echoBurstCooldown = SETTINGS.ECHO_BURST_COOLDOWN;
         this._playSound('echo_burst');
-        
-        // Update UI
         document.getElementById('echo-cooldown').style.width = '100%';
-        
-        // Destroy enemies within range
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const enemy = this.enemies[i];
             if (enemy.position.distanceTo(this.core.position) < SETTINGS.ECHO_BURST_RADIUS) {
@@ -1168,22 +946,15 @@ class Game {
                 this._handleEnemyDefeat(enemy, SETTINGS.ECHO_BURST_DAMAGE);
             }
         }
-        
-        // Create impact effect
         this.addImpactEffect(new ImpactEffect(this.core.position, SETTINGS.ECHO_BURST_COLOR));
     }
     
     _updatePowerupTimers() {
-        // Update each powerup timer
         for (const powerupType in this.powerupTimers) {
             if (this.powerupTimers[powerupType] > 0) {
                 this.powerupTimers[powerupType]--;
-                
-                // If timer reaches zero, deactivate the powerup
                 if (this.powerupTimers[powerupType] === 0) {
                     this.activePowerups[`${powerupType}_active`] = false;
-                    
-                    // Special handling for invincibility
                     if (powerupType === 'invincibility') {
                         this.core.setInvincible(false);
                     }
@@ -1193,11 +964,8 @@ class Game {
     }
     
     _drawPowerupTimers() {
-        // Clear existing timers
         const powerupTimersElement = document.getElementById('powerup-timers');
         powerupTimersElement.innerHTML = '';
-        
-        // Add active powerup timers
         for (const powerupType in this.powerupTimers) {
             if (this.powerupTimers[powerupType] > 0) {
                 const timerElement = document.createElement('div');
@@ -1205,9 +973,7 @@ class Game {
                 
                 const formattedType = powerupType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 const seconds = Math.ceil(this.powerupTimers[powerupType] / SETTINGS.FPS);
-                
-                // Add appropriate icon based on powerup type
-                let iconClass = 'fa-bolt'; // default
+                let iconClass = 'fa-bolt';
                 
                 switch(powerupType) {
                     case 'invincibility':
@@ -1240,11 +1006,7 @@ class Game {
         console.log('Game over called');
         this.state = 'game_over';
         this._playSound('game_over');
-        
-        // Create screen shake effect
         this.screenShake = new ScreenShake(10, 30);
-        
-        // Update UI - ensure proper screen toggling
         const gameScreen = document.getElementById('game-screen');
         const gameOverScreen = document.getElementById('game-over-screen');
         
@@ -1254,49 +1016,33 @@ class Game {
         
         if (gameOverScreen) {
             gameOverScreen.classList.remove('hidden');
-            
-            // Add fade-in animation
             setTimeout(() => {
                 gameOverScreen.style.opacity = '1';
                 gameOverScreen.style.pointerEvents = 'auto';
             }, 100);
-            
-            // Ensure restart button is visible
             const restartButton = document.getElementById('restart-button');
             if (restartButton) {
                 restartButton.style.display = 'block';
             }
         }
-        
-        // Update final score
         const finalScoreElement = document.getElementById('final-score');
         if (finalScoreElement && finalScoreElement.querySelector) {
             const scoreSpan = finalScoreElement.querySelector('span');
             if (scoreSpan) {
                 scoreSpan.textContent = this.score;
-                
-                // Add score animation
                 this._animateScoreCounter(scoreSpan, 0, this.score);
             }
         }
-        
-        // Hide the name input container completely since we already asked for it at the start
         const playerNameContainer = document.getElementById('player-name-container');
         if (playerNameContainer) {
             playerNameContainer.style.display = 'none';
         }
-        
-        // Try to auto-submit the score
         const autoSubmitted = this.autoSubmitScore ? this.autoSubmitScore() : false;
         console.log('Auto-submitted score:', autoSubmitted);
-        
-        // Always load high scores
         this._loadHighScores();
     }
-    
-    // Animate score counter for visual appeal
     _animateScoreCounter(element, start, end) {
-        const duration = 1500; // ms
+        const duration = 1500;
         const frameDuration = 1000 / 60;
         const totalFrames = Math.round(duration / frameDuration);
         const increment = (end - start) / totalFrames;
@@ -1325,67 +1071,46 @@ class Game {
             let highscores = await response.json();
             
             console.log('Loaded highscores (raw data):', highscores);
-            
-            // Ensure highscores is an array
             if (!Array.isArray(highscores)) {
                 console.error('Highscores is not an array:', typeof highscores);
                 highscores = [];
             }
-            
-            // Check for duplicate leaderboard elements
             const leaderboardElements = document.querySelectorAll('#leaderboard-entries');
             console.log('Number of leaderboard elements found:', leaderboardElements.length);
             if (leaderboardElements.length > 1) {
                 console.error('Multiple leaderboard elements found with the same ID!');
-                // Keep only the first one and remove others
                 for (let i = 1; i < leaderboardElements.length; i++) {
                     leaderboardElements[i].parentNode.removeChild(leaderboardElements[i]);
                 }
                 console.log('Removed duplicate leaderboard elements, keeping only the first one');
             }
-            
-            // Get the leaderboard container
             const leaderboardContainer = document.getElementById('leaderboard');
             if (leaderboardContainer) {
-                // Find the existing leaderboard entries div
                 const oldLeaderboardEntries = document.getElementById('leaderboard-entries');
                 if (oldLeaderboardEntries) {
-                    // Remove it completely
                     oldLeaderboardEntries.parentNode.removeChild(oldLeaderboardEntries);
                 }
-                
-                // Create a brand new leaderboard entries div
                 const newLeaderboardEntries = document.createElement('div');
                 newLeaderboardEntries.id = 'leaderboard-entries';
                 leaderboardContainer.appendChild(newLeaderboardEntries);
-                
-                // Deduplicate entries by name (keep highest score for each name)
                 const uniqueScores = {};
                 highscores.forEach(entry => {
                     if (!entry) return;
                     
                     const name = entry.name || 'Anonymous';
                     const score = entry.score || 0;
-                    
-                    // If we haven't seen this name yet, or this score is higher than the previous one
                     if (!uniqueScores[name] || score > uniqueScores[name]) {
                         uniqueScores[name] = score;
                     }
                 });
-                
-                // Convert back to array and sort
                 const uniqueHighscores = Object.entries(uniqueScores).map(([name, score]) => ({
                     name,
                     score
                 }));
                 
                 uniqueHighscores.sort((a, b) => b.score - a.score);
-                
-                // Get current player name for highlighting
                 const currentPlayerName = this.playerName || '';
                 console.log('Current player for highlighting:', currentPlayerName);
-                
-                // Add entries to the new leaderboard div
                 uniqueHighscores.forEach((entry, index) => {
                     const entryElement = document.createElement('div');
                     entryElement.className = 'leaderboard-entry';
@@ -1396,8 +1121,6 @@ class Game {
                     entryElement.innerHTML = `${index + 1}. ${entry.name}<span>${entry.score}</span>`;
                     newLeaderboardEntries.appendChild(entryElement);
                 });
-                
-                // If no entries, show a message
                 if (uniqueHighscores.length === 0) {
                     const emptyElement = document.createElement('div');
                     emptyElement.className = 'leaderboard-entry';
@@ -1411,11 +1134,8 @@ class Game {
     }
     
     async saveHighScore(name) {
-        // Use the name passed in, or the one from cookie, or 'Anonymous'
         const playerName = name || this.playerName || 'Anonymous';
         console.log('Saving high score for:', playerName, 'Score:', this.score);
-        
-        // Update the cookie with the player name
         this._setCookie('playerName', playerName, 30);
         
         try {
@@ -1433,8 +1153,6 @@ class Game {
             if (response.ok) {
                 this.autoSubmitted = true;
                 console.log('Auto-submitted score:', this.autoSubmitted);
-                
-                // Reload high scores after submission
                 await this._loadHighScores();
                 return true;
             } else {
@@ -1448,7 +1166,6 @@ class Game {
     }
     
     reset() {
-        // Reset game state
         this.state = 'playing';
         this.score = 0;
         this.enemies = [];
@@ -1479,32 +1196,20 @@ class Game {
         this.startPos = null;
         this.invalidWaveAttempt = null;
         this.lastEnemySpawnTime = Date.now();
-        
-        // Reset mobile controls if they exist
         if (window.mobileControls) {
             window.mobileControls.resetTouchCooldown();
         }
-        
-        // Reset universal controls if they exist
         if (window.universalControls) {
             window.universalControls.resetInteractionCooldown();
         }
-        
-        // Don't reset playerName to preserve it between games
-        
-        // Reset wave manager
         this.waveManager.currentWave = 0;
         this.waveManager.enemiesToSpawn = 0;
         this.waveManager.spawnedEnemiesCount = 0;
         this.waveManager.spawnTimer = 0;
         this.waveManager.waveActive = false;
         this.waveManager.enemySpeed = SETTINGS.ENEMY_SPEED;
-        this.waveManager.bossSpawned = false; // Reset bossSpawned on reset
-        
-        // Start first wave
+        this.waveManager.bossSpawned = false;
         this.waveManager.startNextWave();
-        
-        // Update UI
         const scoreElement = document.getElementById('score');
         if (scoreElement) scoreElement.textContent = '0';
         
@@ -1525,8 +1230,6 @@ class Game {
         
         const powerupTimersElement = document.getElementById('powerup-timers');
         if (powerupTimersElement) powerupTimersElement.innerHTML = '';
-        
-        // Show game screen, hide game over screen
         const gameOverScreen = document.getElementById('game-over-screen');
         const gameScreen = document.getElementById('game-screen');
         
@@ -1542,7 +1245,6 @@ class Game {
     }
     
     cycleWaveMode() {
-        // Cycle through wave modes: normal -> focused -> wide -> normal
         if (this.currentWaveMode === 'normal') {
             this.currentWaveMode = 'focused';
             document.getElementById('current-mode').textContent = 'Focused';
@@ -1553,8 +1255,6 @@ class Game {
             this.currentWaveMode = 'normal';
             document.getElementById('current-mode').textContent = 'Normal';
         }
-        
-        // Add visual feedback for mode change
         const modeDisplay = document.getElementById('wave-mode');
         modeDisplay.classList.add('mode-changed');
         setTimeout(() => {

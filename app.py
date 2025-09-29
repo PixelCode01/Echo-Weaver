@@ -1,34 +1,27 @@
-from flask import Flask, render_template, send_from_directory, jsonify, request, session
+from flask import Flask, render_template, render_template_string, send_from_directory, jsonify, request, session
 import os
 import logging
 import json
 import sys
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Secret key for sessions
+app.secret_key = os.urandom(24)
 
-# Set up detailed logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-# Ensure the highscores directory exists
 os.makedirs('highscores', exist_ok=True)
 HIGHSCORE_FILE = os.path.join('highscores', 'highscores.json')
-
-# Initialize highscores file if it doesn't exist
 if not os.path.exists(HIGHSCORE_FILE):
     with open(HIGHSCORE_FILE, 'w') as f:
         json.dump([], f)
 
 @app.route('/')
 def index():
-    """Serve the main game page"""
     logger.info("Serving index page")
     try:
         return render_template('index.html')
     except Exception as e:
         logger.error(f"Error rendering index.html: {e}")
-        # Fallback: return a simple HTML response
         return '''
         <!DOCTYPE html>
         <html>
@@ -66,23 +59,20 @@ def index():
 
 @app.route('/game')
 def game():
-    """Alternative route for the game"""
     logger.info("Serving game page via /game route")
     try:
         return render_template('index.html')
     except Exception as e:
         logger.error(f"Error rendering game page: {e}")
-        return index()  # Use the same fallback as index route
+        return index()
 
 @app.route('/guide')
 def guide():
-    """Serve the game guide page"""
     logger.info("Serving game guide page")
     try:
         return render_template('guide.html')
     except Exception as e:
         logger.error(f"Error rendering guide page: {e}")
-        # Fallback: return a simple HTML response
         return '''
         <!DOCTYPE html>
         <html>
@@ -113,16 +103,13 @@ def guide():
 
 @app.route('/play')
 def play_direct():
-    """Direct route to the WebAssembly game"""
     logger.info("Serving WebAssembly game via /play route")
     try:
-        # Check if the file exists
         full_path = os.path.join(os.getcwd(), 'static', 'pygbag', 'index.html')
         logger.info(f"Looking for file at: {full_path}")
         logger.info(f"File exists: {os.path.exists(full_path)}")
         
         response = send_from_directory('static/pygbag', 'index.html')
-        # Add required CORS headers for WebAssembly
         response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
         response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
         logger.info(f"Response headers: {dict(response.headers)}")
@@ -133,26 +120,21 @@ def play_direct():
 
 @app.route('/assets/<path:filename>')
 def assets(filename):
-    """Serve game assets (sounds, sprites)"""
     response = send_from_directory('assets', filename)
-    # Add Cache-Control header - cache assets for 1 day
     response.headers['Cache-Control'] = 'public, max-age=86400'
     return response
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
-    """Serve static files"""
     logger.info(f"Serving static file: {filename}")
     
     try:
-        # Check if the file exists
         full_path = os.path.join(os.getcwd(), 'static', filename)
         logger.info(f"Looking for static file at: {full_path}")
         logger.info(f"File exists: {os.path.exists(full_path)}")
         
         response = send_from_directory('static', filename)
         
-        # Cache other static files for 1 day
         response.headers['Cache-Control'] = 'public, max-age=86400'
             
         return response
@@ -163,9 +145,7 @@ def static_files(filename):
 @app.route('/api/highscores', methods=['GET'])
 def get_highscores():
     try:
-        # Check if file exists and has content
         if not os.path.exists(HIGHSCORE_FILE) or os.path.getsize(HIGHSCORE_FILE) == 0:
-            # Initialize with empty array if file doesn't exist or is empty
             with open(HIGHSCORE_FILE, 'w') as f:
                 json.dump([], f)
             return jsonify([])
@@ -173,16 +153,13 @@ def get_highscores():
         with open(HIGHSCORE_FILE, 'r') as f:
             content = f.read().strip()
             if not content:
-                # Return empty array if file is empty
                 return jsonify([])
                 
             highscores = json.loads(content)
             if not isinstance(highscores, list):
-                # If not a list, return empty array
                 logger.error(f"Highscores file contains invalid data: {highscores}")
                 return jsonify([])
         
-        # Deduplicate entries by name (keep highest score for each name)
         name_to_entry = {}
         for entry in highscores:
             if not isinstance(entry, dict):
@@ -197,34 +174,27 @@ def get_highscores():
             if name not in name_to_entry or score > name_to_entry[name]['score']:
                 name_to_entry[name] = {'name': name, 'score': score}
         
-        # Convert back to array format
         deduped_highscores = list(name_to_entry.values())
         
-        # Sort by score (highest first)
         deduped_highscores.sort(key=lambda x: x['score'], reverse=True)
         
-        # Keep only top 10
         deduped_highscores = deduped_highscores[:10]
         
-        # Update the file with deduplicated data
         with open(HIGHSCORE_FILE, 'w') as f:
             json.dump(deduped_highscores, f)
                 
         return jsonify(deduped_highscores)
     except Exception as e:
         logger.error(f"Error getting highscores: {e}")
-        # Return empty array on error
         return jsonify([])
 
 @app.route('/api/player', methods=['GET'])
 def get_player():
-    """Get the player's name from the session"""
     player_name = session.get('player_name', '')
     return jsonify({"name": player_name})
 
 @app.route('/api/player', methods=['POST'])
 def save_player():
-    """Save the player's name to the session"""
     data = request.json
     name = data.get('name', 'Anonymous')
     session['player_name'] = name
@@ -237,7 +207,6 @@ def save_highscore():
         name = data.get('name', session.get('player_name', 'Anonymous'))
         score = data.get('score', 0)
         
-        # Ensure highscores file exists and contains valid JSON
         if not os.path.exists(HIGHSCORE_FILE) or os.path.getsize(HIGHSCORE_FILE) == 0:
             with open(HIGHSCORE_FILE, 'w') as f:
                 json.dump([], f)
@@ -257,11 +226,9 @@ def save_highscore():
                 logger.error("Invalid JSON in highscores file")
                 highscores = []
         
-        # Check if player already has a score
         player_exists = False
         player_index = -1
         
-        # First, remove any duplicate entries for this player
         filtered_highscores = []
         for entry in highscores:
             if isinstance(entry, dict) and entry.get('name') == name:
@@ -274,15 +241,12 @@ def save_highscore():
         
         highscores = filtered_highscores
         
-        # Update existing player's score if it's higher
         if player_exists:
             if score > highscores[player_index].get('score', 0):
                 highscores[player_index]['score'] = score
         else:
-            # Add new player
             highscores.append({"name": name, "score": score})
         
-        # Sort and keep top 10
         def safe_get_score(item):
             if isinstance(item, dict):
                 return item.get('score', 0)
@@ -301,12 +265,10 @@ def save_highscore():
 
 @app.route('/health')
 def health_check():
-    """Health check endpoint"""
     return jsonify({'status': 'healthy'})
 
 @app.route('/test-universal-controls')
 def test_universal_controls():
-    """Test route to check if universal_controls.js is accessible"""
     logger.info("Testing universal_controls.js accessibility")
     try:
         full_path = os.path.join(os.getcwd(), 'static', 'js', 'universal_controls.js')
@@ -315,7 +277,7 @@ def test_universal_controls():
         
         if os.path.exists(full_path):
             with open(full_path, 'r') as f:
-                content = f.read(100)  # Read first 100 characters
+                content = f.read(100)
             return jsonify({
                 'file_exists': True,
                 'file_size': os.path.getsize(full_path),
@@ -334,7 +296,6 @@ def test_universal_controls():
 
 @app.route('/diagnose')
 def diagnose():
-    """Diagnostic route to check system status"""
     logger.info("Running diagnostics")
     
     diagnostic_info = {
@@ -361,7 +322,6 @@ def diagnose():
         }
     }
     
-    # Try to render a simple template to test template system
     try:
         test_template = render_template_string('<h1>Template Test</h1>')
         diagnostic_info['template_system_working'] = True
@@ -373,7 +333,6 @@ def diagnose():
 
 @app.route('/wasm-test')
 def wasm_test():
-    """Serve a simple WebAssembly test page"""
     logger.info("Serving WebAssembly test page")
     response = send_from_directory('static', 'wasm_test.html')
     response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
@@ -383,13 +342,11 @@ def wasm_test():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    """Handle 404 errors by returning the game page"""
     logger.info(f"404 error for path: {request.path}")
     try:
-        return render_template('index.html'), 200  # Return the game page instead of 404
+        return render_template('index.html'), 200
     except Exception as template_error:
         logger.error(f"Error rendering template in 404 handler: {template_error}")
-        # Fallback to simple HTML response
         return '''
         <!DOCTYPE html>
         <html>
@@ -421,24 +378,19 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def server_error(e):
-    """Custom 500 error page"""
     return jsonify({'error': 'Server error occurred', 'message': str(e)}), 500
 
 @app.before_request
 def log_request():
-    """Log incoming requests for debugging"""
     app.logger.debug(f"Request: {request.path} from {request.remote_addr}")
 
 @app.after_request
 def add_cors_headers(response):
-    """Add CORS headers to all responses"""
-    # Only add WebAssembly CORS headers for specific routes
     if '/pygbag/' in request.path or '/play' in request.path or '/wasm-test' in request.path:
         response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
         response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
         response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
     else:
-        # For regular content, add standard CORS headers
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
@@ -446,7 +398,6 @@ def add_cors_headers(response):
 
 @app.route('/static/pygbag/<path:filename>')
 def pygbag_files(filename):
-    """Serve pygbag files with special headers"""
     logger.info(f"Serving pygbag file: {filename}")
     try:
         full_path = os.path.join(os.getcwd(), 'static', 'pygbag', filename)
@@ -454,7 +405,6 @@ def pygbag_files(filename):
         logger.info(f"File exists: {os.path.exists(full_path)}")
         
         response = send_from_directory('static/pygbag', filename)
-        # Add CORS headers for WebAssembly content
         response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
         response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
         response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
@@ -469,5 +419,4 @@ def pygbag_files(filename):
         raise
 
 if __name__ == '__main__':
-    # For local development
     app.run(debug=True, host='0.0.0.0', port=5000)

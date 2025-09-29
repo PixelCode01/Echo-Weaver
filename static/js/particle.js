@@ -1,6 +1,3 @@
-// Particle classes for visual effects
-
-// Basic particle for explosions and effects
 class Particle {
     constructor(position, color, size = 3) {
         this.position = new Vector(position.x, position.y);
@@ -39,7 +36,6 @@ class Particle {
     }
 }
 
-// Background particle for ambient effects
 class BackgroundParticle {
     constructor() {
         this.position = new Vector(
@@ -59,8 +55,6 @@ class BackgroundParticle {
         if (!this.active) return;
         
         this.position = this.position.add(this.velocity);
-        
-        // Wrap around screen edges
         if (this.position.x < 0) this.position.x = SETTINGS.WIDTH;
         if (this.position.x > SETTINGS.WIDTH) this.position.x = 0;
         if (this.position.y < 0) this.position.y = SETTINGS.HEIGHT;
@@ -77,14 +71,13 @@ class BackgroundParticle {
     }
 }
 
-// Damage number display
 class DamageNumber {
     constructor(position, value, color = SETTINGS.WHITE, isCritical = false) {
         this.position = new Vector(position.x, position.y);
         this.value = value;
         this.color = isCritical ? SETTINGS.YELLOW : color;
         this.isCritical = isCritical;
-        this.velocity = new Vector(randomFloat(-0.5, 0.5), -2); // Float upwards
+    this.velocity = new Vector(randomFloat(-0.5, 0.5), -2);
         this.lifetime = SETTINGS.HIT_NUMBER_LIFETIME;
         this.initialLifetime = this.lifetime;
         this.fontSize = isCritical ? SETTINGS.FONT_SIZE_SCORE + 10 : SETTINGS.FONT_SIZE_SCORE;
@@ -107,23 +100,18 @@ class DamageNumber {
         
         const alpha = this.lifetime / this.initialLifetime;
         ctx.globalAlpha = alpha;
-        
-        // Draw with shadow for critical hits
         if (this.isCritical) {
             ctx.shadowColor = SETTINGS.YELLOW;
             ctx.shadowBlur = 10;
         }
         
         drawText(ctx, this.value.toString(), this.fontSize, this.position.x, this.position.y, this.color);
-        
-        // Reset shadow
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
     }
 }
 
-// Impact effect for explosions
 class ImpactEffect {
     constructor(position, color) {
         this.position = new Vector(position.x, position.y);

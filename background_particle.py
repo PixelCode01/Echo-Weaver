@@ -14,8 +14,6 @@ class BackgroundParticle(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.move_ip(self.velocity)
-
-        # Wrap around screen
         if self.rect.left > WIDTH: self.rect.right = 0
         if self.rect.right < 0: self.rect.left = WIDTH
         if self.rect.top > HEIGHT: self.rect.bottom = 0

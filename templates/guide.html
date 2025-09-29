@@ -9,198 +9,437 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
     <style>
-        /* Reset body and html for guide page - more specific to override main CSS */
-        html.guide-page, body.guide-page {
-            overflow: auto !important;
-            height: auto !important;
-            position: static !important;
-            width: 100% !important;
+        html.guide-page,
+        body.guide-page {
+            min-height: 100%;
+            background: radial-gradient(circle at top, #101830 0%, #05060d 55%, #010104 100%);
+            overflow-y: auto;
+            color: #f0f6ff;
         }
-        
-        /* Ensure the guide container can scroll */
+
         .guide-container {
-            overflow: visible !important;
-            position: relative !important;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: clamp(24px, 4vw, 48px);
         }
-        
-        /* Debug: Add visible border to see if styles are applied */
-        body.guide-page::before {
-            content: 'GUIDE PAGE STYLES LOADED';
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: red;
-            color: white;
-            padding: 5px;
-            z-index: 9999;
-            font-size: 12px;
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: clamp(32px, 5vw, 56px);
         }
-        
-        .guide-container { 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background: #000; 
-            color: #fff; 
-            min-height: 100vh; 
-            position: relative;
-            z-index: 1;
-            overflow: visible;
+
+        .guide-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 3.4rem);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: #33f3ff;
+            text-shadow: 0 0 18px rgba(51, 243, 255, 0.45);
         }
-        .guide-header { text-align: center; margin-bottom: 40px; }
-        .guide-header h1 { color: #00ff00; font-size: 2.5em; margin-bottom: 10px; }
-        .guide-section { margin-bottom: 30px; padding: 20px; background: rgba(0, 255, 255, 0.1); border-radius: 10px; border: 1px solid #00ffff; }
-        .guide-section h2 { color: #00ffff; margin-bottom: 15px; font-size: 1.5em; }
-        .guide-section h3 { color: #ff00ff; margin: 15px 0 10px 0; font-size: 1.2em; }
-        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0; }
-        .control-item { background: rgba(255, 0, 255, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #ff00ff; }
-        .control-item strong { color: #ffff00; }
-        .enemy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 15px 0; }
-        .enemy-item { background: rgba(255, 0, 85, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #ff0055; }
-        .enemy-item h4 { color: #ff0055; margin-bottom: 8px; }
-        .powerup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
-        .powerup-item { background: rgba(0, 255, 0, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #00ff00; }
-        .powerup-item h4 { color: #00ff00; margin-bottom: 8px; }
-        .back-button { display: inline-block; background: #00ff00; color: #000; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; transition: all 0.3s ease; }
-        .back-button:hover { background: #00cc00; transform: scale(1.05); }
-        .tip-box { background: rgba(255, 255, 0, 0.1); border: 1px solid #ffff00; padding: 15px; border-radius: 8px; margin: 15px 0; }
-        .tip-box h4 { color: #ffff00; margin-bottom: 10px; }
-        .score-ranges { background: rgba(0, 255, 255, 0.1); border: 1px solid #00ffff; padding: 15px; border-radius: 8px; margin: 15px 0; }
-        .score-ranges h4 { color: #00ffff; margin-bottom: 10px; }
-        .score-range-item { margin: 8px 0; padding: 5px 0; }
-        @media (max-width: 768px) { .control-grid { grid-template-columns: 1fr; } .guide-container { padding: 10px; } }
+
+        .guide-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: rgba(240, 246, 255, 0.72);
+            margin-bottom: 24px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 999px;
+            background: rgba(51, 243, 255, 0.12);
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(51, 243, 255, 0.4);
+            transition: transform 0.25s ease, background 0.25s ease;
+            font-weight: 600;
+        }
+
+        .back-button:hover,
+        .back-button:focus-visible {
+            background: rgba(51, 243, 255, 0.24);
+            transform: translateY(-2px);
+        }
+
+        .guide-section {
+            margin-bottom: clamp(28px, 4vw, 48px);
+            padding: clamp(20px, 3vw, 32px);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(18, 28, 48, 0.85) 0%, rgba(9, 14, 24, 0.85) 100%);
+            border: 1px solid rgba(51, 243, 255, 0.12);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+            margin-bottom: 18px;
+            color: #33f3ff;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title span {
+            font-size: 1.4em;
+        }
+
+        .section-body {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: rgba(240, 246, 255, 0.82);
+        }
+
+        .section-body strong {
+            color: #fff;
+        }
+
+        .chip-set {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .two-column {
+            display: grid;
+            gap: clamp(16px, 2vw, 24px);
+        }
+
+        .two-column.desktop-mobile {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .card {
+            border-radius: 16px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .hud-callout {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .hud-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 16px;
+            align-items: start;
+            background: rgba(15, 24, 42, 0.68);
+            border-radius: 14px;
+            padding: 14px 18px;
+            border: 1px solid rgba(51, 243, 255, 0.18);
+        }
+
+        .hud-label {
+            font-weight: 600;
+            color: #33f3ff;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .list-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            margin-top: 18px;
+        }
+
+        .list-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .list-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .callout {
+            border-radius: 14px;
+            padding: 18px;
+            background: rgba(255, 214, 102, 0.14);
+            border: 1px solid rgba(255, 214, 102, 0.35);
+            margin-top: 18px;
+        }
+
+        .callout h4 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #ffd666;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .footnote {
+            text-align: center;
+            margin-top: clamp(36px, 6vw, 64px);
+        }
+
+        .play-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 28px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ff3ec9 0%, #5b65ff 100%);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            box-shadow: 0 12px 28px rgba(91, 101, 255, 0.35);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .play-button:hover,
+        .play-button:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(91, 101, 255, 0.45);
+        }
+
+        @media (max-width: 600px) {
+            .hud-item {
+                grid-template-columns: 1fr;
+            }
+
+            .hud-label {
+                font-size: 0.85rem;
+            }
+
+            .card h3 {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="guide-page">
     <div class="guide-container">
         <div class="guide-header">
-            <h1>ECHO WEAVER</h1>
-            <h2>How to Play</h2>
-            <a href="/" class="back-button">← Back to Game</a>
+            <h1 class="guide-title">Echo Weaver</h1>
+            <p class="guide-subtitle">A quick field manual for keeping the core alive and weaving the loudest echoes.</p>
+            <a href="/" class="back-button" aria-label="Back to game">
+                <span>Back</span>
+                <span>Return to the core</span>
+            </a>
         </div>
-        <div class="guide-section">
-            <h2>🎮 Gameplay Overview</h2>
-            <p>Your goal is to defend the glowing core in the center by creating powerful sound waves. Enemies will approach from all sides—use your waves to destroy them before they reach the core!</p>
-        </div>
-        <div class="guide-section">
-            <h2>🕹️ Controls</h2>
-            <div class="control-grid">
-                <div class="control-item"><strong>Mouse:</strong> Click and drag to draw a line, release to unleash a wave.</div>
-                <div class="control-item"><strong>Touch:</strong> Tap and drag to draw a line, release to unleash a wave.</div>
-                <div class="control-item"><strong>1, 2, 3:</strong> Switch between wave modes (Normal, Focused, Wide).</div>
-                <div class="control-item"><strong>Triple-tap (mobile):</strong> Cycle through wave modes.</div>
-                <div class="control-item"><strong>SPACE:</strong> Echo Burst (clears nearby enemies).</div>
-                <div class="control-item"><strong>Double-tap core (mobile):</strong> Echo Burst.</div>
-            </div>
-            <div class="tip-box"><h4>Tip</h4><p>On mobile, you must wait for the touch cooldown bar to fill before drawing again. The cooldown increases as your score rises.</p></div>
-        </div>
-        <div class="guide-section">
-            <h2>📊 Progress Bars</h2>
-            <ul>
-                <li><strong>Fever Meter (bottom left):</strong> <span style="color: #ff00ff;">Purple bar</span> that fills as you build combos by defeating enemies quickly. When full, you enter Fever Mode for extra power!</li>
-                <li><strong>Echo Burst Cooldown (bottom left):</strong> <span style="color: #00ffff;">Cyan bar</span> that shows when you can use your Echo Burst again.</li>
-                <li><strong>Touch Cooldown (all devices):</strong> <span style="color: #ffff00;">Yellow bar</span> that shows when you can draw the next wave. The bar fills up as you wait.</li>
-            </ul>
-        </div>
-        <div class="guide-section">
-            <h2>🌊 Wave Modes</h2>
-            <div class="control-grid">
-                <div class="control-item"><strong>Normal:</strong> Balanced damage and width.</div>
-                <div class="control-item"><strong>Focused:</strong> High damage, narrow width—great for tough enemies.</div>
-                <div class="control-item"><strong>Wide:</strong> Lower damage, but hits a larger area—great for groups.</div>
-            </div>
-        </div>
-        <div class="guide-section">
-            <h2>👾 Enemy Types (by Score Range)</h2>
-            <div class="score-ranges">
-                <h4>Enemy Progression</h4>
-                <div class="score-range-item"><strong>0-10:</strong> Basic Enemy – Simple movement</div>
-                <div class="score-range-item"><strong>10-20:</strong> Zigzag Enemy – Moves in zigzag pattern</div>
-                <div class="score-range-item"><strong>20-45:</strong> Ghost Enemy – Requires multiple hits</div>
-                <div class="score-range-item"><strong>45-90:</strong> Charger Enemy – Charges at high speed</div>
-                <div class="score-range-item"><strong>90-150:</strong> Splitter Enemy – Splits into smaller enemies</div>
-                <div class="score-range-item"><strong>150-220:</strong> Shielded Enemy – Has a protective shield</div>
-                <div class="score-range-item"><strong>220-300:</strong> Teleporter Enemy – Teleports randomly</div>
-                <div class="score-range-item"><strong>300-400:</strong> Reflector Enemy – Reflects waves back</div>
-                <div class="score-range-item"><strong>400-500:</strong> Swarm Enemy – Spawns minions</div>
-                <div class="score-range-item"><strong>500-600:</strong> TimeBomber Enemy – Explodes after timer</div>
-                <div class="score-range-item"><strong>600-700:</strong> Vortex Enemy – Creates pulling vortex</div>
-                <div class="score-range-item"><strong>700-800:</strong> Speedster Enemy – Very fast movement</div>
-                <div class="score-range-item"><strong>800-900:</strong> SlowTank Enemy – Slow but armored</div>
-                <div class="score-range-item"><strong>900+:</strong> Boss Enemy – Large, powerful enemies</div>
-            </div>
-        </div>
-        <div class="guide-section">
-            <h2>⚡ Power-ups</h2>
-            <div class="powerup-grid">
-                <div class="powerup-item"><h4>🛡️ Invincibility</h4><p>Temporary invincibility for the core.</p></div>
-                <div class="powerup-item"><h4>🚀 Wave Boost</h4><p>Increases wave damage and speed.</p></div>
-                <div class="powerup-item"><h4>⏰ Slow Time</h4><p>Slows down all enemies.</p></div>
-                <div class="powerup-item"><h4>💥 Screen Clear</h4><p>Destroys all enemies on screen.</p></div>
-                <div class="powerup-item"><h4>📏 Wide Waves</h4><p>Increases wave width.</p></div>
-                <div class="powerup-item"><h4>⏸️ Time Stop</h4><p>Freezes all enemies briefly.</p></div>
-                <div class="powerup-item"><h4>🧲 Wave Magnet</h4><p>Waves attract enemies.</p></div>
-                <div class="powerup-item"><h4>⚡ Chain Reaction</h4><p>Enemy explosions chain to others.</p></div>
-                <div class="powerup-item"><h4>✨ Multi Wave</h4><p>Creates multiple waves at once.</p></div>
-            </div>
-        </div>
-        <div class="guide-section">
-            <h2>🏆 Scoring, Combos & Achievements</h2>
-            <ul>
-                <li>Defeat enemies to earn points. Bosses give extra points!</li>
-                <li>Destroying enemies quickly builds combos for bonus points and fills the Fever Meter.</li>
-                <li>Critical hits and powerups can boost your score even more.</li>
-                <li>Unlock achievements for high combos, defeating bosses, and surviving longer!</li>
-            </ul>
-        </div>
-        <div class="guide-section">
-            <h2>💡 Tips & Strategies</h2>
-            <ul>
-                <li>Use Focused mode for tough enemies and Wide mode for groups.</li>
-                <li>Save Echo Burst for emergencies when you're surrounded.</li>
-                <li>Collect power-ups as soon as you see them—they can turn the tide!</li>
-                <li>On mobile, watch the cooldown bar and plan your moves.</li>
-                <li>Keep an eye on the Fever Meter for big damage boosts.</li>
-            </ul>
-        </div>
-        <div style="text-align: center; margin-top: 40px;">
-            <a href="/" class="back-button">🎮 Start Playing Now!</a>
-        </div>
-        
 
+        <section class="guide-section">
+            <h2 class="section-title">Mission Brief</h2>
+            <div class="section-body">
+                <p>Echo Weaver is a survival arena where every line you draw becomes a destructive sound wave. Enemies converge on the crystalline core at the center of the arena—if they reach it, the run ends. Stay in motion, chain eliminations, and ride the rhythm of the battlefield for as long as you can.</p>
+                <div class="chip-set" aria-label="Key objectives">
+                    <span class="chip">Protect the core</span>
+                    <span class="chip">Draw → Release → Destroy</span>
+                    <span class="chip">Collect power-ups</span>
+                    <span class="chip">Climb the leaderboard</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Controls at a Glance</h2>
+            <div class="two-column desktop-mobile">
+                <div class="card">
+                    <h3>Desktop</h3>
+                    <ul class="section-body">
+                        <li><strong>Click &amp; Drag:</strong> Sketch a path for your next wave, release to fire.</li>
+                        <li><strong>1 / 2 / 3:</strong> Swap between Normal, Focused, and Wide wave modes.</li>
+                        <li><strong>Spacebar:</strong> Trigger Echo Burst—an emergency pulse that nukes nearby threats.</li>
+                        <li><strong>Esc or P:</strong> Pause to catch your breath and strategize.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Mobile &amp; Tablet</h3>
+                    <ul class="section-body">
+                        <li><strong>Tap &amp; Drag:</strong> Draw a wave path with your finger and release to detonate.</li>
+                        <li><strong>Triple Tap:</strong> Anywhere in the arena to cycle through wave modes.</li>
+                        <li><strong>Echo Burst Button:</strong> Tap the glowing burst icon near the HUD to clear space.</li>
+                        <li><strong>Cool-down Bar:</strong> The yellow bar next to the burst button shows when you can draw again. Higher scores lengthen the cool-down slightly.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="callout" role="note">
+                <h4>Prime tip</h4>
+                <p>Short, precise lines are faster to cast. Use them to pick off stragglers while your Echo Burst recharges.</p>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Reading the HUD</h2>
+            <div class="section-body">
+                <p>Your interface keeps you one step ahead. Here’s how to glance-and-go:</p>
+                <div class="hud-callout">
+                    <div class="hud-item">
+                        <span class="hud-label">Fever Meter</span>
+                        <p>Located bottom-left. Every consecutive kill pumps the bar. Once full, you enter Fever Mode—waves hit harder, glow brighter, and feel incredible.</p>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">Echo Burst Cooldown</span>
+                        <p>Cyan bar under the Fever Meter. When it fills, you can pop another defensive blast. Don’t waste it; burst when you’re boxed in.</p>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">Touch Cooldown</span>
+                        <p>Visible on every device near the HUD. It shows how soon you can sketch your next wave. Keep an eye on it when the arena gets hectic.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Wave Modes</h2>
+            <div class="section-body">
+                <p>Swapping modes mid-fight is vital. Each one rewrites how your line becomes damage:</p>
+                <div class="list-grid">
+                    <div class="list-card">
+                        <h4>Normal</h4>
+                        <p>Balanced reach and damage. Default choice for most encounters.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Focused</h4>
+                        <p>Narrow beam, heavy punch. Aim at elites, shielded enemies, or bosses when you need raw power.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Wide</h4>
+                        <p>Stretches across the arena with lower damage per hit. Use it to soften swarms, then clean up with Normal or Burst.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Enemy Field Guide</h2>
+            <div class="section-body">
+                <p>The longer you survive, the stranger the opposition gets. Expect the mix below to escalate as your score rises:</p>
+                <div class="list-grid">
+                    <div class="list-card">
+                        <h4>Standard Hostiles</h4>
+                        <p>Basic, Zigzag, and Speedster units rush the core with predictable patterns. Practice tracing lines that clip multiple targets at once.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Durability Checks</h4>
+                        <p>Ghosts and Shielded enemies shrug off single hits. Focused mode or chain reactions from explosions finish them faster.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Disruptors</h4>
+                        <p>Teleporters blink away, Reflectors bounce waves back, and Vortex units pull your path off-course. Stay adaptive—short lines give you time to react.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Swarm Architects</h4>
+                        <p>Splitter, Swarm, and TimeBomber enemies flood the field with extra bodies or delayed explosions. Keep an Echo Burst in reserve.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Boss Threats</h4>
+                        <p>Massive health pools, unique attacks, and score jackpots. Expect them every few waves—switch between Focused mode and Burst to stay in control.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Power-Up Cache</h2>
+            <div class="section-body">
+                <p>Power-ups float into the arena at clutch moments. Tap or drag across them as fast as possible—each one lasts about five seconds unless noted.</p>
+                <div class="list-grid">
+                    <div class="list-card">
+                        <h4>Core Barrier</h4>
+                        <p>Makes the core invulnerable for a brief window. Perfect during swarms or boss phases.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Wave Boost</h4>
+                        <p>Pumps damage and speed. Pair with Focused mode to shred elites.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Slow Time</h4>
+                        <p>Slows enemies to a crawl. Ideal chance to reposition and stack combos.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Echo Nova</h4>
+                        <p>Instantly wipes the board. Use it when your burst is down and the screen is chaos.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Wide Band</h4>
+                        <p>Inflates wave width. Great for securing pick-ups and catching flankers.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Time Stop</h4>
+                        <p>Freezes the field outright. Stack waves while enemies are frozen to create huge chains.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Wave Magnet</h4>
+                        <p>Pulls enemies into your lines. Combine with Wide mode to sweep entire clusters.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Chain Reaction</h4>
+                        <p>Turns every explosion into a cascade. Drop lines through clustered foes for fireworks.</p>
+                    </div>
+                    <div class="list-card">
+                        <h4>Multi Wave</h4>
+                        <p>Instantly fires several waves. Use it the moment you pick it up for maximum coverage.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Score, Combos &amp; Achievements</h2>
+            <div class="section-body">
+                <p>Points are only part of the high-score story—style matters too.</p>
+                <ul>
+                    <li><strong>Combos:</strong> Every enemy defeated adds to your chain. Drop a wave too late and the combo decays, so keep lines short and frequent.</li>
+                    <li><strong>Fever Mode:</strong> Triggered at full combo charge. Expect a double-damage surge and an electric glow over the arena.</li>
+                    <li><strong>Critical Hits:</strong> Random spikes of extra damage keep scores rising; chain reaction waves boost your odds.</li>
+                    <li><strong>Achievements:</strong> Boss Slayer, Combo Master, Wave Master, and Survivor award bonus flair on the leaderboard.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="guide-section">
+            <h2 class="section-title">Battlefield Wisdom</h2>
+            <div class="section-body">
+                <ul>
+                    <li>Draw diagonals that intersect multiple approach lanes—each wave can wipe more than one threat.</li>
+                    <li>Stagger Echo Burst and power-up usage. You always want one escape tool cooling down, not both.</li>
+                    <li>Rotate wave modes often. Starting a swarm with Wide mode and finishing with Focused prevents overkill waste.</li>
+                    <li>Keep moving your pointer or finger; standing still encourages enemies to cluster on the core.</li>
+                    <li>Boss waves reward patience. Watch for telegraphed attacks, then carve through exposed weak points.</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="footnote">
+            <a href="/" class="play-button" aria-label="Start playing Echo Weaver">
+                Start the next run
+            </a>
+        </div>
     </div>
-    
-    <script>
-        // Debug script to check CSS conflicts
-        console.log('Guide page loaded');
-        
-        // Force enable scrolling
-        document.body.style.overflow = 'auto';
-        document.documentElement.style.overflow = 'auto';
-        document.body.style.height = 'auto';
-        document.documentElement.style.height = 'auto';
-        
-        // Check if body has guide-page class
-        console.log('Body classes:', document.body.className);
-        console.log('Body overflow:', getComputedStyle(document.body).overflow);
-        console.log('Body height:', getComputedStyle(document.body).height);
-        
-        // Check if scrolling is possible
-        console.log('Document height:', document.documentElement.scrollHeight);
-        console.log('Window height:', window.innerHeight);
-        console.log('Can scroll:', document.documentElement.scrollHeight > window.innerHeight);
-        
-        // Force scroll test
-        setTimeout(() => {
-            console.log('Attempting to scroll to bottom...');
-            window.scrollTo(0, document.documentElement.scrollHeight);
-        }, 1000);
-        
-        // Additional scroll fix
-        window.addEventListener('load', () => {
-            document.body.style.overflow = 'auto';
-            document.documentElement.style.overflow = 'auto';
-        });
-    </script>
 </body>
 </html> 

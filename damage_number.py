@@ -9,14 +9,14 @@ class DamageNumber(pygame.sprite.Sprite):
         self.color = color
         self.is_critical = is_critical
         self.position = pygame.math.Vector2(position)
-        self.velocity = pygame.math.Vector2(random.uniform(-0.5, 0.5), -2) # Float upwards
-        self.lifetime = HIT_NUMBER_LIFETIME # frames
+        self.velocity = pygame.math.Vector2(random.uniform(-0.5, 0.5), -2)
+        self.lifetime = HIT_NUMBER_LIFETIME
         self.initial_lifetime = self.lifetime
 
         self.font_size = FONT_SIZE_SCORE if not is_critical else FONT_SIZE_SCORE + 10
-        self.font = pygame.font.Font(None, self.font_size) # Use default font for now
+        self.font = pygame.font.Font(None, self.font_size)
 
-        self._update_image() # Initial image creation
+        self._update_image()
 
     def _update_image(self):
         text_surface = self.font.render(str(self.value), True, self.color)
@@ -32,4 +32,4 @@ class DamageNumber(pygame.sprite.Sprite):
         self.lifetime -= 1
         if self.lifetime <= 0:
             self.kill()
-        self._update_image() # Update image for fading and position
+        self._update_image()

@@ -3,29 +3,23 @@ import os
 import logging
 
 app = Flask(__name__)
-
-# Set up basic logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @app.route('/')
 def index():
-    """Serve the main landing page"""
     return render_template('index.html')
 
 @app.route('/game')
 def game():
-    """Redirect to the main game page"""
     return redirect('/')
 
 @app.route('/play')
 def play_direct():
-    """Serve the simple HTML5 game version"""
     return render_template('play.html')
 
 @app.route('/assets/<path:filename>')
 def assets(filename):
-    """Serve game assets (sounds, sprites)"""
     try:
         return send_from_directory('assets', filename)
     except Exception as e:
@@ -34,7 +28,6 @@ def assets(filename):
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
-    """Serve static files"""
     try:
         return send_from_directory('static', filename)
     except Exception as e:
@@ -43,7 +36,6 @@ def static_files(filename):
 
 @app.route('/api/highscore', methods=['GET'])
 def get_highscore():
-    """API endpoint to get high score"""
     try:
         with open('highscore.txt', 'r') as f:
             score = int(f.read().strip())
@@ -53,19 +45,16 @@ def get_highscore():
 
 @app.route('/api/highscore', methods=['POST'])
 def update_highscore():
-    """API endpoint to update high score"""
     try:
         data = request.get_json()
         new_score = int(data.get('score', 0))
         
-        # Read current high score
         try:
             with open('highscore.txt', 'r') as f:
                 current_score = int(f.read().strip())
         except:
             current_score = 0
             
-        # Update if new score is higher
         if new_score > current_score:
             with open('highscore.txt', 'w') as f:
                 f.write(str(new_score))
@@ -78,12 +67,10 @@ def update_highscore():
 
 @app.route('/health')
 def health_check():
-    """Health check endpoint"""
     return jsonify({'status': 'healthy'})
 
 @app.errorhandler(404)
 def page_not_found(e):
-    """Custom 404 error page"""
     return render_template('index.html'), 200
 
 if __name__ == '__main__':

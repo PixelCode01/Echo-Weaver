@@ -21,7 +21,7 @@ class Leaderboard:
     def add_score(self, name, score):
         self.scores.append({'name': name, 'score': score})
         self.scores.sort(key=lambda x: x['score'], reverse=True)
-        self.scores = self.scores[:10] # Keep top 10
+        self.scores = self.scores[:10]
         self.save_scores()
 
     def get_scores(self):

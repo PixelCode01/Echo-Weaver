@@ -1,6 +1,3 @@
-// Utility functions for the game
-
-// Vector class for 2D vector operations
 class Vector {
     constructor(x, y) {
         this.x = x;
@@ -30,14 +27,13 @@ class Vector {
     }
 
     distanceTo(v) {
-        // Safety check for undefined or null vectors
         if (!v || typeof v.x === 'undefined' || typeof v.y === 'undefined' || 
             typeof this.x === 'undefined' || typeof this.y === 'undefined') {
             console.error('Vector.distanceTo called with invalid parameters:', {
                 this: { x: this.x, y: this.y },
                 v: v ? { x: v.x, y: v.y } : 'null/undefined'
             });
-            return Infinity; // Return a safe default value
+            return Infinity;
         }
         return Math.sqrt(Math.pow(this.x - v.x, 2) + Math.pow(this.y - v.y, 2));
     }
@@ -56,7 +52,6 @@ class Vector {
     }
 }
 
-// Draw text on canvas
 function drawText(ctx, text, size, x, y, color = SETTINGS.WHITE, align = 'center') {
     ctx.font = `${size}px Orbitron, sans-serif`;
     ctx.fillStyle = color;
@@ -65,30 +60,23 @@ function drawText(ctx, text, size, x, y, color = SETTINGS.WHITE, align = 'center
     ctx.fillText(text, x, y);
 }
 
-// Generate a random integer between min and max (inclusive)
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Generate a random float between min and max
 function randomFloat(min, max) {
     return Math.random() * (max - min) + min;
 }
 
-// Convert hex color to RGB
 function hexToRgb(hex) {
-    // Remove the hash if present
     hex = hex.replace(/^#/, '');
     
-    // Parse the hex values
     let r, g, b;
     if (hex.length === 3) {
-        // For shorthand like #ABC
         r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
         g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
         b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
     } else {
-        // For full form like #AABBCC
         r = parseInt(hex.substring(0, 2), 16);
         g = parseInt(hex.substring(2, 4), 16);
         b = parseInt(hex.substring(4, 6), 16);
@@ -97,17 +85,14 @@ function hexToRgb(hex) {
     return `${r}, ${g}, ${b}`;
 }
 
-// Check if a point is inside a circle
 function pointInCircle(point, circle) {
     return Math.pow(point.x - circle.x, 2) + Math.pow(point.y - circle.y, 2) <= Math.pow(circle.radius, 2);
 }
 
-// Draw a grid on the canvas
 function drawGrid(ctx, offset = { x: 0, y: 0 }) {
     ctx.strokeStyle = SETTINGS.GRID_COLOR;
     ctx.lineWidth = 1;
 
-    // Draw vertical lines
     for (let x = 0; x < SETTINGS.WIDTH; x += SETTINGS.GRID_SIZE) {
         ctx.beginPath();
         ctx.moveTo(x + offset.x, 0);
@@ -115,7 +100,6 @@ function drawGrid(ctx, offset = { x: 0, y: 0 }) {
         ctx.stroke();
     }
 
-    // Draw horizontal lines
     for (let y = 0; y < SETTINGS.HEIGHT; y += SETTINGS.GRID_SIZE) {
         ctx.beginPath();
         ctx.moveTo(0, y + offset.y);
@@ -124,7 +108,6 @@ function drawGrid(ctx, offset = { x: 0, y: 0 }) {
     }
 }
 
-// Create a message display system
 class MessageDisplay {
     constructor() {
         this.messages = [];
@@ -163,7 +146,6 @@ class MessageDisplay {
     }
 }
 
-// Combo manager
 class ComboManager {
     constructor() {
         this.comboCount = 0;
@@ -196,7 +178,6 @@ class ComboManager {
     }
 }
 
-// Fever manager
 class FeverManager {
     constructor() {
         this.charge = 0;
@@ -233,7 +214,6 @@ class FeverManager {
     }
 }
 
-// Screen shake effect
 class ScreenShake {
     constructor(intensity = 5, duration = 20) {
         this.intensity = intensity;

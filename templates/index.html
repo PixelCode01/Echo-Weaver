@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
     <style>
-        /* Ensure proper screen display */
         .screen {
             position: absolute;
             top: 0;
@@ -36,20 +35,17 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Start Screen -->
         <div id="start-screen" class="screen">
             <h1>ECHO WEAVER</h1>
             <div class="instructions">
                 <p>Defend the core by creating sound waves!</p>
                 
-                <!-- Desktop Instructions -->
                 <div class="desktop-instructions">
                     <p>Mouse: Click and drag to draw a line, release to unleash a wave.</p>
                     <p>Keyboard: Press 1, 2, 3 to switch between wave modes (Normal, Focused, Wide).</p>
                     <p>Keyboard: Press SPACE for Echo Burst (clears nearby enemies).</p>
                 </div>
                 
-                <!-- Mobile Instructions -->
                 <div class="mobile-instructions">
                     <p>Touch: Tap and drag to draw a line, release to unleash a wave.</p>
                     <p>Triple-tap quickly anywhere to cycle wave modes.</p>
@@ -64,11 +60,10 @@
             </div>
             <button id="start-button" class="glow-button">START GAME</button>
             <div style="margin-top: 20px;">
-                <a href="/guide" class="glow-button" style="text-decoration: none; display: inline-block;">📖 GAME GUIDE</a>
+                <a href="/guide" class="glow-button" style="text-decoration: none; display: inline-block;">GAME GUIDE</a>
             </div>
         </div>
         
-        <!-- Game Screen -->
         <div id="game-screen" class="screen hidden">
             <canvas id="game-canvas"></canvas>
             <div id="hud">
@@ -89,7 +84,6 @@
             <div id="powerup-timers"></div>
         </div>
         
-        <!-- Game Over Screen -->
         <div id="game-over-screen" class="screen hidden">
             <h1>GAME OVER</h1>
             <div id="final-score">Final Score: <span>0</span></div>
@@ -107,8 +101,12 @@
             
             <button id="restart-button" class="glow-button">Play Again</button>
             <div style="margin-top: 20px;">
-                <a href="/guide" class="glow-button" style="text-decoration: none; display: inline-block;">📖 GAME GUIDE</a>
+                <a href="/guide" class="glow-button" style="text-decoration: none; display: inline-block;">GAME GUIDE</a>
             </div>
+        </div>
+
+        <div id="tutorial-overlay" class="tutorial-overlay hidden">
+            <div class="tutorial-content"></div>
         </div>
     </div>
     
@@ -129,7 +127,6 @@
         console.log('=== DYNAMIC SCRIPT LOADING STARTED ===');
         console.log('Current time:', new Date().toISOString());
         
-        // Dynamic script loading with cache busting
         const script = document.createElement('script');
         script.src = '/static/js/universal_controls.js?v=5&t=' + Date.now();
         console.log('Script URL:', script.src);

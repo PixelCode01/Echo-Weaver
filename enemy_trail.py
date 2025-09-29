@@ -7,7 +7,7 @@ class EnemyTrail(pygame.sprite.Sprite):
         self.color = color
         self.image.fill(self.color)
         self.rect = self.image.get_rect(center=position)
-        self.lifetime = 30 # frames
+        self.lifetime = 30
         self.initial_lifetime = self.lifetime
 
     def update(self):

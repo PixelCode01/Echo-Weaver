@@ -1,42 +1,46 @@
-// Main entry point for the game
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded');
-    console.log('=== SCRIPT LOADING CHECK ===');
-    console.log('Document ready state:', document.readyState);
-    console.log('UniversalControls in window:', !!window.UniversalControls);
-    console.log('UniversalControls type:', typeof window.UniversalControls);
-    console.log('All window properties containing "Control":', Object.keys(window).filter(key => key.includes('Control')));
-    console.log('All window properties containing "Universal":', Object.keys(window).filter(key => key.includes('Universal')));
-    console.log('SETTINGS available:', typeof SETTINGS);
-    console.log('Game class available:', typeof Game);
-    console.log('Script loading order check - all scripts loaded');
-    console.log('Complete script load order:', window.scriptLoadOrder);
-    console.log('=== COMPREHENSIVE UNIVERSAL CONTROLS DIAGNOSTIC ===');
-    console.log('1. UniversalControls in window:', !!window.UniversalControls);
-    console.log('2. UniversalControls type:', typeof window.UniversalControls);
-    console.log('3. UniversalControls constructor:', window.UniversalControls);
-    console.log('4. All window properties:', Object.keys(window).filter(key => key.includes('Control') || key.includes('Universal')));
-    console.log('5. Script load order:', window.scriptLoadOrder);
-    console.log('6. Document ready state:', document.readyState);
-    console.log('7. SETTINGS loaded:', typeof SETTINGS);
-    console.log('8. Game class loaded:', typeof Game);
+    const DEBUG = false;
+    const debugLog = (...args) => {
+        if (DEBUG) {
+            console.log(...args);
+        }
+    };
+    const TUTORIAL_STORAGE_KEY = 'echoWeaverTutorialSeen';
+
+    debugLog('DOM content loaded');
+    debugLog('=== SCRIPT LOADING CHECK ===');
+    debugLog('Document ready state:', document.readyState);
+    debugLog('UniversalControls in window:', !!window.UniversalControls);
+    debugLog('UniversalControls type:', typeof window.UniversalControls);
+    debugLog('All window properties containing "Control":', Object.keys(window).filter(key => key.includes('Control')));
+    debugLog('All window properties containing "Universal":', Object.keys(window).filter(key => key.includes('Universal')));
+    debugLog('SETTINGS available:', typeof SETTINGS);
+    debugLog('Game class available:', typeof Game);
+    debugLog('Script loading order check - all scripts loaded');
+    debugLog('Complete script load order:', window.scriptLoadOrder);
+    debugLog('=== COMPREHENSIVE UNIVERSAL CONTROLS DIAGNOSTIC ===');
+    debugLog('1. UniversalControls in window:', !!window.UniversalControls);
+    debugLog('2. UniversalControls type:', typeof window.UniversalControls);
+    debugLog('3. UniversalControls constructor:', window.UniversalControls);
+    debugLog('4. All window properties:', Object.keys(window).filter(key => key.includes('Control') || key.includes('Universal')));
+    debugLog('5. Script load order:', window.scriptLoadOrder);
+    debugLog('6. Document ready state:', document.readyState);
+    debugLog('7. SETTINGS loaded:', typeof SETTINGS);
+    debugLog('8. Game class loaded:', typeof Game);
     
-    // Detect device type and show appropriate instructions
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
                     (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
     
     if (isMobile) {
-        console.log('Mobile device detected, using touch controls');
+        debugLog('Mobile device detected, using touch controls');
         document.querySelector('.desktop-instructions').style.display = 'none';
         document.querySelector('.mobile-instructions').style.display = 'block';
     } else {
-        console.log('Desktop device detected, using keyboard controls');
+        debugLog('Desktop device detected, using keyboard controls');
         document.querySelector('.desktop-instructions').style.display = 'block';
         document.querySelector('.mobile-instructions').style.display = 'none';
     }
     
-    // Get DOM elements
     const startScreen = document.getElementById('start-screen');
     const gameScreen = document.getElementById('game-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
@@ -49,46 +53,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameOverPlayerNameContainer = document.getElementById('player-name-container-gameover');
     const canvas = document.getElementById('game-canvas');
     
-    // Set up canvas
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
-    // Update settings with actual window size
     SETTINGS.WIDTH = canvas.width;
     SETTINGS.HEIGHT = canvas.height;
     
-    // Load sounds
-    const sounds = {
-        'wave_create': new Audio('/static/assets/sounds/create_wave.wav'),
-        'enemy_hit': new Audio('/static/assets/sounds/enemy_hit.wav'),
-        'game_over': new Audio('/static/assets/sounds/game_over.wav'),
-        'powerup_collect': new Audio('/static/assets/sounds/powerup_collect.wav'),
-        'echo_burst': new Audio('/static/assets/sounds/echo_burst.wav')
+    const soundConfig = {
+        wave_create: '/static/assets/sounds/create_wave.wav',
+        enemy_hit: '/static/assets/sounds/enemy_hit.wav',
+        game_over: '/static/assets/sounds/game_over.wav',
+        powerup_collect: '/static/assets/sounds/powerup_collect.wav',
+        echo_burst: '/static/assets/sounds/echo_burst.wav',
+        boss_spawn: '/static/assets/sounds/enemy_hit.wav',
+        multi_wave: '/static/assets/sounds/create_wave.wav'
     };
+
+    const sounds = Object.entries(soundConfig).reduce((acc, [name, path]) => {
+        const audio = new Audio(path);
+        audio.preload = 'auto';
+        acc[name] = audio;
+        return acc;
+    }, {});
+
+    const DEFAULT_SOUND = 'wave_create';
     
-    // Function to play sounds
     function playSound(soundName) {
-        if (sounds[soundName]) {
-            sounds[soundName].currentTime = 0;
-            sounds[soundName].play().catch(error => {
-                console.log(`Error playing sound ${soundName}:`, error);
+        const sound = sounds[soundName] || sounds[DEFAULT_SOUND];
+        if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(error => {
+                debugLog(`Error playing sound ${soundName}:`, error);
             });
+        } else {
+            console.warn(`No audio resource available for sound ${soundName}`);
         }
     }
     
-    // Create game instance with sound support
     let game = new Game(canvas);
     game._playSound = playSound;
     
-    // Make game globally accessible for components like Core
     window.game = game;
     
-    // Player name state
     let playerName = '';
-    let gamePaused = false; // Start with game running
+    let gamePaused = false;
     
-    // Cookie functions
     function setCookie(name, value, days) {
         let expires = '';
         if (days) {
@@ -110,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
     
-    // Check for saved player name in cookie
     const savedPlayerName = getCookie('playerName');
     if (savedPlayerName) {
         playerName = savedPlayerName;
@@ -118,14 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (playerNameInput) {
             playerNameInput.value = playerName;
         }
-        console.log('Loaded player name from cookie:', playerName);
+    debugLog('Loaded player name from cookie:', playerName);
     }
     
-    // Load high scores initially
     fetch('/api/highscores')
         .then(response => response.json())
         .then(highscores => {
-            console.log('Initial highscores:', highscores);
+            debugLog('Initial highscores:', highscores);
             
             if (highscores && highscores.length > 0) {
                 const highscoreElement = document.getElementById('highscore');
@@ -134,30 +142,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Also update the leaderboard on the game over screen
             updateLeaderboard(highscores);
         })
         .catch(error => console.error('Error loading high scores:', error));
     
-    // Game loop variables
     let lastTime = 0;
     let accumulator = 0;
     const timeStep = 1000 / SETTINGS.FPS;
     
-    // Game loop
     function gameLoop(timestamp) {
-        // Calculate delta time
         if (!lastTime) lastTime = timestamp;
         const deltaTime = timestamp - lastTime;
         lastTime = timestamp;
         
-        // Failsafe: Prevent infinite loops by limiting delta time
-        const maxDeltaTime = 100; // 100ms max
+        const maxDeltaTime = 100;
         const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
         
-        // Only update if game is not paused
         if (!gamePaused) {
-            // Update with fixed time step
             accumulator += clampedDeltaTime;
             while (accumulator >= timeStep) {
                 game.update();
@@ -165,26 +166,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Always draw, even when paused
         game.draw(ctx);
         
-        // Continue loop
         requestAnimationFrame(gameLoop);
     }
     
-    // Event listeners
     startButton.addEventListener('click', function() {
-        console.log('Start button clicked');
+        debugLog('Start button clicked');
         
-        // Get player name if entered
         if (playerNameInput && playerNameInput.value.trim() !== '') {
             playerName = playerNameInput.value.trim();
-            console.log('Setting player name to:', playerName);
+            debugLog('Setting player name to:', playerName);
             
-            // Save player name to cookie (30 days expiration)
             setCookie('playerName', playerName, 30);
             
-            // Save player name to server
             fetch('/api/player', {
                 method: 'POST',
                 headers: {
@@ -194,55 +189,74 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Player name saved successfully');
+                debugLog('Player name saved successfully');
             })
             .catch(error => {
                 console.error('Error saving player name:', error);
             });
         }
         
-        // Hide start screen and show game screen
         if (startScreen) startScreen.classList.add('hidden');
         if (gameScreen) gameScreen.classList.remove('hidden');
         
-        // Start the game
-        gamePaused = false;
+        gamePaused = true;
         game.start();
-        
-        // Start the game loop if it hasn't been started yet
-        if (lastTime === 0) {
-            requestAnimationFrame(gameLoop);
+
+        const startGameplay = () => {
+            if (lastTime === 0) {
+                requestAnimationFrame(gameLoop);
+            }
+            gamePaused = false;
+        };
+
+        let tutorialSeen = false;
+        try {
+            tutorialSeen = localStorage.getItem(TUTORIAL_STORAGE_KEY) === 'true';
+        } catch (storageError) {
+            debugLog('Unable to read tutorial completion flag:', storageError);
+        }
+        if (!tutorialSeen) {
+            showTutorial(() => {
+                try {
+                    localStorage.setItem(TUTORIAL_STORAGE_KEY, 'true');
+                } catch (storageError) {
+                    debugLog('Unable to persist tutorial completion flag:', storageError);
+                }
+                game.messageDisplay.addMessage(
+                    'Welcome to Echo Weaver!',
+                    { x: SETTINGS.WIDTH / 2, y: SETTINGS.HEIGHT / 2 },
+                    SETTINGS.PRIMARY_COLOR,
+                    36
+                );
+                startGameplay();
+            });
+        } else {
+            startGameplay();
         }
     });
     
     restartButton.addEventListener('click', () => {
-        console.log('Restart button clicked');
+        debugLog('Restart button clicked');
         
         game.reset();
         
-        // Switch screens
         gameOverScreen.classList.add('hidden');
         gameScreen.classList.remove('hidden');
         
-        // Resume game
         gamePaused = false;
     });
     
     submitScoreButton.addEventListener('click', () => {
-        console.log('Submit score button clicked');
+        debugLog('Submit score button clicked');
         
-        // Use the stored player name
         let name = playerName;
         
         if (!name || name.trim() === '') {
-            // If we somehow don't have a player name, use Anonymous
             name = 'Anonymous';
             
-            // Save the name for future use if it's not Anonymous
             if (name !== 'Anonymous') {
                 playerName = name;
                 
-                // Save player name to session
                 fetch('/api/player', {
                     method: 'POST',
                     headers: {
@@ -253,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                 })
                 .then(response => {
-                    console.log('Player name saved successfully');
+                    debugLog('Player name saved successfully');
                 })
                 .catch(error => {
                     console.error('Error saving player name:', error);
@@ -261,61 +275,49 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Save the high score
         game.saveHighScore(name);
         
-        // Update button state
         submitScoreButton.disabled = true;
         submitScoreButton.textContent = 'Score Submitted!';
         
-        // Update leaderboard in real-time
         fetch('/api/highscores')
             .then(response => response.json())
             .then(highscores => {
-                console.log('Received highscores after submit:', highscores);
+                debugLog('Received highscores after submit:', highscores);
                 updateLeaderboard(highscores);
             })
             .catch(error => console.error('Error updating leaderboard:', error));
     });
     
-    // Function to update the leaderboard
     function updateLeaderboard(highscores) {
-        console.log('Updating leaderboard with:', highscores);
-        
-        // Ensure highscores is an array
+    debugLog('Updating leaderboard with:', highscores);
+
         if (!Array.isArray(highscores)) {
             console.error('Highscores is not an array:', typeof highscores);
             highscores = [];
         }
-        
-        // Check for duplicate leaderboard elements
+
         const leaderboardElements = document.querySelectorAll('#leaderboard-entries');
-        console.log('Number of leaderboard elements found in updateLeaderboard:', leaderboardElements.length);
+    debugLog('Number of leaderboard elements found in updateLeaderboard:', leaderboardElements.length);
         if (leaderboardElements.length > 1) {
             console.error('Multiple leaderboard elements found with the same ID!');
-            // Keep only the first one and remove others
             for (let i = 1; i < leaderboardElements.length; i++) {
                 leaderboardElements[i].parentNode.removeChild(leaderboardElements[i]);
             }
-            console.log('Removed duplicate leaderboard elements, keeping only the first one');
+            debugLog('Removed duplicate leaderboard elements, keeping only the first one');
         }
         
-        // Get the leaderboard container
         const leaderboardContainer = document.getElementById('leaderboard');
         if (leaderboardContainer) {
-            // Find the existing leaderboard entries div
             const oldLeaderboardEntries = document.getElementById('leaderboard-entries');
             if (oldLeaderboardEntries) {
-                // Remove it completely
                 oldLeaderboardEntries.parentNode.removeChild(oldLeaderboardEntries);
             }
             
-            // Create a brand new leaderboard entries div
             const newLeaderboardEntries = document.createElement('div');
             newLeaderboardEntries.id = 'leaderboard-entries';
             leaderboardContainer.appendChild(newLeaderboardEntries);
             
-            // Deduplicate entries by name (keep highest score for each name)
             const uniqueScores = {};
             highscores.forEach(entry => {
                 if (!entry) return;
@@ -323,13 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const name = entry.name || 'Anonymous';
                 const score = entry.score || 0;
                 
-                // If we haven't seen this name yet, or this score is higher than the previous one
                 if (!uniqueScores[name] || score > uniqueScores[name]) {
                     uniqueScores[name] = score;
                 }
             });
             
-            // Convert back to array and sort
             const uniqueHighscores = Object.entries(uniqueScores).map(([name, score]) => ({
                 name,
                 score
@@ -337,10 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             uniqueHighscores.sort((a, b) => b.score - a.score);
             
-            // Get current player name for highlighting
-            console.log('Current player for highlighting:', playerName);
+            debugLog('Current player for highlighting:', playerName);
             
-            // Add entries to the new leaderboard div
             uniqueHighscores.forEach((entry, index) => {
                 const entryElement = document.createElement('div');
                 entryElement.className = 'leaderboard-entry';
@@ -352,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 newLeaderboardEntries.appendChild(entryElement);
             });
             
-            // If no entries, show a message
             if (uniqueHighscores.length === 0) {
                 const emptyElement = document.createElement('div');
                 emptyElement.className = 'leaderboard-entry';
@@ -364,24 +361,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Auto-submit score when game over if we already have a player name
     game.autoSubmitScore = function() {
-        console.log('Auto-submit score called, player name:', playerName);
+    debugLog('Auto-submit score called, player name:', playerName);
         
         if (playerName && playerName.trim() !== '') {
             this.saveHighScore(playerName);
             
-            // Update UI to show score was submitted
             if (submitScoreButton) {
                 submitScoreButton.disabled = true;
                 submitScoreButton.textContent = 'Score Submitted!';
             }
             
-            // Update leaderboard in real-time
             fetch('/api/highscores')
                 .then(response => response.json())
                 .then(highscores => {
-                    console.log('Received highscores after auto-submit:', highscores);
+                    debugLog('Received highscores after auto-submit:', highscores);
                     updateLeaderboard(highscores);
                 })
                 .catch(error => console.error('Error updating leaderboard:', error));
@@ -391,26 +385,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     };
     
-    // Game input events
     canvas.addEventListener('mousedown', (event) => {
-        console.log('=== MOUSE DOWN EVENT ===');
-        console.log('Game paused:', gamePaused);
-        console.log('Universal controls exist:', !!window.universalControls);
+        debugLog('=== MOUSE DOWN EVENT ===');
+        debugLog('Game paused:', gamePaused);
+        debugLog('Universal controls exist:', !!window.universalControls);
         
         if (!gamePaused) {
-            // Check universal controls cooldown
             if (window.universalControls && !window.universalControls.canInteractNow()) {
-                console.log('Mouse click blocked by universal controls cooldown');
+                debugLog('Mouse click blocked by universal controls cooldown');
                 return;
             }
             
-            console.log('Mouse click allowed, processing...');
+            debugLog('Mouse click allowed, processing...');
             game.handleEvent(event);
             
-            // Record interaction for universal controls
             if (window.universalControls) {
                 window.universalControls.recordInteraction();
-                console.log('Interaction recorded for universal controls');
+                debugLog('Interaction recorded for universal controls');
             }
         }
     });
@@ -427,23 +418,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Handle touch events for mobile
     canvas.addEventListener('touchstart', (event) => {
         event.preventDefault();
         event.stopPropagation();
         
-        console.log('=== TOUCH START EVENT ===');
-        console.log('Game paused:', gamePaused);
-        console.log('Universal controls exist:', !!window.universalControls);
+        debugLog('=== TOUCH START EVENT ===');
+        debugLog('Game paused:', gamePaused);
+        debugLog('Universal controls exist:', !!window.universalControls);
         
         if (!gamePaused) {
-            // Check universal controls cooldown
             if (window.universalControls && !window.universalControls.canInteractNow()) {
-                console.log('Touch blocked by universal controls cooldown');
+                debugLog('Touch blocked by universal controls cooldown');
                 return;
             }
             
-            console.log('Touch allowed, processing...');
+            debugLog('Touch allowed, processing...');
             
             const touch = event.touches[0];
             const mouseEvent = new MouseEvent('mousedown', {
@@ -452,17 +441,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             game.handleEvent(mouseEvent);
             
-            // Record interaction for universal controls
             if (window.universalControls) {
                 window.universalControls.recordInteraction();
-                console.log('Interaction recorded for universal controls');
+                debugLog('Interaction recorded for universal controls');
             }
             
-            // Mobile triple-tap detection for wave mode switching
             if (game.lastTapTime && (Date.now() - game.lastTapTime) < 300) {
                 game.tapCount = (game.tapCount || 0) + 1;
-                
-                // On third tap, switch wave mode
                 if (game.tapCount >= 2) {
                     game.tapCount = 0;
                     game.cycleWaveMode();
@@ -502,49 +487,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, { passive: false });
     
-    // Prevent touch events on the entire document to avoid unwanted behaviors
     document.addEventListener('touchstart', (event) => {
-        // Only prevent default on game-related elements
         if (event.target.closest('#game-canvas') || event.target.closest('#mobile-controls')) {
             event.preventDefault();
         }
     }, { passive: false });
     
     document.addEventListener('touchmove', (event) => {
-        // Only prevent default on game-related elements
         if (event.target.closest('#game-canvas') || event.target.closest('#mobile-controls')) {
             event.preventDefault();
         }
     }, { passive: false });
     
-    // Handle window resize
     window.addEventListener('resize', () => {
-        // Update settings
         SETTINGS.WIDTH = window.innerWidth;
         SETTINGS.HEIGHT = window.innerHeight;
         
-        // Resize canvas
         canvas.width = SETTINGS.WIDTH;
         canvas.height = SETTINGS.HEIGHT;
         
-        // Reset core position
         if (game.core) {
             game.core.position = new Vector(SETTINGS.WIDTH / 2, SETTINGS.HEIGHT / 2);
         }
     });
     
-    // Handle visibility change (pause/resume)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            // Game is paused
-            console.log('Game paused');
+            debugLog('Game paused');
             gamePaused = true;
         } else {
-            // Game is resumed only if tutorial is completed
-            console.log('Game resumed');
-            lastTime = 0; // Reset last time to avoid large delta time
+            debugLog('Game resumed');
+            lastTime = 0;
             
-            // Only unpause if there's no tutorial visible
             const tutorialOverlay = document.getElementById('tutorial-overlay');
             if (tutorialOverlay && !tutorialOverlay.classList.contains('hidden')) {
                 gamePaused = true;
@@ -554,95 +528,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Function to show tutorial based on device
-    function showTutorial() {
-        // Detect if mobile or desktop
+    function showTutorial(onComplete = () => {}) {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Show the tutorial overlay
         const tutorialOverlay = document.getElementById('tutorial-overlay');
         if (tutorialOverlay) {
-            // Clear existing tutorial content
             const tutorialContent = tutorialOverlay.querySelector('.tutorial-content');
             if (tutorialContent) {
                 tutorialContent.innerHTML = '';
             } else {
-                return; // Can't find tutorial content container
+                onComplete();
+                return;
             }
             
-            // Create device-specific tutorial
-            if (isMobile) {
-                // Mobile tutorial
-                tutorialContent.innerHTML = `
-                    <h2>How to Play on Mobile</h2>
-                    
-                    <div class="tutorial-step" data-step="1">
-                        <h3>Draw Sound Waves</h3>
-                        <p>Touch and drag to create directional sound waves</p>
-                        <div class="tutorial-image mobile-draw"></div>
+            const tutorialStepsData = isMobile
+                ? [
+                    {
+                        title: 'Draw Sound Waves',
+                        description: 'Touch and drag to sketch a line. Release to blast enemies with a sound wave that follows your stroke.',
+                        media: {
+                            src: '/static/images/tutorial-mobile-draw.svg',
+                            alt: 'Finger drawing a sound wave on a phone screen'
+                        }
+                    },
+                    {
+                        title: 'Trigger Echo Burst',
+                        description: 'Tap the Echo Burst button when it glows to clear enemies near the core and buy yourself time.',
+                        media: {
+                            src: '/static/images/tutorial-mobile-burst.svg',
+                            alt: 'Echo Burst button activated on mobile HUD'
+                        }
+                    },
+                    {
+                        title: 'Swap Wave Modes',
+                        description: 'Tap the wave icon or triple-tap the arena to rotate between Normal, Focused, and Wide waves for different strategies.',
+                        media: {
+                            src: '/static/images/tutorial-mobile-tap.svg',
+                            alt: 'Player cycling wave modes with taps'
+                        }
+                    }
+                ]
+                : [
+                    {
+                        title: 'Draw Sound Waves',
+                        description: 'Click and drag a path from the core. Release to unleash a wave that follows your line and slices through enemies.',
+                        media: {
+                            src: '/static/images/tutorial-desktop-draw.svg',
+                            alt: 'Mouse drawing a wave path around the core'
+                        }
+                    },
+                    {
+                        title: 'Switch Wave Modes',
+                        description: 'Press 1, 2, or 3 to swap between Normal, Focused, and Wide waves. Each mode changes damage, width, and reach.',
+                        media: {
+                            src: '/static/images/tutorial-desktop-keys.svg',
+                            alt: 'Keyboard keys 1, 2, and 3 highlighted for wave modes'
+                        }
+                    },
+                    {
+                        title: 'Echo Burst & Pause',
+                        description: 'Press SPACE to fire an Echo Burst that detonates nearby enemies. Need a breather? Press ESC or P to pause and plan.',
+                        media: {
+                            src: '/static/images/tutorial-desktop-space.svg',
+                            alt: 'Space bar triggering an Echo Burst ability'
+                        }
+                    }
+                ];
+
+            const totalSteps = tutorialStepsData.length;
+
+            tutorialContent.innerHTML = `
+                <div class="tutorial-header">
+                    <span class="tutorial-pill">${isMobile ? 'Touch Controls' : 'Keyboard & Mouse'}</span>
+                    <h2>Quick Primer</h2>
+                    <p class="tutorial-tagline">Master the basics in a few taps so you can dive straight into weaving echoes and keeping the core alive.</p>
+                </div>
+                <div class="tutorial-step-wrapper"></div>
+                <div class="tutorial-progress">
+                    <span class="tutorial-progress-label">Step <span class="tutorial-current-step">1</span> of ${totalSteps}</span>
+                    <div class="tutorial-progress-bar">
+                        <div class="tutorial-progress-bar-fill"></div>
                     </div>
-                    
-                    <div class="tutorial-step hidden" data-step="2">
-                        <h3>Special Buttons</h3>
-                        <p>Use the buttons at the bottom right for special abilities</p>
-                        <div class="tutorial-image mobile-buttons"></div>
-                    </div>
-                    
-                    <div class="tutorial-step hidden" data-step="3">
-                        <h3>Echo Burst</h3>
-                        <p>Tap the burst button to destroy nearby enemies</p>
-                        <div class="tutorial-image mobile-burst"></div>
-                    </div>
-                    
-                    <div class="tutorial-step hidden" data-step="4">
-                        <h3>Wave Modes</h3>
-                        <p>Tap the mode button to cycle between wave types</p>
-                        <div class="tutorial-image mobile-modes"></div>
-                    </div>
-                    
+                </div>
+                <div class="tutorial-controls">
                     <button class="glow-button tutorial-next">Next</button>
+                    <button class="tutorial-skip" type="button">Skip Tutorial</button>
+                </div>
+            `;
+
+            const stepsContainer = tutorialContent.querySelector('.tutorial-step-wrapper');
+            tutorialStepsData.forEach((step, index) => {
+                const stepElement = document.createElement('article');
+                stepElement.className = 'tutorial-step hidden';
+                stepElement.dataset.step = (index + 1).toString();
+
+                const stepCard = document.createElement('div');
+                stepCard.className = 'tutorial-step-card';
+
+                const visual = document.createElement('div');
+                visual.className = 'tutorial-visual';
+                const img = document.createElement('img');
+                img.src = step.media.src;
+                img.alt = step.media.alt;
+                img.loading = 'lazy';
+                visual.appendChild(img);
+
+                const copy = document.createElement('div');
+                copy.className = 'tutorial-copy';
+                copy.innerHTML = `
+                    <h3>${step.title}</h3>
+                    <p>${step.description}</p>
                 `;
-            } else {
-                // Desktop tutorial
-                tutorialContent.innerHTML = `
-                    <h2>How to Play on Desktop</h2>
-                    
-                    <div class="tutorial-step" data-step="1">
-                        <h3>Draw Sound Waves</h3>
-                        <p>Click and drag to create directional sound waves</p>
-                        <div class="tutorial-image desktop-draw"></div>
-                    </div>
-                    
-                    <div class="tutorial-step hidden" data-step="2">
-                        <h3>Wave Modes</h3>
-                        <p>Press 1, 2, or 3 to switch between Normal, Focused, and Wide wave modes</p>
-                        <div class="tutorial-image desktop-keys"></div>
-                    </div>
-                    
-                    <div class="tutorial-step hidden" data-step="3">
-                        <h3>Echo Burst</h3>
-                        <p>Press SPACE to activate Echo Burst when available - destroys nearby enemies!</p>
-                        <div class="tutorial-image desktop-space"></div>
-                    </div>
-                    
-                    <div class="tutorial-step hidden" data-step="4">
-                        <h3>Pause Game</h3>
-                        <p>Press ESC or P to pause the game at any time</p>
-                        <div class="tutorial-image desktop-pause"></div>
-                    </div>
-                    
-                    <button class="glow-button tutorial-next">Next</button>
-                `;
-            }
-            
+
+                stepCard.appendChild(visual);
+                stepCard.appendChild(copy);
+                stepElement.appendChild(stepCard);
+                stepsContainer.appendChild(stepElement);
+            });
+
             tutorialOverlay.classList.remove('hidden');
-            
-            // Set up tutorial navigation
-            const tutorialSteps = document.querySelectorAll('.tutorial-step');
-            const nextButton = document.querySelector('.tutorial-next');
+            tutorialOverlay.setAttribute('tabindex', '-1');
+            setTimeout(() => {
+                if (typeof tutorialOverlay.focus === 'function') {
+                    tutorialOverlay.focus({ preventScroll: true });
+                }
+            }, 0);
+
+            const tutorialSteps = tutorialContent.querySelectorAll('.tutorial-step');
+            const nextButton = tutorialContent.querySelector('.tutorial-next');
+            const skipButton = tutorialContent.querySelector('.tutorial-skip');
+            const progressCurrent = tutorialContent.querySelector('.tutorial-current-step');
+            const progressBarFill = tutorialContent.querySelector('.tutorial-progress-bar-fill');
+            if (!nextButton || tutorialSteps.length === 0) {
+                tutorialOverlay.classList.add('hidden');
+                onComplete();
+                return;
+            }
             let currentStep = 0;
-            
-            // Function to show a specific tutorial step
+
             function showStep(stepIndex) {
                 tutorialSteps.forEach((step, index) => {
                     if (index === stepIndex) {
@@ -656,7 +679,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 
-                // Update button text for the last step
+                if (progressCurrent) {
+                    progressCurrent.textContent = (stepIndex + 1).toString();
+                }
+                if (progressBarFill) {
+                    const progressPercent = ((stepIndex + 1) / totalSteps) * 100;
+                    progressBarFill.style.width = `${progressPercent}%`;
+                }
+
                 if (stepIndex === tutorialSteps.length - 1) {
                     nextButton.textContent = 'Start Playing!';
                 } else {
@@ -664,54 +694,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Show the first step
             showStep(currentStep);
             
-            // Handle next button clicks
-            nextButton.addEventListener('click', () => {
+            const handleNext = () => {
                 currentStep++;
-                
                 if (currentStep < tutorialSteps.length) {
                     showStep(currentStep);
                 } else {
-                    // Tutorial complete, start the game
                     tutorialOverlay.classList.add('hidden');
-                    gamePaused = false; // Unpause the game
-                    
-                    // Add a welcome message
-                    game.messageDisplay.addMessage(
-                        'Welcome to Echo Weaver!', 
-                        { x: SETTINGS.WIDTH / 2, y: SETTINGS.HEIGHT / 2 }, 
-                        SETTINGS.PRIMARY_COLOR, 
-                        36
-                    );
+                    nextButton.removeEventListener('click', handleNext);
+                    tutorialOverlay.removeEventListener('keydown', keyboardHandler);
+                    tutorialOverlay.removeAttribute('tabindex');
+                    onComplete();
                 }
-            });
+            };
+
+            nextButton.addEventListener('click', handleNext);
+            if (typeof nextButton.focus === 'function') {
+                nextButton.focus();
+            }
+            if (skipButton) {
+                skipButton.addEventListener('click', () => {
+                    tutorialOverlay.classList.add('hidden');
+                    nextButton.removeEventListener('click', handleNext);
+                    tutorialOverlay.removeEventListener('keydown', keyboardHandler);
+                    tutorialOverlay.removeAttribute('tabindex');
+                    onComplete();
+                }, { once: true });
+            }
+
+            const keyboardHandler = (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleNext();
+                }
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    if (skipButton) {
+                        skipButton.click();
+                    } else {
+                        tutorialOverlay.classList.add('hidden');
+                        nextButton.removeEventListener('click', handleNext);
+                        tutorialOverlay.removeEventListener('keydown', keyboardHandler);
+                        tutorialOverlay.removeAttribute('tabindex');
+                        onComplete();
+                    }
+                }
+            };
+
+            tutorialOverlay.addEventListener('keydown', keyboardHandler);
         } else {
-            // If tutorial overlay doesn't exist, just start the game
-            gamePaused = false;
+            onComplete();
         }
     }
     
-    // Universal touch/drag cooldown system for all devices
-    console.log("=== INITIALIZING UNIVERSAL CONTROLS ===");
-    console.log("Game state at initialization:", game.state);
-    console.log("Game score at initialization:", game.score);
+    debugLog("=== INITIALIZING UNIVERSAL CONTROLS ===");
+    debugLog("Game state at initialization:", game.state);
+    debugLog("Game score at initialization:", game.score);
     
-    // Initialize universal controls (works on all devices)
     function initializeUniversalControls() {
         try {
-            // Check if UniversalControls class is available
             if (typeof window.UniversalControls === 'undefined') {
                 console.error("UniversalControls class is not defined. Check if universal_controls.js is loaded properly.");
-                console.log("Available global classes:", Object.keys(window).filter(key => key.includes('Control')));
+                debugLog("Available global classes:", Object.keys(window).filter(key => key.includes('Control')));
                 return false;
             }
             
             const universalControls = new window.UniversalControls(game);
-            window.universalControls = universalControls; // Make it globally accessible
-            console.log("Universal controls initialized successfully:", universalControls);
-            console.log("Universal controls added to window:", !!window.universalControls);
+            window.universalControls = universalControls;
+            debugLog("Universal controls initialized successfully:", universalControls);
+            debugLog("Universal controls added to window:", !!window.universalControls);
             return true;
         } catch (error) {
             console.error("Failed to initialize universal controls:", error);
@@ -720,59 +772,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Wait for UniversalControls script to load and then initialize
     function waitForUniversalControls() {
         if (typeof window.UniversalControls !== 'undefined') {
-            console.log("UniversalControls class found, initializing...");
+            debugLog("UniversalControls class found, initializing...");
             const success = initializeUniversalControls();
             if (success) {
-                console.log("Universal controls initialized successfully on first try");
+                debugLog("Universal controls initialized successfully on first try");
             } else {
                 console.error("Universal controls initialization failed");
             }
         } else {
-            console.log("UniversalControls class not yet available, retrying in 200ms...");
+            debugLog("UniversalControls class not yet available, retrying in 200ms...");
             setTimeout(waitForUniversalControls, 200);
         }
     }
     
-    // Start waiting for UniversalControls to load
     waitForUniversalControls();
     
-    // Update universal controls in the game loop
     const originalGameUpdate = game.update;
     game.update = function() {
         originalGameUpdate.call(game);
         
-        // Update universal controls
         if (window.universalControls && game.state === 'playing') {
             window.universalControls.update();
-            // Debug: Log universal controls update
             if (game.score % 120 === 0 && game.score > 0) {
-                console.log('=== UNIVERSAL CONTROLS UPDATE IN GAME LOOP ===');
-                console.log('Game state:', game.state);
-                console.log('Game score:', game.score);
-                console.log('Universal controls exist:', !!window.universalControls);
+                debugLog('=== UNIVERSAL CONTROLS UPDATE IN GAME LOOP ===');
+                debugLog('Game state:', game.state);
+                debugLog('Game score:', game.score);
+                debugLog('Universal controls exist:', !!window.universalControls);
             }
         } else {
-            // Debug: Log why universal controls aren't updating
             if (game.score % 120 === 0 && game.score > 0) {
-                console.log('=== UNIVERSAL CONTROLS UPDATE SKIPPED ===');
-                console.log('Universal controls exist:', !!window.universalControls);
-                console.log('Game state:', game.state);
-                console.log('Game state is playing:', game.state === 'playing');
+                debugLog('=== UNIVERSAL CONTROLS UPDATE SKIPPED ===');
+                debugLog('Universal controls exist:', !!window.universalControls);
+                debugLog('Game state:', game.state);
+                debugLog('Game state is playing:', game.state === 'playing');
             }
         }
     };
     
-    // Add keyboard shortcuts for wave modes (desktop)
     document.addEventListener('keydown', (e) => {
         if (game.state === 'playing') {
             if (e.key === '1') {
                 game.currentWaveMode = 'normal';
                 document.getElementById('current-mode').textContent = 'Normal';
-                
-                // Add visual feedback
                 const modeDisplay = document.getElementById('wave-mode');
                 modeDisplay.classList.add('mode-changed');
                 setTimeout(() => {
@@ -781,8 +824,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (e.key === '2') {
                 game.currentWaveMode = 'focused';
                 document.getElementById('current-mode').textContent = 'Focused';
-                
-                // Add visual feedback
                 const modeDisplay = document.getElementById('wave-mode');
                 modeDisplay.classList.add('mode-changed');
                 setTimeout(() => {
@@ -791,8 +832,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (e.key === '3') {
                 game.currentWaveMode = 'wide';
                 document.getElementById('current-mode').textContent = 'Wide';
-                
-                // Add visual feedback
                 const modeDisplay = document.getElementById('wave-mode');
                 modeDisplay.classList.add('mode-changed');
                 setTimeout(() => {
@@ -802,13 +841,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Add pause functionality
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
             if (game.state === 'playing') {
                 gamePaused = !gamePaused;
-                
-                // Show pause message
                 if (gamePaused) {
                     const pauseMessage = document.createElement('div');
                     pauseMessage.id = 'pause-message';
@@ -824,12 +860,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Add visual effects for the game canvas
     function addVisualEffects() {
-        // Add canvas filter for better visual appearance
         const canvas = document.getElementById('game-canvas');
         if (canvas) {
-            // Check if the browser supports backdrop-filter
             const div = document.createElement('div');
             div.style.backdropFilter = 'blur(1px)';
             const supportsBackdropFilter = div.style.backdropFilter === 'blur(1px)';
@@ -840,14 +873,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Call visual effects setup
     addVisualEffects();
     
-    // Add debug button functionality
     const debugButton = document.getElementById('debug-button');
     if (debugButton) {
         debugButton.addEventListener('click', () => {
-            console.log('Debug button clicked, resetting data');
+            debugLog('Debug button clicked, resetting data');
             if (window.resetMockAPI) {
                 window.resetMockAPI();
             }

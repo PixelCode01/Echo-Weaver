@@ -10,7 +10,6 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Start Screen -->
         <div id="start-screen" class="screen">
             <h1>Echo Weaver</h1>
             
@@ -27,7 +26,6 @@
             <button id="start-button" class="glow-button">Start Game</button>
         </div>
         
-        <!-- Game Screen -->
         <div id="game-screen" class="screen hidden">
             <canvas id="game-canvas"></canvas>
             
@@ -94,7 +92,6 @@
             </div>
         </div>
         
-        <!-- Game Over Screen -->
         <div id="game-over-screen" class="screen hidden">
             <h1>Game Over</h1>
             
@@ -113,14 +110,11 @@
             
             <div id="leaderboard">
                 <h2><i class="fas fa-trophy"></i> Leaderboard</h2>
-                <div id="leaderboard-entries">
-                    <!-- Leaderboard entries will be added here -->
-                </div>
+                <div id="leaderboard-entries"></div>
             </div>
         </div>
     </div>
-    
-    <!-- Load scripts -->
+
     <script>
         console.log('=== TEMPLATE SCRIPT EXECUTION START ===');
         console.log('Settings.js about to load');
@@ -138,7 +132,6 @@
         console.log('=== DYNAMIC SCRIPT LOADING STARTED ===');
         console.log('Current time:', new Date().toISOString());
         
-        // Dynamic script loading with cache busting
         const script = document.createElement('script');
         script.src = '/static/js/universal_controls.js?v=5&t=' + Date.now();
         console.log('Script URL:', script.src);

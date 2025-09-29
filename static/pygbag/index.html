@@ -13,13 +13,9 @@ Loading Echo Weaver from echo_weaver.apk
     SPDX-License-Identifier: cookiecutter.spdx
 
 """)
+WIDTH=1024
+HEIGHT=600
 
-
-# screen pixels (real, hardware)
-WIDTH=1024  # 1280
-HEIGHT=600  # 720
-
-# reference/idealized screen pixels
 REFX = 1980
 REFY = 1080
 
@@ -46,9 +42,6 @@ def uy(*argv):
     return acc
 
 
-
-
-# do not rename
 async def custom_site():
 
     import sys
@@ -87,22 +80,17 @@ async def custom_site():
     apk = "echo_weaver.apk"
 
     bundle = "echo_weaver"
-
-    # the C or js loader could do that but be explicit.
-    appdir = Path(f"/data/data/{bundle}") # /data/data/echo_weaver
+    appdir = Path(f"/data/data/{bundle}")
     appdir.mkdir()
-
-
-    # mount apk
 
     cfg = {
         "io": "url",
-        "type":"mount",
-        "mount" : {
-            "point" : appdir.as_posix(),
-            "path" : "/",
+        "type": "mount",
+        "mount": {
+            "point": appdir.as_posix(),
+            "path": "/",
         },
-        "path" : f"/ => {appdir.as_posix()}",
+        "path": f"/ => {appdir.as_posix()}",
     }
 
     print(f"Loading APK: {apk}")
@@ -110,56 +98,37 @@ async def custom_site():
     print(f"Config: {cfg}")
 
     try:
-    track = platform.window.MM.prepare(apk, json.dumps(cfg))
+        track = platform.window.MM.prepare(apk, json.dumps(cfg))
         print("Track object created successfully")
     except Exception as e:
         print(f"Error preparing APK: {e}")
         raise
 
-    marginx = ux(.020) # 20%
-    marginy = uy(.045) # 45%
+    marginx = ux(.020)
+    marginy = uy(.045)
 
 
     def pg_bar(pos):
         nonlocal marginx, marginy
-        # resolution of progress bar, recalculate since it may not be know yet.
-        total = track.len or 10  # avoid div0
-        slot = ux(.060)/ total # 60%
+    total = track.len or 10
+    slot = ux(.060)/ total
 
         pygame.draw.rect(screen,(10,10,10),( marginx-ux(10), marginy-uy(10), (total*slot)+ux(20), uy(110) ) )
         pygame.draw.rect(screen,(0,255,0), ( marginx, marginy, track.pos*slot, uy(90)) )
 
-    # wait until zip mount + overlayfs is complete
     while not track.ready:
         pg_bar(track.pos)
         compose()
         await asyncio.sleep(.1)
-
-    # fill it up in case it was cached and instant download
     pg_bar(track.len)
     compose()
-
-
-    # preloader will change dir and prepend it to sys.path
     platform.run_main(PyConfig, loaderhome= appdir / "assets", loadermain=None)
-
-
-    # wait preloading complete
-    # that includes images and wasm compilation of bundled modules
     while embed.counter()<0:
         await asyncio.sleep(.1)
 
     main = appdir / "assets" / "main.py"
-
-    # start async top level machinery and add a console.
     await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
-
-    # now that apk is mounted we have access to font cache
-    # but we need to fill __file__ that is not yet set
     __import__(__name__).__file__ = str(main)
-
-
-    # now make a prompt
     fnt = pygame.sysfont.SysFont("freesans",  uy(80) )
 
     def ui_callback(pkg, error=None):
@@ -172,10 +141,7 @@ async def custom_site():
         screen.blit(prompt, ( marginx+ ux(80), marginy - uy(10) ) )
         compose()
 
-    # test/wait if user media interaction required
     if not platform.window.MM.UME:
-
-        # now make a prompt
         fnt = pygame.sysfont.SysFont("freesans",  uy(80) )
         prompt = fnt.render("Ready to start !", True, "blue")
         pg_bar(track.len)
@@ -186,8 +152,6 @@ async def custom_site():
     """)
         while not platform.window.MM.UME:
             await asyncio.sleep(.1)
-
-    # cleanup
     screen.fill( (0,0,0,0) )
     pygame.display.flip()
 
