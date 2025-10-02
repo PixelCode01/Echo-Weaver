@@ -42,7 +42,7 @@ Echo Weaver is a fast-paced arcade defense game. Your goal is to protect the glo
 - **800-900:** SlowTank Enemy – Slow but armored
 - **900+:** Boss Enemy – Large, powerful enemies
 
-## Powerups
+## Power-ups
 - **Invincibility:** Temporary invincibility for the core.
 - **Wave Boost:** Increases wave damage and speed.
 - **Slow Time:** Slows down all enemies.
@@ -56,7 +56,7 @@ Echo Weaver is a fast-paced arcade defense game. Your goal is to protect the glo
 ## Scoring, Combos & Achievements
 - Defeat enemies to earn points. Bosses give extra points!
 - Destroying enemies quickly builds combos for bonus points and fills the Fever Meter.
-- Critical hits and powerups can boost your score even more.
+- Critical hits and power-ups can boost your score even more.
 - Unlock achievements for high combos, defeating bosses, and surviving longer!
 
 ## Tips
