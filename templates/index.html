@@ -146,6 +146,12 @@
         console.log('About to append script to document.head');
         document.head.appendChild(script);
         console.log('Script appended to document.head');
+
+    <!-- remove the annoying context menu when right clicking (desktop) / long tap (mobile) -->
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            return false;
+        });
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
